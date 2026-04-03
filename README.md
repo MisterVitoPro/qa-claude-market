@@ -4,9 +4,9 @@ A Claude Code plugin that deploys a swarm of specialized QA agents to analyze yo
 
 ## What It Does
 
-**`/qa-swarm <prompt>`** -- Runs 11-17 specialized QA agents in parallel against your codebase. Each agent has a distinct specialty (security, performance, concurrency, etc.). Findings are aggregated, deduplicated, ranked P0-P3, tagged with confidence levels, and cross-referenced for corroboration. Produces three files: a ranked report, an implementation spec, and a TDD test plan.
+**`/qa-swarm:attack <prompt>`** -- Runs 11-17 specialized QA agents in parallel against your codebase. Each agent has a distinct specialty (security, performance, concurrency, etc.). Findings are aggregated, deduplicated, ranked P0-P3, tagged with confidence levels, and cross-referenced for corroboration. Produces three files: a ranked report, an implementation spec, and a TDD test plan.
 
-**`/qa-swarm:implement <report> <spec> <tests>`** -- Takes the output files from a swarm run and implements fixes. Writes failing tests first (TDD red phase), then fixes P0 issues one-at-a-time with strict retry limits, then batches P1-P3 fixes. Loops until tests pass.
+**`/qa-swarm:implement <report> <spec> <tests>`** -- Takes the output files from an attack and implements fixes. Writes failing tests first (TDD red phase), then fixes P0 issues one-at-a-time with strict retry limits, then batches P1-P3 fixes. Loops until tests pass.
 
 ## Installation
 
@@ -27,15 +27,15 @@ claude --plugin-dir /path/to/qa-swarm
 ### Run QA Analysis
 
 ```
-/qa-swarm "check all API endpoints for security and input validation issues"
+/qa-swarm:attack "check all API endpoints for security and input validation issues"
 ```
 
 ```
-/qa-swarm "review the database layer for data integrity and performance problems"
+/qa-swarm:attack "review the database layer for data integrity and performance problems"
 ```
 
 ```
-/qa-swarm "find bugs in the authentication and authorization flow"
+/qa-swarm:attack "find bugs in the authentication and authorization flow"
 ```
 
 After the swarm completes, it recommends:

@@ -13,7 +13,7 @@ You are a Senior Test Engineer following strict TDD methodology. You write tests
 
 This agent operates in two modes depending on the phase:
 
-### Mode 1: Test Plan (during /qa-swarm)
+### Mode 1: Test Plan (during /qa-swarm:attack)
 
 You receive the ranked QA report and produce a test plan document.
 

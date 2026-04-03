@@ -4,7 +4,7 @@ description: >
   Use when the user wants to run QA analysis on a codebase, find bugs across multiple
   dimensions (security, performance, correctness, architecture, etc.), or deploy a swarm
   of specialized QA agents. Triggers on: code review, QA audit, bug sweep, quality analysis,
-  find issues, check for bugs, swarm analysis. Also use when user mentions /qa-swarm.
+  find issues, check for bugs, swarm analysis. Also use when user mentions /qa-swarm:attack.
 ---
 
 # QA Swarm
@@ -15,15 +15,15 @@ then optionally implements fixes via TDD.
 
 ## Commands
 
-- `/qa-swarm <prompt>` -- Run QA analysis. The prompt describes what to focus on.
-  Example: `/qa-swarm "check all API endpoints for security and input validation issues"`
+- `/qa-swarm:attack <prompt>` -- Run QA analysis. The prompt describes what to focus on.
+  Example: `/qa-swarm:attack "check all API endpoints for security and input validation issues"`
 
-- `/qa-swarm:implement <report> <spec> <tests>` -- Implement fixes from a QA swarm run.
-  Takes the 3 output file paths from a `/qa-swarm` run.
+- `/qa-swarm:implement <report> <spec> <tests>` -- Implement fixes from an attack run.
+  Takes the 3 output file paths from a `/qa-swarm:attack` run.
 
 ## How It Works
 
-### /qa-swarm
+### /qa-swarm:attack
 1. 11 core QA specialist agents analyze the codebase in parallel (Sonnet)
 2. Pre-aggregation deduplicates findings and detects project type (Haiku)
 3. User confirms which optional specialist agents (up to 6) to activate
