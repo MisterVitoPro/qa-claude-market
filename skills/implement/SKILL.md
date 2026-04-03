@@ -1,5 +1,8 @@
 ---
-description: "Implement fixes from a QA swarm analysis: write TDD tests, fix code by priority, loop until tests pass"
+name: implement
+description: >
+  Implement fixes from a QA swarm analysis: write TDD tests, fix code by priority, loop
+  until tests pass. Takes the 3 output file paths from a /qa-swarm:attack run.
 argument-hint: "<report.md> <spec.md> <tests.md>"
 ---
 
