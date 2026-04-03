@@ -10,23 +10,13 @@ A Claude Code plugin that deploys a swarm of specialized QA agents to analyze yo
 
 ## Installation
 
-**Step 1:** Add the marketplace:
-
 ```bash
 claude plugin marketplace add MisterVitoPro/qa-swarm
-```
-
-**Step 2:** Install the plugin:
-
-```bash
 claude plugin install qa-swarm
+# Restart Claude Code to activate
 ```
 
-**Step 3:** Restart Claude Code to activate the plugin.
-
-### Alternative: Local Installation
-
-Clone the repo and load it directly for a single session:
+Or load directly for a single session:
 
 ```bash
 claude --plugin-dir /path/to/qa-swarm
