@@ -1,0 +1,7 @@
+{
+  "name": "qa-swarm",
+  "description": "Deploy a swarm of specialized QA agents to analyze, report, and fix issues in any codebase",
+  "version": "1.0.0",
+  "license": "MIT",
+  "keywords": ["qa", "testing", "code-review", "tdd", "multi-agent"]
+}
