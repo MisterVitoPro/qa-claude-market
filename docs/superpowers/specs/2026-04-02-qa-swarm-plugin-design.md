@@ -259,47 +259,96 @@ Step 1: INGEST
     "Missing file: [path]. Run /qa-swarm first to generate the analysis files."
   - Read the 3 input files
   - Parse findings grouped by priority
-  - Build implementation queue: P0 first, then P1, P2, P3
+  - Check for existing results file (docs/qa-swarm/YYYY-MM-DD-results.md)
+    - If found, load it and mark already-fixed issues as complete
+    - This enables incremental runs across sessions
 
-Step 2: TDD SETUP (Sonnet)
-  - TDD Agent reads the test plan
+Step 2: PHASE SELECTION
+  - Present a summary table of all phases:
+
+    "QA Swarm Implementation Phases:
+
+     Phase | Priority | Issues | Status
+     ------|----------|--------|-------
+       1   | P0 Crit  |   3    | Not started
+       2   | P1 High  |   5    | Not started
+       3   | P2 Med   |   8    | Not started
+       4   | P3 Low   |   4    | Not started
+
+     Options:
+       [A]   All phases (P0 -> P1 -> P2 -> P3)
+       [1]   Phase 1 only
+       [2]   Phase 2 only
+       [3]   Phase 3 only
+       [4]   Phase 4 only
+       [1-2] Phases 1 through 2
+       [1,3] Phases 1 and 3
+
+     Select phases:"
+
+  - If resuming a previous run, Status column shows "Done (3/3)", "Partial (2/5)", etc.
+  - Wait for user selection before proceeding
+
+Step 3: TDD SETUP (Sonnet)
+  - TDD Agent reads the test plan for SELECTED PHASES ONLY
   - Writes actual test files into the project's test directory
   - Runs the test suite -- confirms they fail (red phase)
   - Tests that already pass are removed from queue (already fixed or false positive)
 
-Step 3: P0 IMPLEMENTATION (strict ordering, Opus)
-  - For each P0 issue, one at a time:
-    a. Implementation Agent reads the spec (implementation-ready detail)
-    b. Writes the fix
-    c. Runs ALL tests
-    d. If new failures appear, fix them before moving on
-    e. If fix fails after 4 attempts, HALT
-       - Surface to user: what was tried, what failed, why
-       - Ask user to intervene or skip
-    f. Move to next P0
+Step 4: PHASE EXECUTION
+  - Execute selected phases in priority order (P0 first even if user selected [2,1])
+  - P0 phase uses strict ordering:
+    - For each P0 issue, one at a time:
+      a. Implementation Agent reads the spec (implementation-ready detail)
+      b. Writes the fix
+      c. Runs ALL tests
+      d. If new failures appear, fix them before moving on
+      e. If fix fails after 4 attempts, HALT
+         - Surface to user: what was tried, what failed, why
+         - Ask user to intervene or skip
+      f. Move to next P0
+  - P1-P3 phases use batched execution:
+    - For each priority level in selection:
+      a. Implementation Agent reads spec for the batch
+      b. Writes fixes for the batch
+      c. Runs ALL tests
+      d. If failures, attempt to fix
+      e. If fix fails after 2 attempts, skip, log as unresolved
+      f. Move to next issue
 
-Step 4: P1-P3 IMPLEMENTATION (batched by priority, Opus)
-  - For each priority level (P1, then P2, then P3):
-    a. Implementation Agent reads spec for the batch
-    b. Writes fixes for the batch
-    c. Runs ALL tests
-    d. If failures, attempt to fix
-    e. If fix fails after 2 attempts, skip, log as unresolved
-    f. Move to next priority level
+Step 5: PHASE COMPLETE
+  - Run full test suite for verification
+  - Update results file incrementally (docs/qa-swarm/YYYY-MM-DD-results.md)
+  - Print phase summary:
+    "Phase N complete.
+     Fixed:      N/N issues
+     Unresolved: N issues
+     Halted:     N (required intervention)
+     Tests:      N passing, N failing"
 
-Step 5: FINAL TEST RUN
-  - Run full test suite
-  - Capture results
+Step 6: CONTINUE PROMPT
+  - If more phases remain (not selected or not yet run):
+    "Remaining phases:
 
-Step 6: COMPLETION REPORT
-  - Save to docs/qa-swarm/YYYY-MM-DD-results.md
-  - Print summary:
+     Phase | Priority | Issues | Status
+     ------|----------|--------|-------
+       3   | P2 Med   |   8    | Not started
+       4   | P3 Low   |   4    | Not started
+
+     Continue with another phase? [3/4/3-4/A/done]"
+  - If user selects more phases, loop back to Step 3
+  - If user selects "done" or no phases remain, proceed to Step 7
+
+Step 7: FINAL REPORT
+  - Save/update docs/qa-swarm/YYYY-MM-DD-results.md
+  - Print overall summary:
     "Implementation complete.
      Fixed:      N/N issues
      Unresolved: N issues (see report)
      Halted:     N P0s (required human intervention)
+     Skipped:    N issues (phases not selected)
 
-     Tests: N passing, N failing (unresolved issues)
+     Tests: N passing, N failing
 
      Results: docs/qa-swarm/YYYY-MM-DD-results.md"
 ```

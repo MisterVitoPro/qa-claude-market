@@ -132,10 +132,12 @@ then optionally implements fixes via TDD.
 7. Three files saved to docs/qa-swarm/
 
 ### /qa-swarm:implement
-1. TDD agent writes actual test files, confirms they fail
-2. P0 fixes: one at a time, full test run after each, 4 retry max, halt on failure
-3. P1-P3 fixes: batched by priority, 2 retry max, skip on failure
-4. Final test run and completion report
+1. Ingests report/spec/tests, checks for prior results (supports incremental runs)
+2. Presents phase selection table -- user chooses which priority phases to tackle
+3. TDD agent writes test files for selected phases, confirms they fail
+4. Phase execution: P0 strict one-at-a-time (4 retry), P1-P3 batched (2 retry)
+5. After selected phases complete, prompts to continue with remaining phases
+6. Results file updated incrementally across phases and sessions
 ```
 
 Write to `skills/qa-swarm/SKILL.md`.
@@ -2184,11 +2186,11 @@ git commit -m "feat: add /qa-swarm orchestration command"
 
 ```markdown
 ---
-description: "Implement fixes from a QA swarm analysis: write TDD tests, fix code by priority, loop until tests pass"
+description: "Implement fixes from a QA swarm analysis: choose phases, write TDD tests, fix code, loop until tests pass"
 argument-hint: "<report.md> <spec.md> <tests.md>"
 ---
 
-You are orchestrating QA Swarm implementation. You will write tests, fix code, and loop until green.
+You are orchestrating QA Swarm implementation. You will present phases, write tests, fix code, and loop until green.
 
 ## Arguments
 
@@ -2208,31 +2210,48 @@ Expected: `<report_path> <spec_path> <test_plan_path>`
 2. Read all three files.
 3. Parse the report to extract findings grouped by priority (P0, P1, P2, P3).
 4. Count total findings per priority level.
-5. Print:
-   ```
-   QA Swarm Implementation Starting
-   ==================================
-   Report:    {report_path}
-   Spec:      {spec_path}
-   Test Plan: {test_plan_path}
+5. Check for an existing results file at `docs/qa-swarm/{DATE}-results.md`.
+   - If found, read it and mark already-fixed issues as complete.
+   - This enables incremental runs across sessions.
 
-   Findings to address:
-     P0 Critical: {N}
-     P1 High:     {N}
-     P2 Medium:   {N}
-     P3 Low:      {N}
+## Step 2: PHASE SELECTION
 
-   Implementation strategy:
-     - P0: strict one-at-a-time, 4 retry max, halt on failure
-     - P1-P3: batched by priority, 2 retry max, skip on failure
+Present the user with a summary table and let them choose what to tackle:
 
-   Proceeding...
-   ```
+```
+QA Swarm Implementation
+========================
+Report:    {report_path}
+Spec:      {spec_path}
+Test Plan: {test_plan_path}
 
-## Step 2: TDD SETUP
+ Phase | Priority    | Issues | Status
+-------|-------------|--------|------------
+   1   | P0 Critical |   {N}  | {status}
+   2   | P1 High     |   {N}  | {status}
+   3   | P2 Medium   |   {N}  | {status}
+   4   | P3 Low      |   {N}  | {status}
+
+Status key: Not started | Partial (N/M) | Done (N/N)
+
+Options:
+  [A]   All phases (P0 -> P1 -> P2 -> P3)
+  [1]   Phase 1 only
+  [2]   Phase 2 only
+  [3]   Phase 3 only
+  [4]   Phase 4 only
+  [1-2] Phases 1 through 2
+  [1,3] Phases 1 and 3
+
+Select phases:
+```
+
+Wait for user selection before proceeding. Parse their input to determine which phases to run.
+
+## Step 3: TDD SETUP
 
 Launch the qa-tdd agent (model: sonnet) in Mode 2 (Test Writer):
-- Pass it the test plan file
+- Pass it the test plan file, filtered to SELECTED PHASES ONLY
 - Instruct it to:
   1. Read existing tests in the project to detect conventions (test framework, file location, naming)
   2. Write the actual test files to disk following those conventions
@@ -2247,7 +2266,11 @@ After the TDD agent completes:
     - {finding_id}: {title} -- likely already fixed or false positive
   ```
 
-## Step 3: P0 IMPLEMENTATION (Strict Ordering)
+## Step 4: PHASE EXECUTION
+
+Execute selected phases in priority order (P0 always runs first even if user selected [2,1]).
+
+### P0 Phase (Strict Ordering)
 
 For EACH P0 finding, one at a time:
 
@@ -2284,9 +2307,9 @@ For EACH P0 finding, one at a time:
      ```
      Wait for user input. If they provide guidance, retry with their instructions. If "skip", continue. If "abort", jump to Step 5.
 
-## Step 4: P1-P3 IMPLEMENTATION (Batched by Priority)
+### P1-P3 Phases (Batched by Priority)
 
-For each priority level (P1, then P2, then P3):
+For each selected priority level (P1, then P2, then P3):
 
 1. Print:
    ```
@@ -2313,13 +2336,39 @@ For each priority level (P1, then P2, then P3):
      ```
      Continue to next priority level.
 
-## Step 5: FINAL TEST RUN
+## Step 5: PHASE COMPLETE + CONTINUE PROMPT
 
-Run the complete test suite one final time. Capture the full output.
+After all selected phases finish:
 
-## Step 6: COMPLETION REPORT
+1. Run the full test suite for verification.
+2. Update the results file incrementally at `docs/qa-swarm/{DATE}-results.md`.
+3. Print phase summary:
+   ```
+   Phase(s) complete.
+   Fixed:      {N}/{N} issues
+   Unresolved: {N} issues
+   Halted:     {N} (required intervention)
+   Tests:      {N} passing, {N} failing
+   ```
 
-Get today's date and save the results:
+4. If unselected phases remain, present the continue prompt:
+   ```
+   Remaining phases:
+
+    Phase | Priority    | Issues | Status
+   -------|-------------|--------|------------
+      3   | P2 Medium   |   {N}  | Not started
+      4   | P3 Low      |   {N}  | Not started
+
+   Continue? [3/4/3-4/A/done]
+   ```
+
+5. If user selects more phases, loop back to Step 3 (TDD Setup for new phases).
+6. If user selects "done" or no phases remain, proceed to Step 6.
+
+## Step 6: FINAL REPORT
+
+Get today's date and save/update the results:
 
 Write to `docs/qa-swarm/{DATE}-results.md`:
 
@@ -2333,7 +2382,8 @@ Write to `docs/qa-swarm/{DATE}-results.md`:
 - Fixed: {N}/{total} issues
 - Unresolved: {N} issues
 - Halted: {N} P0s (required human intervention)
-- Skipped (already passing): {N} issues
+- Skipped (phases not selected): {N} issues
+- Already passing: {N} issues
 
 ## Test Results
 - Total tests: {N}
@@ -2344,6 +2394,7 @@ Write to `docs/qa-swarm/{DATE}-results.md`:
 {for each fixed issue}
 ### [{finding_id}] {title}
 **Priority:** {P0|P1|P2|P3}
+**Phase:** {N}
 **Attempts:** {N}
 **Fix applied:** {brief description of what was changed}
 **Files modified:** {list}
@@ -2365,6 +2416,9 @@ Write to `docs/qa-swarm/{DATE}-results.md`:
 **Why it failed:** {analysis}
 **Recommendation:** {what needs human attention}
 
+## Phases Not Selected
+{list of phases the user chose not to run, with issue counts}
+
 ## Already Passing (Skipped)
 {for each finding whose tests already passed}
 - [{finding_id}] {title} -- {likely already fixed / false positive}
@@ -2378,7 +2432,8 @@ QA Swarm Implementation Complete
 Fixed:      {N}/{total} issues
 Unresolved: {N} issues
 Halted:     {N} P0s
-Skipped:    {N} (already passing)
+Skipped:    {N} (phases not selected)
+Already OK: {N} (tests already passing)
 
 Tests: {passing} passing, {failing} failing
 
