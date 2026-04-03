@@ -10,10 +10,11 @@ A Claude Code plugin that deploys a swarm of specialized QA agents to analyze yo
 
 ## Installation
 
-Add this plugin to your Claude Code installation:
+Add the marketplace and install the plugin:
 
 ```bash
-claude plugin add https://github.com/YOUR_USERNAME/qa-swarm-plugin
+claude plugin marketplace add MisterVitoPro/qa-swarm
+claude plugin install qa-swarm
 ```
 
 ## Usage
