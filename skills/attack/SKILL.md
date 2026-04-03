@@ -1,5 +1,11 @@
 ---
-description: "Deploy a QA agent swarm to analyze the codebase and produce a prioritized findings report, implementation spec, and test plan"
+name: attack
+description: >
+  Deploy a QA agent swarm to analyze the codebase and produce a prioritized findings report,
+  implementation spec, and test plan. Use when the user wants to run QA analysis, find bugs
+  across multiple dimensions (security, performance, correctness, architecture, etc.), or
+  deploy a swarm of specialized QA agents. Triggers on: code review, QA audit, bug sweep,
+  quality analysis, find issues, check for bugs, swarm analysis.
 argument-hint: "<prompt describing what to analyze>"
 ---
 
