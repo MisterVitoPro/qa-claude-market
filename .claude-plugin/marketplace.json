@@ -1,5 +1,8 @@
 {
   "name": "qa-swarm",
+  "metadata": {
+    "description": "Deploy a swarm of specialized QA agents to analyze, report, and fix issues in any codebase"
+  },
   "owner": {
     "name": "MisterVitoPro"
   },
