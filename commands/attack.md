@@ -9,7 +9,13 @@ You are orchestrating a QA Swarm analysis. The user's analysis prompt is:
 
 Follow this pipeline exactly. Do not skip steps.
 
+## Timing
+
+Track elapsed time for each phase. At the start of each step, run `date +%s` (Bash tool) to capture the Unix timestamp. Store these timestamps so you can compute durations at the end. You will report per-phase durations in the handoff summary.
+
 ## Step 1: SETUP
+
+Record the pipeline start time: run `date +%s` and store it as `t_start`.
 
 Generate a codebase map:
 1. Use the Glob tool to list all source files (exclude node_modules, target, dist, build, .git, vendor, __pycache__)
@@ -17,6 +23,8 @@ Generate a codebase map:
 3. Compile this into a codebase map string: file tree + key signatures
 
 Store the codebase map -- you will pass it to every agent.
+
+Record timestamp: run `date +%s` and store as `t_setup_done`.
 
 ## Step 2: CORE SWARM
 
@@ -52,6 +60,8 @@ Launch these agents in parallel (all in one message with multiple Agent tool cal
 
 Collect all 11 agent results.
 
+Record timestamp: run `date +%s` and store as `t_core_done`.
+
 ## Step 3: PRE-AGGREGATION
 
 Launch the qa-pre-aggregator agent (model: haiku) with:
@@ -62,6 +72,8 @@ The pre-aggregator will return:
 - Deduplicated findings with corroboration map
 - Project type detection
 - Optional agent recommendations
+
+Record timestamp: run `date +%s` and store as `t_preagg_done`.
 
 ## Step 4: USER CONFIRMATION
 
@@ -87,6 +99,8 @@ Proceed with these optional agents? (Y/n, or adjust: "+logging -supply-chain")
 
 Wait for user response. Parse any adjustments.
 
+Record timestamp: run `date +%s` and store as `t_confirm_done`.
+
 ## Step 5: OPTIONAL SWARM
 
 If any optional agents are approved, launch them IN PARALLEL using the Agent tool.
@@ -99,6 +113,8 @@ Each optional agent gets:
 
 Collect all optional agent results.
 
+Record timestamp: run `date +%s` and store as `t_optional_done`. If no optional agents were run, set `t_optional_done = t_confirm_done`.
+
 ## Step 6: FINAL AGGREGATION
 
 Launch the qa-aggregator agent (model: opus) with:
@@ -107,6 +123,8 @@ Launch the qa-aggregator agent (model: opus) with:
 - Project type info
 
 The aggregator produces the final ranked report in markdown format.
+
+Record timestamp: run `date +%s` and store as `t_agg_done`.
 
 ## Step 7: PARALLEL OUTPUT
 
@@ -122,6 +140,8 @@ Launch TWO agents IN PARALLEL:
    - Has access to the codebase (to read existing test patterns)
    - Produces the test plan (Mode 1)
 
+Record timestamp: run `date +%s` and store as `t_output_done`.
+
 ## Step 8: SAVE FILES
 
 Get today's date and save the three output files:
@@ -131,7 +151,20 @@ Get today's date and save the three output files:
 
 Create the `docs/qa-swarm/` directory if it does not exist.
 
+Record timestamp: run `date +%s` and store as `t_save_done`.
+
 ## Step 9: HANDOFF
+
+Compute phase durations from stored timestamps (format as Xm Ys):
+- Setup:          `t_setup_done - t_start`
+- Core Swarm:     `t_core_done - t_setup_done`
+- Pre-aggregation:`t_preagg_done - t_core_done`
+- User Confirm:   `t_confirm_done - t_preagg_done`  (skip this from the total -- it's wait time)
+- Optional Swarm: `t_optional_done - t_confirm_done` (show "skipped" if none were run)
+- Aggregation:    `t_agg_done - t_optional_done`
+- Spec + Tests:   `t_output_done - t_agg_done`
+- Save Files:     `t_save_done - t_output_done`
+- Total:          `t_save_done - t_start` minus user confirm wait time
 
 Print the summary and next steps. Count the actual agents dispatched during this run:
 - Core agents: always 11 (Sonnet)
@@ -146,6 +179,17 @@ QA Swarm Analysis Complete
 ============================
 Findings: {total} ({P0} P0, {P1} P1, {P2} P2, {P3} P3)
 Confidence: {confirmed} confirmed, {likely} likely, {suspected} suspected
+
+Phase Timing:
+  Setup           {Xm Ys}
+  Core Swarm      {Xm Ys}   (11 Sonnet agents)
+  Pre-aggregation {Xm Ys}   (1 Haiku agent)
+  Optional Swarm  {Xm Ys}   ({N} Sonnet agents) or "skipped"
+  Aggregation     {Xm Ys}   (1 Opus agent)
+  Spec + Tests    {Xm Ys}   (1 Opus + 1 Sonnet agent)
+  Save Files      {Xm Ys}
+  ────────────────────────
+  Total           {Xm Ys}   (excludes user confirmation wait)
 
 Agent Usage:
   Sonnet : {11 + optional_count + 1} agents  (11 core + {optional_count} optional + 1 TDD)
