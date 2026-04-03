@@ -5,6 +5,14 @@ argument-hint: "<report.md> <spec.md> <tests.md>"
 
 You are orchestrating QA Swarm implementation. You will write tests, fix code, and loop until green.
 
+**IMPORTANT:** Before modifying any code, verify that the current working tree is clean or committed. If there are uncommitted changes, warn the user:
+```
+Warning: You have uncommitted changes. If fixes go wrong, you may lose work.
+Recommendation: Commit or stash your changes before proceeding.
+Continue anyway? (Y/n)
+```
+Wait for confirmation before proceeding.
+
 ## Arguments
 
 Parse the three file paths from the arguments: `{$ARGUMENTS}`
@@ -13,17 +21,40 @@ Expected: `<report_path> <spec_path> <test_plan_path>`
 
 ## Step 1: VALIDATE AND INGEST
 
-1. Check that all three files exist. If any are missing, print:
+1. Parse the three file paths from the arguments. If fewer than three paths are provided, print:
    ```
-   Missing file: {path}
-   Run /qa-swarm:attack first to generate the analysis files.
+   Error: Expected 3 file paths, got {N}.
+
+   Usage: /qa-swarm:implement <report.md> <spec.md> <test_plan.md>
+   Example: /qa-swarm:implement docs/qa-swarm/2026-04-02-report.md docs/qa-swarm/2026-04-02-spec.md docs/qa-swarm/2026-04-02-tests.md
+
+   Run /qa-swarm:attack first to generate these files.
    ```
    Then STOP.
 
-2. Read all three files.
-3. Parse the report to extract findings grouped by priority (P0, P1, P2, P3).
-4. Count total findings per priority level.
-5. Print:
+2. Check that all three files exist. For EACH missing file, collect the error. If any are missing, print:
+   ```
+   Cannot start implementation -- missing files:
+     {path_1}  <-- not found
+     {path_2}  <-- not found
+
+   Expected files in docs/qa-swarm/:
+     {date}-report.md   (ranked findings)
+     {date}-spec.md     (implementation spec)
+     {date}-tests.md    (TDD test plan)
+
+   Run /qa-swarm:attack first to generate these files.
+   ```
+   Then STOP.
+
+3. Read all three files.
+4. Parse the report to extract findings grouped by priority (P0, P1, P2, P3).
+5. Count total findings per priority level. If total findings is 0, print:
+   ```
+   No findings to implement -- the report contains 0 actionable findings.
+   ```
+   Then STOP.
+6. Print:
    ```
    QA Swarm Implementation Starting
    ==================================
@@ -198,4 +229,11 @@ Skipped:    {N} (already passing)
 Tests: {passing} passing, {failing} failing
 
 Results: docs/qa-swarm/{DATE}-results.md
+
+Next steps:
+  1. Review changes:  git diff
+  2. Run your tests:  {detected test command, or "your test command"}
+  3. Run linter:      {detected lint command, if any}
+  4. Commit:          git add -A && git commit -m "fix: resolve QA swarm findings"
+  5. Open a PR for review
 ```
