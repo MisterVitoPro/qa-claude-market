@@ -1,0 +1,14 @@
+{
+  "name": "qa-swarm",
+  "owner": {
+    "name": "MisterVitoPro"
+  },
+  "plugins": [
+    {
+      "name": "qa-swarm",
+      "description": "Deploy a swarm of specialized QA agents to analyze, report, and fix issues in any codebase",
+      "source": "./",
+      "category": "development"
+    }
+  ]
+}
