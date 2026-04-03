@@ -253,6 +253,15 @@ Step 8: HANDOFF
 **Input:** 3 file paths (report, spec, test plan)
 **Output:** Fixed code + completion report
 
+### Progress Tracking
+
+The implement command uses Claude Tasks (TaskCreate, TaskUpdate) to give the user real-time visibility into progress:
+- **Phase tasks**: One per selected priority phase (e.g., "Phase 1: P0 Critical (3 issues)")
+- **Finding sub-tasks**: One per individual finding within a phase (e.g., "Fix P0-001: SQL injection")
+- **Pipeline tasks**: For cross-cutting steps (TDD Setup, Final Test Run, Write Results)
+
+All tasks reference the spec file and finding IDs so agents and the user can trace work back to the plan. Tasks are marked `in_progress` when started and `completed` immediately when done (never batched). Failed or skipped tasks are updated with the reason.
+
 ```
 Step 1: INGEST
   - Validate all 3 input files exist. If any are missing, error with:
