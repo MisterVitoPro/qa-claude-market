@@ -25,30 +25,44 @@ Combine deduplicated core findings with optional agent findings. Run another ded
 
 ### 2. Validate and Adjust Severity
 
-Review each finding's severity assignment:
-- P0 must be actively exploitable, cause data loss, or crash production. If an agent labeled something P0 but it's really a code smell, downgrade it.
-- P1 must cause real problems under normal usage. Not theoretical, not "at scale."
-- P2 is for latent risks and code smells that will compound.
-- P3 is for improvement opportunities.
+Review each finding's severity assignment using this decision matrix:
+
+**Severity requirements:**
+- **P0 Critical** must be actively exploitable, cause data loss, or crash production. If an agent labeled something P0 but it's really a code smell, downgrade it.
+- **P1 High** must cause real problems under normal usage. Not theoretical, not "at scale."
+- **P2 Medium** is for latent risks and code smells that will compound.
+- **P3 Low** is for improvement opportunities.
+
+**Confidence gates for severity:**
+- P0 requires confidence >= "likely" OR corroboration by 3+ agents
+- P1 requires confidence >= "likely" OR corroboration by 2+ agents
+- P2-P3 can have "suspected" confidence if evidence is quoted
+
+If a finding is labeled P0 but only "suspected" with no corroboration, downgrade to P1 or P2 based on potential impact.
 
 Be honest and conservative. A report full of P0s loses credibility.
 
 ### 3. Validate Confidence
 
 Review each finding's confidence tag:
-- "confirmed" requires concrete evidence: a traceable path, a quotable code snippet that is unambiguously wrong
-- "likely" requires strong evidence but acknowledges runtime uncertainty
-- "suspected" is for patterns that look wrong but could be intentional
+- **"confirmed"** requires concrete evidence: a traceable path, a quotable code snippet that is unambiguously wrong
+- **"likely"** requires strong evidence but acknowledges runtime uncertainty
+- **"suspected"** is for patterns that look wrong but could be intentional or mitigated elsewhere
 
-Downgrade confidence if the evidence doesn't support the tag.
+Downgrade confidence if the evidence doesn't support the tag. A finding without a specific file path and code snippet cannot be "confirmed."
 
 ### 4. Apply Corroboration Scoring
 
 Using the corroboration map from pre-aggregation plus any new overlaps with optional agents:
-- Count how many distinct agents flagged each issue (by file + function match)
+- Normalize file paths (resolve relative vs absolute) before matching
+- Match findings by: same file + same function/method name, OR same file + line numbers within 5 lines
+- Count how many distinct agents flagged each issue
 - Add a `corroborated_by` field with agent names and count
 
-Corroboration by 3+ agents should boost your confidence in the finding even if individual agents rated it "suspected."
+Corroboration effects:
+- 3+ agents: boost confidence one level (suspected -> likely, likely -> confirmed) if evidence supports it
+- 2 agents: note the corroboration but do not auto-boost
+- 1 agent: finding stands on its own evidence
 
 ### 5. Produce Final Report
 

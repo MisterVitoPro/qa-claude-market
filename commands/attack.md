@@ -24,9 +24,41 @@ Generate a codebase map:
 
 Store the codebase map -- you will pass it to every agent.
 
+Count the total source files and estimate total lines of code from the map. Print a cost estimate and codebase summary:
+
+```
+QA Swarm -- Codebase Summary
+==============================
+Source files: {file_count}
+Estimated lines: ~{line_count}
+
+Estimated cost (API tokens):
+  Core swarm    (11 Sonnet agents):  ~60% of total
+  Pre-aggregator (1 Haiku agent):   ~5% of total
+  Aggregator     (1 Opus agent):    ~15% of total
+  Architect      (1 Opus agent):    ~10% of total
+  TDD            (1 Sonnet agent):  ~10% of total
+
+  Small project  (< 50 files):   ~$0.50-1
+  Medium project (50-200 files): ~$1-3
+  Large project  (200+ files):   ~$3-10
+
+Proceed? (Y/n)
+```
+
+Wait for user confirmation. If "n", stop and print "Aborted."
+
 Record timestamp: run `date +%s` and store as `t_setup_done`.
 
 ## Step 2: CORE SWARM
+
+Print:
+```
+[Phase 1/6] Deploying 11 core QA agents in parallel...
+  Security Auditor, Error Handling, Performance, Concurrency,
+  API Contract, Edge Case, Logic, Data Integrity,
+  Architecture, Resilience, Resource Management
+```
 
 Launch all 11 core QA agents IN PARALLEL using the Agent tool. Each agent gets the same prompt structure:
 
@@ -58,11 +90,20 @@ Launch these agents in parallel (all in one message with multiple Agent tool cal
 10. qa-resilience (model: sonnet)
 11. qa-resource-mgmt (model: sonnet)
 
-Collect all 11 agent results.
+**Wait for ALL 11 agents to complete before proceeding.** Do not start Step 3 until every agent has returned its results. If any agent fails or returns an error instead of findings, log it and continue with the remaining agents' results:
+```
+Agent {name} failed: {error}
+Continuing with {N}/11 agent results.
+```
 
 Record timestamp: run `date +%s` and store as `t_core_done`.
 
 ## Step 3: PRE-AGGREGATION
+
+Print:
+```
+[Phase 2/6] Core swarm complete. Deduplicating and detecting project type...
+```
 
 Launch the qa-pre-aggregator agent (model: haiku) with:
 - All 11 core agent findings combined
@@ -103,6 +144,17 @@ Record timestamp: run `date +%s` and store as `t_confirm_done`.
 
 ## Step 5: OPTIONAL SWARM
 
+If any optional agents are approved, print:
+```
+[Phase 3/6] Deploying {N} optional agents in parallel...
+  {agent names, comma-separated}
+```
+
+If no optional agents are approved, print:
+```
+[Phase 3/6] No optional agents selected. Skipping.
+```
+
 If any optional agents are approved, launch them IN PARALLEL using the Agent tool.
 
 Each optional agent gets:
@@ -111,11 +163,20 @@ Each optional agent gets:
 - A summary of core findings (so they don't duplicate work)
 - Their agent-specific instructions
 
-Collect all optional agent results.
+**Wait for ALL optional agents to complete before proceeding.** If any optional agent fails, log it and continue with available results:
+```
+Optional agent {name} failed: {error}
+Continuing with {N}/{total} optional agent results.
+```
 
 Record timestamp: run `date +%s` and store as `t_optional_done`. If no optional agents were run, set `t_optional_done = t_confirm_done`.
 
 ## Step 6: FINAL AGGREGATION
+
+Print:
+```
+[Phase 4/6] Ranking and corroborating all findings...
+```
 
 Launch the qa-aggregator agent (model: opus) with:
 - All deduplicated findings (core + optional)
@@ -127,6 +188,11 @@ The aggregator produces the final ranked report in markdown format.
 Record timestamp: run `date +%s` and store as `t_agg_done`.
 
 ## Step 7: PARALLEL OUTPUT
+
+Print:
+```
+[Phase 5/6] Generating implementation spec and test plan...
+```
 
 Launch TWO agents IN PARALLEL:
 
@@ -143,6 +209,11 @@ Launch TWO agents IN PARALLEL:
 Record timestamp: run `date +%s` and store as `t_output_done`.
 
 ## Step 8: SAVE FILES
+
+Print:
+```
+[Phase 6/6] Saving reports...
+```
 
 Get today's date and save the three output files:
 1. Write the aggregator's report to `docs/qa-swarm/{DATE}-report.md`

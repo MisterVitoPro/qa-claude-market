@@ -1,7 +1,21 @@
 {
   "name": "qa-swarm",
   "metadata": {
-    "description": "Deploy a swarm of specialized QA agents to analyze, report, and fix issues in any codebase"
+    "description": "AI-powered code quality analyzer: 17 specialized agents find security, performance, architecture, and correctness issues, then fix them via TDD",
+    "repository": "https://github.com/MisterVitoPro/qa-swarm-plugin",
+    "tags": [
+      "qa",
+      "testing",
+      "code-review",
+      "security-audit",
+      "tdd",
+      "multi-agent",
+      "bug-detection",
+      "code-quality",
+      "static-analysis",
+      "performance-analysis",
+      "architecture-review"
+    ]
   },
   "owner": {
     "name": "MisterVitoPro"
@@ -9,7 +23,7 @@
   "plugins": [
     {
       "name": "qa-swarm",
-      "description": "Deploy a swarm of specialized QA agents to analyze, report, and fix issues in any codebase",
+      "description": "AI-powered code quality analyzer: 17 specialized agents find security, performance, architecture, and correctness issues, then fix them via TDD",
       "source": "./",
       "category": "development"
     }
