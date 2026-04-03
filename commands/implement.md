@@ -16,7 +16,7 @@ Expected: `<report_path> <spec_path> <test_plan_path>`
 1. Check that all three files exist. If any are missing, print:
    ```
    Missing file: {path}
-   Run /qa-swarm first to generate the analysis files.
+   Run /qa-swarm:attack first to generate the analysis files.
    ```
    Then STOP.
 
