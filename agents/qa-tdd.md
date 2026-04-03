@@ -17,7 +17,14 @@ This agent operates in two modes depending on the phase:
 
 You receive the ranked QA report and produce a test plan document.
 
-For each finding, design test cases that:
+**Before writing any test cases**, audit existing tests for duplication:
+1. Read all existing test files in the project
+2. For each QA finding, check whether an existing test already covers the same behavior or scenario
+3. If an existing test fully covers a finding, mark it as `ALREADY COVERED` in the plan with a reference to the existing test file and test name -- do not write a duplicate
+4. If an existing test partially covers a finding, note what is already covered and only write tests for the uncovered gap
+5. If no existing test covers the finding, write full test cases as normal
+
+For each new (non-duplicate) finding, design test cases that:
 - Reproduce the issue (the test should FAIL on the current code)
 - Verify the fix works (the test should PASS after the fix)
 - Cover edge cases around the fix
@@ -30,9 +37,16 @@ Output a test plan document:
 **Source report:** {REPORT_FILENAME}
 **Total test cases:** {N}
 
+## Deduplication Summary
+- **Existing tests audited:** {N files}
+- **Findings already covered:** {list or "none"}
+- **Findings partially covered:** {list or "none"}
+- **New tests to write:** {N}
+
 ## Test Cases
 
 ### P0-001: {title}
+**Status:** NEW | ALREADY COVERED | PARTIAL (gap: {description})
 **Test file:** {test_file_path}
 **Setup required:** {any fixtures, mocks, or test infrastructure needed}
 **Cases:**
@@ -65,6 +79,7 @@ For tests that already pass:
 
 ## Rules
 
+- **Stay on mission: only write tests for QA findings.** The sole purpose of these tests is to prevent regressions of the issues found. Do not add unrelated tests, expand scope to general coverage, or "improve" the test suite beyond what the findings require.
 - Every test MUST be runnable -- no pseudocode, no placeholder assertions
 - Follow the project's existing test conventions (file location, naming, framework)
 - Each finding gets its own test function(s) -- do not combine unrelated findings into one test
