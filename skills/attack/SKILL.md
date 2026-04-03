@@ -193,6 +193,21 @@ The aggregator produces the final ranked report in markdown format.
 
 Record timestamp: run `date +%s` and store as `t_agg_done`.
 
+Print a table of ALL findings from the aggregated report so the user can see every bug and issue at a glance. Format it as a markdown table sorted by severity (P0 first), then by confidence (confirmed > likely > suspected):
+
+```
+Findings Summary
+==================
+
+| ID     | Severity | Confidence | Title                          | Location                        | Corroborated By   |
+|--------|----------|------------|--------------------------------|---------------------------------|--------------------|
+| P0-001 | P0       | confirmed  | SQL injection in login handler | src/auth.ts:42 `handleLogin()`  | 4 agents (SEC,ERR) |
+| P1-001 | P1       | likely     | Unbounded retry loop           | src/client.ts:88 `fetchData()`  | 2 agents (RES,ERR) |
+| ...    | ...      | ...        | ...                            | ...                             | ...                |
+```
+
+Print every finding -- do not truncate or summarize. If there are zero findings, print "No findings detected." instead.
+
 ## Step 7: PARALLEL OUTPUT
 
 Print:
