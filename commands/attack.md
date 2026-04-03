@@ -133,13 +133,25 @@ Create the `docs/qa-swarm/` directory if it does not exist.
 
 ## Step 9: HANDOFF
 
-Print the summary and next steps:
+Print the summary and next steps. Count the actual agents dispatched during this run:
+- Core agents: always 11 (Sonnet)
+- Pre-aggregator: always 1 (Haiku)
+- Optional agents: count how many were approved in Step 5 (Sonnet)
+- Aggregator: always 1 (Opus)
+- Solutions Architect: always 1 (Opus)
+- TDD Agent: always 1 (Sonnet)
 
 ```
 QA Swarm Analysis Complete
 ============================
 Findings: {total} ({P0} P0, {P1} P1, {P2} P2, {P3} P3)
 Confidence: {confirmed} confirmed, {likely} likely, {suspected} suspected
+
+Agent Usage:
+  Sonnet : {11 + optional_count + 1} agents  (11 core + {optional_count} optional + 1 TDD)
+  Haiku  : 1 agent   (pre-aggregator)
+  Opus   : 2 agents  (aggregator + solutions architect)
+  Total  : {15 + optional_count} agents dispatched
 
 Report:    docs/qa-swarm/{DATE}-report.md
 Spec:      docs/qa-swarm/{DATE}-spec.md
