@@ -216,7 +216,7 @@ For each selected priority level (P1, then P2, then P3):
    Implementing {N} P{level} fixes...
    ```
 
-3. Launch an implementation agent (model: opus) with:
+3. Launch an implementation agent (model: sonnet) with:
    - All findings for this priority level from the report
    - The corresponding fix details from the spec (tell the agent: "Read {spec_path} > P{level} Fixes for approach details.")
    - The relevant test files

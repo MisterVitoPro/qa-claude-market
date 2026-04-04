@@ -35,7 +35,7 @@ Two commands:
 - `/qa-swarm:attack <prompt>` -- Analysis pipeline (scan, aggregate, report)
 - `/qa-swarm:implement <report> <spec> <tests>` -- Implementation pipeline (phased TDD fix loop)
 
-The user stays in the loop at every decision point: confirming optional agents, selecting implementation phases, and choosing whether to continue after each phase completes.
+The user stays in the loop at key decision points: confirming agent selection before the swarm, selecting implementation phases, and choosing whether to continue after each phase completes.
 
 ---
 
@@ -47,24 +47,16 @@ qa-swarm-plugin/
 │   ├── plugin.json                  # Plugin manifest
 │   └── marketplace.json             # Marketplace metadata
 ├── agents/
-│   ├── qa-security-auditor.md       # Core agent 1
-│   ├── qa-error-handling.md         # Core agent 2
-│   ├── qa-performance.md            # Core agent 3
-│   ├── qa-concurrency.md            # Core agent 4
-│   ├── qa-api-contract.md           # Core agent 5
-│   ├── qa-edge-case.md              # Core agent 6
-│   ├── qa-logic-correctness.md      # Core agent 7
-│   ├── qa-data-integrity.md         # Core agent 8
-│   ├── qa-architecture.md           # Core agent 9
-│   ├── qa-resilience.md             # Core agent 10
-│   ├── qa-resource-mgmt.md          # Core agent 11
-│   ├── qa-config-env.md             # Optional agent 12
-│   ├── qa-type-safety.md            # Optional agent 13
-│   ├── qa-logging.md                # Optional agent 14
-│   ├── qa-backwards-compat.md       # Optional agent 15
-│   ├── qa-supply-chain.md           # Optional agent 16
-│   ├── qa-state-mgmt.md             # Optional agent 17
-│   ├── qa-pre-aggregator.md         # Pipeline: dedup + project detection
+│   ├── qa-security-error.md         # Core: security + error handling
+│   ├── qa-performance-resources.md  # Core: performance + concurrency + resources
+│   ├── qa-correctness.md            # Core: data integrity + API contracts + logic + edge cases
+│   ├── qa-architecture.md           # Core: architecture & design
+│   ├── qa-config-env.md             # Optional: configuration & environment
+│   ├── qa-type-safety.md            # Optional: type & null safety
+│   ├── qa-logging.md                # Optional: logging & observability
+│   ├── qa-backwards-compat.md       # Optional: backwards compatibility
+│   ├── qa-supply-chain.md           # Optional: dependency & supply chain
+│   ├── qa-state-mgmt.md             # Optional: state management
 │   ├── qa-aggregator.md             # Pipeline: final ranking
 │   ├── qa-solutions-architect.md    # Pipeline: spec writer
 │   └── qa-tdd.md                    # Pipeline: test plan + test writer
@@ -91,7 +83,7 @@ qa-swarm-plugin/
 ```json
 {
   "name": "qa-swarm",
-  "description": "AI-powered code quality analyzer: 17 specialized agents find security, performance, architecture, and correctness issues, then fix them via TDD",
+  "description": "AI-powered code quality analyzer: specialized agents find security, performance, architecture, and correctness issues, then fix them via TDD",
   "version": "1.0.0",
   "license": "MIT",
   "keywords": ["qa", "testing", "code-review", "tdd", "multi-agent", "security-audit", "bug-detection", "code-quality", "static-analysis", "code-scanner", "ai-code-review", "performance-analysis", "architecture-review"],
@@ -114,40 +106,32 @@ claude --plugin-dir /path/to/qa-swarm
 
 ## Agent Roster
 
-### Core Agents (always active) -- 11 agents
+### Core Agents (always active) -- 4 agents
 
-| # | Agent | File | ID Prefix | Focus |
-|---|-------|------|-----------|-------|
-| 1 | Security Auditor | qa-security-auditor.md | SEC | Injection, auth flaws, secrets exposure, OWASP top 10 |
-| 2 | Error Handling Analyst | qa-error-handling.md | ERR | Silent failures, missing catches, panic paths |
-| 3 | Performance Analyst | qa-performance.md | PERF | N+1 queries, unnecessary allocations, bottlenecks |
-| 4 | Concurrency Reviewer | qa-concurrency.md | CONC | Race conditions, deadlocks, unsafe shared state |
-| 5 | API Contract Validator | qa-api-contract.md | API | Input validation, response consistency |
-| 6 | Edge Case Hunter | qa-edge-case.md | EDGE | Boundary conditions, empty inputs, overflow |
-| 7 | Logic & Correctness Reviewer | qa-logic-correctness.md | LOGIC | Off-by-one, wrong operators, flawed conditionals |
-| 8 | Data Integrity Analyst | qa-data-integrity.md | DATA | Schema mismatches, data loss paths |
-| 9 | Architecture & Design Reviewer | qa-architecture.md | ARCH | SOLID violations, coupling, god classes, wrong abstractions |
-| 10 | Resilience & Failure Mode Analyst | qa-resilience.md | RES | Timeouts, retries, graceful degradation |
-| 11 | Resource & Memory Management Auditor | qa-resource-mgmt.md | MEM | Leaks, unclosed handles, unbounded growth |
+| # | Agent | File | ID Prefixes | Focus |
+|---|-------|------|-------------|-------|
+| 1 | Security & Error | qa-security-error.md | SEC, ERR | Injection, auth flaws, secrets, silent failures, missing catches, timeouts, cascade failures |
+| 2 | Performance & Resources | qa-performance-resources.md | PERF, CONC, MEM | N+1 queries, bottlenecks, race conditions, deadlocks, memory leaks, resource exhaustion |
+| 3 | Correctness | qa-correctness.md | DATA, API, LOGIC, EDGE | Schema mismatches, data loss, contract violations, off-by-one, boundary failures |
+| 4 | Architecture & Design | qa-architecture.md | ARCH | SOLID violations, coupling, god classes, wrong abstractions, circular deps |
 
 ### Optional Agents (activated by project type) -- up to 6 agents
 
 | # | Agent | File | ID Prefix | Focus | Activates When |
 |---|-------|------|-----------|-------|----------------|
-| 12 | Configuration & Env Reviewer | qa-config-env.md | CFG | Hardcoded values, missing env vars, config drift | Environment-dependent deployment detected |
-| 13 | Type & Null Safety Auditor | qa-type-safety.md | TYPE | Null derefs, unsafe casts, type coercion traps | Dynamic typing or weak type checking detected |
-| 14 | Logging & Observability Auditor | qa-logging.md | LOG | Missing logs, sensitive data in logs, trace gaps | Production service detected |
-| 15 | Backwards Compatibility Analyst | qa-backwards-compat.md | COMPAT | Breaking public APIs, serialization format changes | Library or public API detected |
-| 16 | Dependency & Supply Chain Auditor | qa-supply-chain.md | SUPPLY | Known CVEs, unpinned versions, license conflicts | Third-party dependencies present |
-| 17 | State Management Reviewer | qa-state-mgmt.md | STATE | Invalid state transitions, global state abuse | Frontend app or stateful service detected |
+| 5 | Configuration & Env Reviewer | qa-config-env.md | CFG | Hardcoded values, missing env vars, config drift | Environment-dependent deployment detected |
+| 6 | Type & Null Safety Auditor | qa-type-safety.md | TYPE | Null derefs, unsafe casts, type coercion traps | Dynamic typing or weak type checking detected |
+| 7 | Logging & Observability Auditor | qa-logging.md | LOG | Missing logs, sensitive data in logs, trace gaps | Production service detected |
+| 8 | Backwards Compatibility Analyst | qa-backwards-compat.md | COMPAT | Breaking public APIs, serialization format changes | Library or public API detected |
+| 9 | Dependency & Supply Chain Auditor | qa-supply-chain.md | SUPPLY | Known CVEs, unpinned versions, license conflicts | Third-party dependencies present |
+| 10 | State Management Reviewer | qa-state-mgmt.md | STATE | Invalid state transitions, global state abuse | Frontend app or stateful service detected |
 
 ### Pipeline Agents
 
 | Agent | File | Model | Role |
 |-------|------|-------|------|
-| Pre-Aggregator | qa-pre-aggregator.md | Haiku | Deduplicate core findings, detect project type, recommend optional agents |
-| Final Aggregator | qa-aggregator.md | Opus | Merge all findings, rank P0-P3, apply confidence + corroboration |
-| Solutions Architect | qa-solutions-architect.md | Opus | Write layered implementation spec from ranked findings |
+| Final Aggregator | qa-aggregator.md | Sonnet | Merge all findings, rank P0-P3, apply confidence + corroboration |
+| Solutions Architect | qa-solutions-architect.md | Sonnet | Write layered implementation spec from ranked findings |
 | TDD Agent | qa-tdd.md | Sonnet | Write test plan (Mode 1) and test files (Mode 2) |
 
 ---
@@ -156,33 +140,34 @@ claude --plugin-dir /path/to/qa-swarm
 
 | Role | Model | Count | Rationale |
 |------|-------|-------|-----------|
-| Core QA agents | Sonnet | 11 | Focused single-specialty analysis. Saves tokens at scale. |
-| Optional QA agents | Sonnet | 0-6 | Same -- focused scope, single lens. |
-| Pre-Aggregator | Haiku | 1 | Simple task: dedupe, detect project type. |
-| Final Aggregator | Opus | 1 | Hardest job: synthesize 11-17 reports, corroboration, ranking. |
-| Solutions Architect | Opus | 1 | Implementation-ready specs for P0s need deep reasoning. |
+| Core QA agents | Haiku | 4 | Merged specialties reduce agent count while maintaining coverage. Haiku is fast and cheap for focused analysis. |
+| Optional QA agents | Sonnet | 0-6 | Focused scope, single lens. |
+| Final Aggregator | Sonnet | 1 | Synthesizes 4-10 agent reports, applies corroboration and ranking. Structured task suits Sonnet. |
+| Solutions Architect | Sonnet | 1 | Writes layered implementation spec from findings. Follows template. |
 | TDD Agent | Sonnet | 1 | Writing test code from known issues. Well-scoped. |
-| Implementation Agent | Opus | 1 | Actually modifying production code to fix bugs. |
+| P0 Implementation Agent | Opus | 1 | Critical fixes need deep reasoning. One at a time. |
+| P1-P3 Implementation Agent | Sonnet | 1 | Batched fixes from spec. Follows prescribed steps. |
 
-**Total agents per run:** 15-21 (depending on optional agent count)
+**Total agents per attack run:** 7-13 (depending on optional agent count)
 
 ### Estimated Cost
 
 | Project Size | Estimated Cost |
 |-------------|----------------|
-| Small (< 50 files) | ~$0.50-1 |
-| Medium (50-200 files) | ~$1-3 |
-| Large (200+ files) | ~$3-10 |
+| Small (< 50 files) | ~$0.10-0.30 |
+| Medium (50-200 files) | ~$0.30-1.00 |
+| Large (200+ files) | ~$1.00-3.00 |
 
 ---
 
 ## Token Management
 
 1. **Structured output format** -- every QA agent returns findings in a strict JSON schema. No prose.
-2. **File budget** -- each agent gets user prompt + codebase map (file tree + key signatures), then reads files relevant to its specialty. Not the full codebase.
-3. **Findings cap** -- max 10 findings per agent, ranked by severity. Forces prioritization.
-4. **Pre-aggregation compression** -- Haiku deduplicates before Opus gets the combined input.
+2. **Scoped file lists** -- each agent gets only the files tagged relevant to its specialty, not the full codebase.
+3. **Findings cap** -- max 10-15 findings per agent, ranked by severity. Forces prioritization.
+4. **Inline dedup** -- orchestrator deduplicates findings before passing to aggregator, reducing input size.
 5. **Layered spec detail** -- Solutions Architect writes full detail for P0, strategic for P1, brief for P2-P3.
+6. **Single swarm** -- core + optional agents launch in one parallel batch, eliminating sequential overhead.
 
 ---
 
@@ -207,7 +192,7 @@ claude --plugin-dir /path/to/qa-swarm
 
 ### Corroboration
 
-When multiple agents independently flag the same issue (matched by file + function, or file + line within 5 lines), the aggregator marks it with a corroboration count (e.g., "3/17 agents").
+When multiple agents independently flag the same issue (matched by file + function, or file + line within 5 lines), the aggregator marks it with a corroboration count (e.g., "3 agents").
 
 Corroboration effects on confidence:
 - **3+ agents**: boost confidence one level (suspected -> likely, likely -> confirmed) if evidence supports it
@@ -254,11 +239,11 @@ Every QA agent returns findings in this format:
 
 ### Constraints
 
-- Max 10 findings per agent
+- Max 10-15 findings per agent
 - Every finding must include `location` with file + line
 - `evidence` quotes the actual problematic code
 - `confidence` is one of: confirmed, likely, suspected
-- ID prefix matches agent specialty: SEC, ERR, PERF, CONC, API, EDGE, LOGIC, DATA, ARCH, RES, MEM, CFG, TYPE, LOG, COMPAT, SUPPLY, STATE
+- ID prefix matches agent specialty: SEC, ERR, PERF, CONC, MEM, DATA, API, LOGIC, EDGE, ARCH, CFG, TYPE, LOG, COMPAT, SUPPLY, STATE
 
 ---
 
@@ -268,56 +253,38 @@ Every QA agent returns findings in this format:
 **Output:** 3 files in `docs/qa-swarm/`
 **Skill file:** `skills/attack/SKILL.md`
 
-### Pipeline Steps
+### Pipeline Steps (optimized -- 5 steps)
 
 ```
 Step 1: SETUP
   - Parse user prompt
   - Generate codebase map (file tree, key exports/signatures via first 50 lines of key files)
-  - Print cost estimate and codebase summary
-  - Wait for user confirmation (Y/n)
+  - Tag files by category (auth, api, db, io, state, config, logic, frontend, test, entry)
+  - Auto-detect project type from file extensions, names, and signatures
+  - Select optional agents based on project type
+  - Print cost estimate, codebase summary, and agent selection
+  - Wait for user confirmation (Y/n, or adjust agents: "+logging -supply-chain")
   - Track timestamps for per-phase timing
 
-Step 2: CORE SWARM (parallel, 11 Sonnet agents)
-  - Launch all 11 core QA agents simultaneously via Agent tool
-  - Each receives: user prompt + codebase map + agent-specific instructions from agents/*.md
-  - Each explores relevant files, returns max 10 findings in structured JSON
+Step 2: FULL SWARM (parallel, 4-10 agents)
+  - Launch ALL agents (4 core + selected optional) simultaneously via Agent tool
+  - Each receives: user prompt + scoped file list for its specialty + agent instructions
+  - Each reads scoped files, returns max 10-15 findings in structured JSON
   - If any agent fails, log it and continue with remaining agents
 
-Step 3: PRE-AGGREGATION (1 Haiku agent)
-  - Collect all core agent findings
-  - Deduplicate overlapping findings (same file + line range within 5 lines, or same file + function + similar description)
-  - Build corroboration map (flagged_by array per finding)
-  - Detect project type from codebase files
-  - Recommend which optional agents to activate with reasons
-
-Step 4: USER CONFIRMATION
-  - Present optional agent recommendations:
-    "Detected: [project type]
-     Core agents (11): complete, {N} findings ({N} after dedup)
-     Optional agents recommended:
-       + [Agent name] -- [reason]
-     Skipping:
-       - [Agent name] -- [reason]
-     Proceed? (Y/n, or adjust: "+logging -supply-chain")"
-  - Wait for user response; parse adjustments
-
-Step 5: OPTIONAL SWARM (parallel, 0-6 Sonnet agents)
-  - Launch approved optional agents in parallel
-  - Each receives: user prompt + codebase map + core findings summary (so they don't duplicate)
-  - Return max 10 findings each
-
-Step 6: FINAL AGGREGATION (1 Opus agent)
-  - Merge all findings from core + optional agents
-  - Run second dedup pass for core-optional overlaps
-  - Validate and adjust severity using confidence gates
-  - Validate confidence tags against evidence
+Step 3: AGGREGATION (1 Sonnet agent)
+  - Orchestrator performs inline dedup before launching aggregator:
+    - Same file + line within 5 = duplicate
+    - Same file + function + similar title = duplicate
+    - Build flagged_by array for corroboration
+  - Launch aggregator with deduplicated findings + project type
+  - Validate severity against confidence gates
   - Apply corroboration scoring
   - Produce ranked report in markdown
   - Print findings summary table (all findings, sorted by severity then confidence)
 
-Step 7: PARALLEL OUTPUT (1 Opus + 1 Sonnet agent)
-  - Solutions Architect (Opus): Writes layered implementation spec
+Step 4: SPEC + TESTS (2 Sonnet agents, parallel)
+  - Solutions Architect (Sonnet): Writes layered implementation spec
     - P0: implementation-ready detail (files, steps, code patterns, risk)
     - P1: strategic detail (approach, grouping, dependencies)
     - P2-P3: brief descriptions in table format
@@ -326,14 +293,12 @@ Step 7: PARALLEL OUTPUT (1 Opus + 1 Sonnet agent)
     - Test cases for each finding, grouped by priority
     - Complete test code ready to write to disk
 
-Step 8: SAVE
+Step 5: SAVE + HANDOFF
   - docs/qa-swarm/YYYY-MM-DD-report.md
   - docs/qa-swarm/YYYY-MM-DD-spec.md
   - docs/qa-swarm/YYYY-MM-DD-tests.md
-
-Step 9: HANDOFF
   - Print per-phase timing breakdown
-  - Print agent usage summary (Sonnet/Haiku/Opus counts)
+  - Print agent usage summary (Haiku/Sonnet counts)
   - Print file paths for all 3 output files
   - Recommend: /clear then /qa-swarm:implement with the 3 file paths
 ```
@@ -402,7 +367,7 @@ Step 4: PHASE EXECUTION
        - Surface what was tried, what failed
        - Options: user guidance, skip, or abort
 
-  P1-P3 Phases (batched by priority, Opus):
+  P1-P3 Phases (batched by priority, Sonnet):
     For each priority level:
     a. Launch implementation agent with all findings for this level
     b. Run FULL test suite
@@ -484,13 +449,16 @@ When the user selects additional phases via the continue prompt, new phase tasks
 
 ## Project Type Detection
 
-The pre-aggregation agent (Haiku) examines the project's files and reasons about which optional agents are relevant. No hardcoded detection rules -- the agent uses its understanding of:
+The orchestrator auto-detects project type during Step 1 (Setup) by examining file extensions, names, and key signatures. This determines which optional agents to recommend:
 
-- What files exist (Cargo.toml, package.json, go.mod, etc.)
-- What dependencies are present
-- What the project structure suggests (library vs binary, frontend vs backend, etc.)
+- **qa-config-env**: Docker, k8s, .env files detected
+- **qa-type-safety**: dynamically typed language or weak type checking
+- **qa-logging**: production service (web service, daemon)
+- **qa-backwards-compat**: library or public API
+- **qa-supply-chain**: third-party dependencies (package.json, Cargo.toml, go.mod, etc.)
+- **qa-state-mgmt**: frontend app or stateful service
 
-The user always gets a confirmation prompt showing which optional agents will activate and why, with the ability to add or remove agents before proceeding (e.g., `+logging -supply-chain`).
+The user sees the recommendations in the initial confirmation prompt and can adjust before the single parallel swarm launches (e.g., `+logging -supply-chain`).
 
 ---
 
@@ -504,7 +472,7 @@ All output is saved to `docs/qa-swarm/` in the target project.
 # QA Swarm Report
 **Date:** YYYY-MM-DD
 **Prompt:** "user's original prompt"
-**Agents deployed:** N (11 core + N optional)
+**Agents deployed:** N (4 core + N optional)
 
 ## Summary
 - P0 Critical: N findings
@@ -697,23 +665,15 @@ Agent-specific constraints.
 
 | Agent | What It Looks For |
 |-------|------------------|
-| **Security Auditor** | SQL/command/path injection, SSRF, auth flaws, privilege escalation, hardcoded secrets, XSS, CSRF, insecure crypto, PII exposure, missing rate limiting, IDOR |
-| **Error Handling** | Silent failures, missing catches, panic paths, swallowed errors, unchecked return values |
-| **Performance** | N+1 queries, unnecessary allocations, missing pagination, synchronous bottlenecks, unbatched operations |
-| **Concurrency** | Race conditions, deadlocks, unsafe shared state, missing locks, non-atomic operations |
-| **API Contract** | Missing input validation, inconsistent response shapes, undocumented error codes, missing content-type checks |
-| **Edge Case** | Boundary conditions, empty/null inputs, integer overflow, Unicode edge cases, max-length violations |
-| **Logic & Correctness** | Off-by-one errors, wrong comparison operators, flawed conditional logic, inverted boolean expressions |
-| **Data Integrity** | Schema mismatches, data loss paths, inconsistent transformations, missing foreign key constraints |
-| **Architecture** | SOLID violations, tight coupling, god classes, wrong abstractions, circular dependencies |
-| **Resilience** | Missing timeouts, no retry logic, no circuit breakers, ungraceful degradation, cascade failure paths |
-| **Resource Management** | Memory leaks, unclosed file handles/connections, unbounded growth, missing cleanup |
+| **Security & Error** | SQL/command/path injection, SSRF, auth flaws, hardcoded secrets, XSS, CSRF, insecure crypto, PII exposure, IDOR, silent failures, missing catches, panic paths, timeouts, retries, cascade failures |
+| **Performance & Resources** | N+1 queries, unnecessary allocations, missing pagination, bottlenecks, race conditions, deadlocks, unsafe shared state, memory leaks, unclosed handles, unbounded growth |
+| **Correctness** | Schema mismatches, data loss, contract violations, missing validation, off-by-one, wrong operators, flawed conditionals, boundary failures, empty/null inputs, overflow |
+| **Architecture** | SOLID violations, tight coupling, god classes, wrong abstractions, circular dependencies, inconsistent patterns |
 
 ### Pipeline Agent Roles
 
 | Agent | Input | Output | Key Rules |
 |-------|-------|--------|-----------|
-| **Pre-Aggregator** | 11 core agent findings + file tree | Deduplicated findings + project type + optional agent recommendations | Match duplicates by file+line (within 5) or file+function+description |
-| **Aggregator** | Deduplicated findings + optional findings + project type | Final ranked report in markdown | Must validate severity against confidence gates; cannot add new findings; conservative ranking |
-| **Solutions Architect** | Ranked report + codebase access | Layered implementation spec | Must read actual code before writing steps; simplest correct fix; cross-reference related findings |
+| **Aggregator** | Deduplicated findings + project type | Final ranked report in markdown | Must validate severity against confidence gates; cannot add new findings; conservative ranking |
+| **Solutions Architect** | Ranked report + codebase access | Layered implementation spec | Must read actual code for P0 fixes only; simplest correct fix; cross-reference related findings |
 | **TDD Agent** | Ranked report + codebase access (Mode 1); test plan (Mode 2) | Test plan document (Mode 1); test files on disk (Mode 2) | Must audit existing tests for duplication first; every test must be runnable; no scope creep beyond findings |

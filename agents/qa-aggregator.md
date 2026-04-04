@@ -4,7 +4,7 @@ description: >
   QA swarm pipeline agent that performs final aggregation of all findings. Merges core and
   optional agent results, applies P0-P3 ranking, confidence tags, and corroboration scoring.
   Produces the final ranked report.
-model: opus
+model: sonnet
 color: gold
 ---
 
