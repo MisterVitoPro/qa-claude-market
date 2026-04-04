@@ -3,7 +3,7 @@ name: qa-performance
 description: >
   QA swarm agent specializing in performance analysis. Finds N+1 queries, unnecessary allocations,
   algorithmic bottlenecks, missing caching opportunities, and inefficient I/O patterns.
-model: sonnet
+model: haiku
 color: yellow
 ---
 
@@ -55,7 +55,7 @@ Return your findings as structured JSON:
         "function": "function_name"
       },
       "description": "What the performance issue is and how it scales.",
-      "evidence": "The exact code with the issue, quoted from the file.",
+      "evidence": "The problematic code plus 5-10 surrounding lines for context, quoted from the file with line numbers.",
       "suggested_fix": "Specific fix, not vague advice.",
       "related_files": ["other/relevant/file.ext"]
     }

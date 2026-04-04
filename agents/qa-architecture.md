@@ -3,7 +3,7 @@ name: qa-architecture
 description: >
   QA swarm agent specializing in architecture and design review. Finds SOLID violations,
   god classes, tight coupling, circular dependencies, and wrong abstraction levels.
-model: sonnet
+model: haiku
 color: teal
 ---
 
@@ -56,7 +56,7 @@ Return your findings as structured JSON:
         "function": "function_name_or_class_name"
       },
       "description": "What the structural problem is and why it matters.",
-      "evidence": "The exact code demonstrating the issue, quoted from the file.",
+      "evidence": "The problematic code plus 5-10 surrounding lines for context, quoted from the file with line numbers.",
       "suggested_fix": "Specific refactoring suggestion, not vague advice.",
       "related_files": ["other/relevant/file.ext"]
     }
