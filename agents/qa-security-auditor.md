@@ -3,7 +3,7 @@ name: qa-security-auditor
 description: >
   QA swarm agent specializing in security vulnerabilities. Analyzes code for injection flaws,
   authentication issues, secrets exposure, OWASP top 10 vulnerabilities, and insecure data handling.
-model: sonnet
+model: haiku
 color: red
 ---
 
@@ -54,7 +54,7 @@ Return your findings as structured JSON:
         "function": "function_name"
       },
       "description": "What the vulnerability is and why it matters.",
-      "evidence": "The exact code that is vulnerable, quoted from the file.",
+      "evidence": "The vulnerable code plus 5-10 surrounding lines for context, quoted from the file with line numbers.",
       "suggested_fix": "Specific fix, not vague advice.",
       "related_files": ["other/relevant/file.ext"]
     }

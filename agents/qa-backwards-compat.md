@@ -54,7 +54,7 @@ Return your findings as structured JSON:
         "function": "function_name"
       },
       "description": "What compatibility issue exists and what consumers break.",
-      "evidence": "The exact code with the issue, quoted from the file.",
+      "evidence": "The problematic code plus 5-10 surrounding lines for context, quoted from the file with line numbers.",
       "suggested_fix": "Specific fix, not vague advice.",
       "related_files": ["other/relevant/file.ext"]
     }

@@ -55,7 +55,7 @@ Return your findings as structured JSON:
         "function": "function_name"
       },
       "description": "What observability gap exists and what scenario it hides.",
-      "evidence": "The exact code with the issue, quoted from the file.",
+      "evidence": "The problematic code plus 5-10 surrounding lines for context, quoted from the file with line numbers.",
       "suggested_fix": "Specific fix, not vague advice.",
       "related_files": ["other/relevant/file.ext"]
     }

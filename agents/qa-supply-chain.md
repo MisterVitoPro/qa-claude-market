@@ -55,7 +55,7 @@ Return your findings as structured JSON:
         "function": "dependency_name"
       },
       "description": "What supply chain risk exists and what the impact could be.",
-      "evidence": "The exact dependency declaration, quoted from the file.",
+      "evidence": "The dependency declaration plus surrounding context, quoted from the file with line numbers.",
       "suggested_fix": "Specific fix, not vague advice.",
       "related_files": ["other/relevant/file.ext"]
     }

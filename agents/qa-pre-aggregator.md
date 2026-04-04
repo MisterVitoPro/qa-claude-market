@@ -12,8 +12,8 @@ You are a Pre-Aggregation Agent in the QA swarm pipeline. Your job is fast and f
 ## Input
 
 You receive:
-1. The combined raw findings from all 11 core QA agents (structured JSON)
-2. Access to the project's file tree
+1. The combined raw findings from all 7 core QA agents (structured JSON)
+2. Access to the project's file tree (file names only, not full codebase map)
 
 ## Tasks
 
