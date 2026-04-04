@@ -23,7 +23,7 @@ Track elapsed time for each phase. At the start of each step, run `date +%s` (Ba
 
 Record the pipeline start time: run `date +%s` and store it as `t_start`.
 
-Generate a codebase map and tag files by category:
+Generate a codebase map, tag files, and detect project type:
 
 1. Use the Glob tool to list all source files (exclude node_modules, target, dist, build, .git, vendor, __pycache__)
 2. For the key files (entry points, main modules, config files), read the first 50 lines to capture exports/signatures
@@ -45,7 +45,21 @@ Generate a codebase map and tag files by category:
 5. Store the full file tree (paths only) as the **file tree**.
 6. Store each tag's file list as a separate variable (e.g., `auth_files`, `api_files`, etc.).
 
-Do NOT pass the full codebase map to downstream pipeline agents (pre-aggregator, aggregator, solutions-architect, TDD). Those agents work from findings, not raw code.
+**Auto-detect project type** from file extensions, names, and signatures:
+- Primary language(s) (e.g., TypeScript, Python, Rust, Go, Java)
+- Framework(s) in use (e.g., Express, Django, Actix-web, Spring)
+- Project type: library, CLI, web service, frontend app, etc.
+- Notable characteristics: has CI, has Docker, has API spec, etc.
+
+**Select optional agents** based on detected project type:
+- **qa-config-env**: activate for projects with environment-dependent deployment (Docker, k8s, .env files)
+- **qa-type-safety**: activate for dynamically typed languages or projects without strict type checking
+- **qa-logging**: activate for services that run in production (web services, daemons)
+- **qa-backwards-compat**: activate for libraries, public APIs, or projects with external consumers
+- **qa-supply-chain**: activate for projects with third-party dependencies (package.json, Cargo.toml, go.mod, etc.)
+- **qa-state-mgmt**: activate for frontend apps or stateful services
+
+Do NOT pass the full codebase map to downstream pipeline agents (aggregator, solutions-architect, TDD). Those agents work from findings, not raw code.
 
 Count the total source files and estimate total lines of code from the map. Print a cost estimate and codebase summary:
 
@@ -55,37 +69,36 @@ QA Swarm -- Codebase Summary
 Source files: {file_count}
 Estimated lines: ~{line_count}
 
+Detected: {language(s)} {framework(s)} {project_type}
+
+Agents to deploy:
+  Core (4):  Security & Error, Performance & Resources, Correctness, Architecture
+  Optional:  {list of selected optional agents, or "none"}
+
 Estimated cost (API tokens):
-  Core swarm    (7 Haiku agents):    ~20% of total
-  Pre-aggregator (1 Haiku agent):    ~5% of total
-  Aggregator     (1 Opus agent):     ~30% of total
-  Architect      (1 Opus agent):     ~25% of total
-  TDD            (1 Sonnet agent):   ~20% of total
+  Small project  (< 50 files):   ~$0.10-0.30
+  Medium project (50-200 files): ~$0.30-1.00
+  Large project  (200+ files):   ~$1.00-3.00
 
-  Small project  (< 50 files):   ~$0.15-0.40
-  Medium project (50-200 files): ~$0.40-1.50
-  Large project  (200+ files):   ~$1.50-4
-
-Proceed? (Y/n)
+Proceed? (Y/n, or adjust optional agents: "+logging -supply-chain")
 ```
 
-Wait for user confirmation. If "n", stop and print "Aborted."
+Wait for user confirmation. If "n", stop and print "Aborted." Parse any agent adjustments.
 
 Record timestamp: run `date +%s` and store as `t_setup_done`.
 
-## Step 2: CORE SWARM
+## Step 2: FULL SWARM
 
 Print:
 ```
-[Phase 1/6] Deploying 7 core QA agents in parallel...
-  Security Auditor, Error & Resilience, Performance,
-  Concurrency & Resources, Data & API Contract,
-  Logic & Edge Cases, Architecture
+[Phase 1/4] Deploying {N} QA agents in parallel...
+  Core: Security & Error, Performance & Resources, Correctness, Architecture
+  Optional: {list or "none"}
 ```
 
-Launch all 7 core QA agents IN PARALLEL using the Agent tool. Each agent gets a **scoped** prompt with only the files relevant to its specialty.
+Launch ALL agents (core + optional) IN PARALLEL using the Agent tool in a single message. Each agent gets a **scoped** prompt with only the files relevant to its specialty.
 
-For each agent, use this prompt template (fill in the agent-specific parts):
+For each agent, use this prompt template:
 
 ```
 You are being deployed as part of a QA swarm analysis.
@@ -103,123 +116,58 @@ YOUR SCOPED FILES (read these first -- they are most relevant to your specialty)
 Analyze the codebase according to your specialty. Start with the scoped files. You may read other files from the file tree if you find references that need tracing, but focus your effort on the scoped set. Return your findings as structured JSON.
 ```
 
-Each agent receives different scoped files based on the tags from Step 1:
+**Core agents and their scoped files:**
 
-1. **qa-security-auditor** (model: haiku) -- receives: auth + api + db + config files
-2. **qa-error-resilience** (model: haiku) -- receives: io + db + api + entry files
-3. **qa-performance** (model: haiku) -- receives: db + io + api + logic files
-4. **qa-concurrency-resources** (model: haiku) -- receives: state + io + db + entry files
-5. **qa-data-api-contract** (model: haiku) -- receives: db + api + logic files
-6. **qa-logic-edge-cases** (model: haiku) -- receives: logic + api + db files
-7. **qa-architecture** (model: haiku) -- receives: entry + api + logic + config files
+1. **qa-security-error** (model: haiku) -- receives: auth + api + db + config + io + entry files
+2. **qa-performance-resources** (model: haiku) -- receives: db + io + api + logic + state + entry files
+3. **qa-correctness** (model: haiku) -- receives: db + api + logic files
+4. **qa-architecture** (model: haiku) -- receives: entry + api + logic + config files
 
-Launch all 7 in parallel (all in one message with multiple Agent tool calls).
+**Optional agents and their scoped files (if selected):**
 
-**Wait for ALL 7 agents to complete before proceeding.** Do not start Step 3 until every agent has returned its results. If any agent fails or returns an error instead of findings, log it and continue with the remaining agents' results:
+- **qa-config-env** (model: sonnet): config + entry + io files
+- **qa-type-safety** (model: sonnet): logic + api + db files
+- **qa-logging** (model: sonnet): io + api + entry files
+- **qa-backwards-compat** (model: sonnet): api + db + config files
+- **qa-supply-chain** (model: sonnet): config files + dependency/package files
+- **qa-state-mgmt** (model: sonnet): state + frontend + logic files
+
+Launch ALL in parallel (all in one message with multiple Agent tool calls).
+
+**Wait for ALL agents to complete before proceeding.** If any agent fails, log it and continue:
 ```
 Agent {name} failed: {error}
-Continuing with {N}/7 agent results.
+Continuing with {N}/{total} agent results.
 ```
 
-Record timestamp: run `date +%s` and store as `t_core_done`.
+Record timestamp: run `date +%s` and store as `t_swarm_done`.
 
-## Step 3: PRE-AGGREGATION
+## Step 3: AGGREGATION
 
 Print:
 ```
-[Phase 2/6] Core swarm complete. Deduplicating and detecting project type...
+[Phase 2/4] Deduplicating and ranking findings...
 ```
 
-Launch the qa-pre-aggregator agent (model: haiku) with:
-- All 7 core agent findings combined
-- Access to the project file tree (file names only, NOT the full codebase map)
+**Inline dedup** -- before launching the aggregator, scan all agent findings and identify duplicates:
+- Same file + same line range (within 5 lines) = duplicate
+- Same file + same function + similar title = duplicate
 
-The pre-aggregator will return:
-- Deduplicated findings with corroboration map
-- Project type detection
-- Optional agent recommendations
-
-Record timestamp: run `date +%s` and store as `t_preagg_done`.
-
-## Step 4: USER CONFIRMATION
-
-Present the pre-aggregator's optional agent recommendations to the user:
-
+For duplicates, keep the one with higher confidence and build a `flagged_by` array showing all agents that reported it. Remove the rest. Print:
 ```
-QA Swarm -- Core Analysis Complete
-===================================
-Core agents (7) found {N} findings ({N} after dedup).
-
-Detected: {project type}
-
-Optional agents recommended:
-  + {agent name} -- {reason}
-  + {agent name} -- {reason}
-
-Skipping:
-  - {agent name} -- {reason}
-  - {agent name} -- {reason}
-
-Proceed with these optional agents? (Y/n, or adjust: "+logging -supply-chain")
+Dedup: {original_count} findings -> {deduped_count} ({removed} duplicates merged)
 ```
 
-Wait for user response. Parse any adjustments.
-
-Record timestamp: run `date +%s` and store as `t_confirm_done`.
-
-## Step 5: OPTIONAL SWARM
-
-If any optional agents are approved, print:
-```
-[Phase 3/6] Deploying {N} optional agents in parallel...
-  {agent names, comma-separated}
-```
-
-If no optional agents are approved, print:
-```
-[Phase 3/6] No optional agents selected. Skipping.
-```
-
-If any optional agents are approved, launch them IN PARALLEL using the Agent tool.
-
-Each optional agent gets:
-- The user's original prompt
-- The full file tree (paths only) and scoped files relevant to its specialty:
-  - **qa-config-env**: config + entry + io files
-  - **qa-type-safety**: logic + api + db files
-  - **qa-logging**: io + api + entry files
-  - **qa-backwards-compat**: api + db + config files
-  - **qa-supply-chain**: config files + dependency/package files (package.json, Cargo.toml, go.mod, requirements.txt, etc.)
-  - **qa-state-mgmt**: state + frontend + logic files
-- A summary of core findings (so they don't duplicate work)
-- Their agent-specific instructions
-
-**Wait for ALL optional agents to complete before proceeding.** If any optional agent fails, log it and continue with available results:
-```
-Optional agent {name} failed: {error}
-Continuing with {N}/{total} optional agent results.
-```
-
-Record timestamp: run `date +%s` and store as `t_optional_done`. If no optional agents were run, set `t_optional_done = t_confirm_done`.
-
-## Step 6: FINAL AGGREGATION
-
-Print:
-```
-[Phase 4/6] Ranking and corroborating all findings...
-```
-
-Launch the qa-aggregator agent (model: opus) with:
-- All deduplicated findings (core + optional)
-- The corroboration map
-- Project type info
+Launch the qa-aggregator agent (model: sonnet) with:
+- All deduplicated findings with corroboration info
+- The detected project type
 - Do NOT pass the codebase map -- the aggregator works from findings only
 
 The aggregator produces the final ranked report in markdown format.
 
 Record timestamp: run `date +%s` and store as `t_agg_done`.
 
-Print a table of ALL findings from the aggregated report so the user can see every bug and issue at a glance. Format it as a markdown table sorted by severity (P0 first), then by confidence (confirmed > likely > suspected):
+Print a table of ALL findings from the aggregated report sorted by severity (P0 first), then by confidence (confirmed > likely > suspected):
 
 ```
 Findings Summary
@@ -227,23 +175,22 @@ Findings Summary
 
 | ID     | Severity | Confidence | Title                          | Location                        | Corroborated By   |
 |--------|----------|------------|--------------------------------|---------------------------------|--------------------|
-| P0-001 | P0       | confirmed  | SQL injection in login handler | src/auth.ts:42 `handleLogin()`  | 4 agents (SEC,ERR) |
-| P1-001 | P1       | likely     | Unbounded retry loop           | src/client.ts:88 `fetchData()`  | 2 agents (RES,ERR) |
+| P0-001 | P0       | confirmed  | SQL injection in login handler | src/auth.ts:42 `handleLogin()`  | 3 agents (SEC,ERR) |
 | ...    | ...      | ...        | ...                            | ...                             | ...                |
 ```
 
 Print every finding -- do not truncate or summarize. If there are zero findings, print "No findings detected." instead.
 
-## Step 7: PARALLEL OUTPUT
+## Step 4: SPEC + TESTS
 
 Print:
 ```
-[Phase 5/6] Generating implementation spec and test plan...
+[Phase 3/4] Generating implementation spec and test plan...
 ```
 
 Launch TWO agents IN PARALLEL:
 
-1. **qa-solutions-architect** (model: opus):
+1. **qa-solutions-architect** (model: sonnet):
    - Receives the final ranked report (with all evidence and file paths)
    - Do NOT pass the codebase map -- the architect reads source files only for P0 fixes to verify evidence
    - Produces the implementation spec
@@ -255,11 +202,11 @@ Launch TWO agents IN PARALLEL:
 
 Record timestamp: run `date +%s` and store as `t_output_done`.
 
-## Step 8: SAVE FILES
+## Step 5: SAVE + HANDOFF
 
 Print:
 ```
-[Phase 6/6] Saving reports...
+[Phase 4/4] Saving reports...
 ```
 
 Get today's date and save the three output files:
@@ -271,25 +218,20 @@ Create the `docs/qa-swarm/` directory if it does not exist.
 
 Record timestamp: run `date +%s` and store as `t_save_done`.
 
-## Step 9: HANDOFF
-
 Compute phase durations from stored timestamps (format as Xm Ys):
 - Setup:          `t_setup_done - t_start`
-- Core Swarm:     `t_core_done - t_setup_done`
-- Pre-aggregation:`t_preagg_done - t_core_done`
-- User Confirm:   `t_confirm_done - t_preagg_done`  (skip this from the total -- it's wait time)
-- Optional Swarm: `t_optional_done - t_confirm_done` (show "skipped" if none were run)
-- Aggregation:    `t_agg_done - t_optional_done`
+- User Confirm:   (skip from total -- it's wait time)
+- Agent Swarm:    `t_swarm_done - t_setup_done`
+- Aggregation:    `t_agg_done - t_swarm_done`
 - Spec + Tests:   `t_output_done - t_agg_done`
 - Save Files:     `t_save_done - t_output_done`
 - Total:          `t_save_done - t_start` minus user confirm wait time
 
-Print the summary and next steps. Count the actual agents dispatched during this run:
-- Core agents: always 7 (Sonnet)
-- Pre-aggregator: always 1 (Haiku)
-- Optional agents: count how many were approved in Step 5 (Sonnet)
-- Aggregator: always 1 (Opus)
-- Solutions Architect: always 1 (Opus)
+Count the actual agents dispatched during this run:
+- Core agents: always 4 (Haiku)
+- Optional agents: count how many were selected (Sonnet)
+- Aggregator: always 1 (Sonnet)
+- Solutions Architect: always 1 (Sonnet)
 - TDD Agent: always 1 (Sonnet)
 
 ```
@@ -300,20 +242,18 @@ Confidence: {confirmed} confirmed, {likely} likely, {suspected} suspected
 
 Phase Timing:
   Setup           {Xm Ys}
-  Core Swarm      {Xm Ys}   (7 Haiku agents)
-  Pre-aggregation {Xm Ys}   (1 Haiku agent)
-  Optional Swarm  {Xm Ys}   ({N} Sonnet agents) or "skipped"
-  Aggregation     {Xm Ys}   (1 Opus agent)
-  Spec + Tests    {Xm Ys}   (1 Opus + 1 Sonnet agent)
+  Agent Swarm     {Xm Ys}   ({N} agents in parallel)
+  Aggregation     {Xm Ys}   (1 Sonnet agent)
+  Spec + Tests    {Xm Ys}   (2 Sonnet agents)
   Save Files      {Xm Ys}
   ────────────────────────
   Total           {Xm Ys}   (excludes user confirmation wait)
 
 Agent Usage:
-  Haiku  : {7 + 1} agents  (7 core + 1 pre-aggregator)
-  Sonnet : {optional_count + 1} agents  ({optional_count} optional + 1 TDD)
-  Opus   : 2 agents  (aggregator + solutions architect)
-  Total  : {11 + optional_count} agents dispatched
+  Haiku  : 4 agents  (4 core)
+  Sonnet : {optional_count + 3} agents  ({optional_count} optional + aggregator + architect + TDD)
+  Opus   : 0 agents
+  Total  : {7 + optional_count} agents dispatched
 
 Report:    docs/qa-swarm/{DATE}-report.md
 Spec:      docs/qa-swarm/{DATE}-spec.md

@@ -1,6 +1,6 @@
 {
   "name": "qa-swarm",
-  "description": "AI-powered code quality analyzer: 17 specialized agents find security, performance, architecture, and correctness issues, then fix them via TDD",
+  "description": "AI-powered code quality analyzer: specialized agents find security, performance, architecture, and correctness issues, then fix them via TDD",
   "version": "1.0.0",
   "license": "MIT",
   "keywords": [

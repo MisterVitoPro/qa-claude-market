@@ -3,7 +3,7 @@ name: qa-solutions-architect
 description: >
   QA swarm pipeline agent that takes the ranked QA report and produces a layered implementation
   spec. P0 fixes get implementation-ready detail, P1 gets strategic detail, P2-P3 get brief descriptions.
-model: opus
+model: sonnet
 color: gold
 ---
 
