@@ -1,7 +1,7 @@
 # QA Swarm Plugin -- Master Specification
 
 **Date:** 2026-04-03
-**Version:** 1.0.0
+**Version:** 1.2.0
 **Status:** Current
 **Repository:** https://github.com/MisterVitoPro/qa-swarm-plugin
 **License:** MIT
@@ -85,7 +85,7 @@ qa-swarm-plugin/
 {
   "name": "qa-swarm",
   "description": "AI-powered code quality analyzer: specialized agents find security, performance, architecture, and correctness issues, then fix them via TDD",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "license": "MIT",
   "keywords": ["qa", "testing", "code-review", "tdd", "multi-agent", "security-audit", "bug-detection", "code-quality", "static-analysis", "code-scanner", "ai-code-review", "performance-analysis", "architecture-review"],
   "repository": "https://github.com/MisterVitoPro/qa-swarm-plugin"
