@@ -1,9 +1,10 @@
 # QA Swarm Plugin
 
-AI-powered code quality analyzer that finds security, performance, architecture, and correctness issues across your codebase using up to 17 specialized agents -- then fixes them via TDD.
+AI-powered code quality analyzer that finds security, performance, architecture, and correctness issues across your codebase using specialized agents -- then fixes them via TDD.
 
-- **11 core agents** scan in parallel (security, performance, concurrency, data integrity, and more)
-- **6 optional agents** activate based on your project type (config review, type safety, supply chain, etc.)
+- **4 core agents** scan in parallel (security & error handling, performance & resources, correctness, architecture)
+- **Up to 6 optional agents** activate based on your project type (config review, type safety, supply chain, etc.)
+- Source files are **pre-read and embedded** in agent prompts for zero-overhead analysis
 - Findings are **deduplicated, ranked P0-P3**, tagged with confidence levels, and **corroborated** across agents
 - Fixes are implemented **test-first** -- failing tests are written before code is changed
 
@@ -22,16 +23,16 @@ claude plugin marketplace add MisterVitoPro/qa-swarm
 
 ## Why QA Swarm?
 
-Most code review approaches give you one lens at a time. QA Swarm runs 11-17 specialized agents **in parallel**, each with a distinct expertise. When 3+ agents independently flag the same issue, you know it's real.
+Most code review approaches give you one lens at a time. QA Swarm runs 4-10 specialized agents **in parallel**, each with a distinct expertise. When 3+ agents independently flag the same issue, you know it's real.
 
 | | QA Swarm | Manual Review | Linters (ESLint, etc.) | GitHub Code Scanning |
 |---|----------|---------------|------------------------|----------------------|
-| **Parallel analysis** | 11-17 agents | 1 reviewer | 1-2 tools | 1 tool |
+| **Parallel analysis** | 4-10 agents | 1 reviewer | 1-2 tools | 1 tool |
 | **Cross-specialty** | Security + perf + architecture + more, simultaneously | Depends on reviewer | Single lens per rule | Single lens |
 | **Implements fixes** | Yes, TDD-driven | Reviewer suggests, you implement | No | No |
 | **Corroboration** | Flags issues found by multiple agents | No | No | No |
 | **Confidence scoring** | Confirmed / Likely / Suspected | Informal | Binary (pass/fail) | Binary |
-| **Time** | ~5 minutes | Hours to days | Seconds | Minutes |
+| **Time** | ~2-5 minutes | Hours to days | Seconds | Minutes |
 
 **Best for:** Pre-release audits, onboarding to unfamiliar codebases, quarterly deep dives, and catching issues that slip past linters and CI.
 
@@ -45,7 +46,7 @@ After running `/qa-swarm:attack`, you get a ranked report like this:
 # QA Swarm Report
 **Date:** 2026-04-02
 **Prompt:** "find bugs in the authentication and authorization flow"
-**Agents deployed:** 14 (11 core + 3 optional)
+**Agents deployed:** 7 (4 core + 3 optional)
 
 ## Summary
 - P0 Critical: 2 findings
@@ -57,7 +58,7 @@ After running `/qa-swarm:attack`, you get a ranked report like this:
 ## P0 - Critical
 
 ### [P0-001] SQL injection in user lookup query
-**Confidence:** Confirmed | **Corroborated by:** 3 agents (Security Auditor, API Contract Validator, Data Integrity Analyst)
+**Confidence:** Confirmed | **Corroborated by:** 3 agents (Security & Error, Correctness, Architecture)
 **Location:** src/auth/users.ts:47 in `findUserByEmail`
 **Description:** User-supplied email is interpolated directly into a SQL query
 without parameterization. An attacker can inject arbitrary SQL via the login form.
@@ -67,7 +68,7 @@ without parameterization. An attacker can inject arbitrary SQL via the login for
 **Related files:** src/auth/login.ts, src/middleware/validate.ts
 
 ### [P0-002] JWT secret hardcoded in source
-**Confidence:** Confirmed | **Corroborated by:** 2 agents (Security Auditor, Configuration & Env Reviewer)
+**Confidence:** Confirmed | **Corroborated by:** 2 agents (Security & Error, Configuration & Env)
 **Location:** src/auth/jwt.ts:12 in `signToken`
 **Description:** JWT signing secret is a hardcoded string literal. Anyone with
 source access can forge valid tokens.
@@ -124,6 +125,13 @@ After the swarm completes:
 /qa-swarm:implement docs/qa-swarm/2026-04-02-report.md docs/qa-swarm/2026-04-02-spec.md docs/qa-swarm/2026-04-02-tests.md
 ```
 
+The implementation pipeline:
+1. Presents phases (P0-P3) -- you choose which to tackle
+2. Writes TDD tests that fail on current code (red phase)
+3. Implements fixes one at a time (P0) or batched (P1-P3)
+4. Loops until tests pass (green phase)
+5. Offers to continue with remaining phases
+
 ## Priority and Confidence
 
 Findings are ranked by priority and tagged with confidence:
@@ -154,23 +162,16 @@ All output is saved to `docs/qa-swarm/` in your project:
 <details>
 <summary><h2>Agent Roster</h2></summary>
 
-### Core Agents (always active)
+### Core Agents (always active -- Haiku)
 
 | Agent | Specialty |
 |-------|-----------|
-| Security Auditor | Injection, auth flaws, secrets, OWASP top 10 |
-| Error Handling Analyst | Silent failures, missing catches, panic paths |
-| Performance Analyst | N+1 queries, allocations, bottlenecks |
-| Concurrency Reviewer | Race conditions, deadlocks, unsafe shared state |
-| API Contract Validator | Input validation, response consistency |
-| Edge Case Hunter | Boundary conditions, empty inputs, overflow |
-| Logic & Correctness Reviewer | Off-by-one, wrong operators, flawed conditionals |
-| Data Integrity Analyst | Schema mismatches, data loss paths |
-| Architecture & Design Reviewer | SOLID violations, coupling, god classes |
-| Resilience & Failure Mode Analyst | Timeouts, retries, graceful degradation |
-| Resource & Memory Management Auditor | Leaks, unclosed handles, unbounded growth |
+| Security & Error Handling | Injection, auth flaws, secrets, OWASP top 10, silent failures, missing catches, panic paths, timeouts, cascade failures |
+| Performance & Resources | N+1 queries, bottlenecks, race conditions, deadlocks, memory leaks, unclosed handles, unbounded growth |
+| Correctness | Schema mismatches, data loss, contract violations, off-by-one, wrong operators, boundary failures |
+| Architecture & Design | SOLID violations, coupling, god classes, wrong abstractions, circular dependencies |
 
-### Optional Agents (activated by project type)
+### Optional Agents (activated by project type -- Haiku)
 
 | Agent | Activates When |
 |-------|----------------|
@@ -181,21 +182,58 @@ All output is saved to `docs/qa-swarm/` in your project:
 | Dependency & Supply Chain Auditor | Third-party dependencies present |
 | State Management Reviewer | Frontend app or stateful service detected |
 
-After core analysis, you are asked to confirm which optional agents to activate. Customize with `+agent-name` to add or `-agent-name` to remove from the recommendation.
+You are asked to confirm which optional agents to activate before the swarm launches. Customize with `+agent-name` to add or `-agent-name` to remove.
 
 </details>
 
 <details>
-<summary><h2>Model Usage</h2></summary>
+<summary><h2>Pipeline Architecture</h2></summary>
+
+### Attack Pipeline (`/qa-swarm:attack`)
+
+```
+Step 1: Setup + Pre-read
+  - Build file tree, tag files by category
+  - Auto-detect project type, select optional agents
+  - Pre-read ALL source files (embedded in agent prompts)
+
+Step 2: Swarm (parallel)
+  - Launch 4-10 Haiku agents with code embedded inline
+  - Zero Read tool calls -- agents analyze immediately
+
+Step 3: Inline Aggregation (no agent spawn)
+  - Orchestrator deduplicates, validates severity/confidence
+  - Applies corroboration scoring, formats ranked report
+
+Step 4: Fix Planner (1 Sonnet agent)
+  - Produces both implementation spec AND test plan
+
+Step 5: Save + Handoff
+  - Writes report, spec, and test plan to docs/qa-swarm/
+```
+
+### Model Usage
 
 | Role | Model | Count |
 |------|-------|-------|
-| QA Agents | Sonnet | 11-17 |
-| Pre-Aggregator | Haiku | 1 |
-| Aggregator | Opus | 1 |
-| Solutions Architect | Opus | 1 |
-| TDD Agent | Sonnet | 1 |
-| Implementation Agent | Opus | 1 |
+| Core QA agents | Haiku | 4 |
+| Optional QA agents | Haiku | 0-6 |
+| Fix Planner | Sonnet | 1 |
+| Aggregation | (inline) | 0 |
+| **Total (attack)** | | **5-11** |
+
+| Role | Model | Count |
+|------|-------|-------|
+| TDD Writer | Sonnet | 1 |
+| P0 Implementation | Opus | per finding |
+| P1-P3 Implementation | Sonnet | per priority |
+
+### Key Optimizations (v1.2.0)
+
+1. **Pre-read & embed** -- source files read once in setup, embedded directly in agent prompts. Eliminates ~40-60 Read tool call round-trips across agents.
+2. **Inline aggregation** -- orchestrator performs dedup and ranking directly instead of spawning an aggregator agent.
+3. **Merged fix planner** -- single agent produces both spec and test plan, eliminating a pipeline stage.
+4. **All-Haiku swarm** -- pre-read code compensates by giving Haiku full context upfront.
 
 </details>
 

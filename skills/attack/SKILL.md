@@ -1,5 +1,5 @@
 ---
-name: attack
+name: qa-swarm:attack
 description: >
   Deploy a QA agent swarm to analyze the codebase and produce a prioritized findings report,
   implementation spec, and test plan. Use when the user wants to run QA analysis, find bugs
