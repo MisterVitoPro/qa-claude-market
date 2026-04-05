@@ -3,7 +3,7 @@ name: qa-supply-chain
 description: >
   QA swarm optional agent specializing in dependency and supply chain analysis. Finds known CVEs
   in dependencies, unpinned versions, license conflicts, and typosquatting risks.
-model: sonnet
+model: haiku
 color: maroon
 ---
 

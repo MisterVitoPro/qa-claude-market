@@ -3,7 +3,7 @@ name: qa-config-env
 description: >
   QA swarm optional agent specializing in configuration and environment review. Finds hardcoded
   values, missing env vars, config drift, and environment-specific bugs.
-model: sonnet
+model: haiku
 color: gray
 ---
 

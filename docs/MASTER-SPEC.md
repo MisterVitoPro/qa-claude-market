@@ -57,9 +57,10 @@ qa-swarm-plugin/
 │   ├── qa-backwards-compat.md       # Optional: backwards compatibility
 │   ├── qa-supply-chain.md           # Optional: dependency & supply chain
 │   ├── qa-state-mgmt.md             # Optional: state management
-│   ├── qa-aggregator.md             # Pipeline: final ranking
-│   ├── qa-solutions-architect.md    # Pipeline: spec writer
-│   └── qa-tdd.md                    # Pipeline: test plan + test writer
+│   ├── qa-fix-planner.md             # Pipeline: spec + test plan (attack)
+│   ├── qa-aggregator.md             # Legacy (inlined into orchestrator)
+│   ├── qa-solutions-architect.md    # Legacy (merged into fix-planner)
+│   └── qa-tdd.md                    # Pipeline: test writer (implement only)
 ├── skills/
 │   ├── attack/
 │   │   └── SKILL.md                 # /qa-swarm:attack orchestrator
@@ -128,11 +129,12 @@ claude --plugin-dir /path/to/qa-swarm
 
 ### Pipeline Agents
 
-| Agent | File | Model | Role |
-|-------|------|-------|------|
-| Final Aggregator | qa-aggregator.md | Sonnet | Merge all findings, rank P0-P3, apply confidence + corroboration |
-| Solutions Architect | qa-solutions-architect.md | Sonnet | Write layered implementation spec from ranked findings |
-| TDD Agent | qa-tdd.md | Sonnet | Write test plan (Mode 1) and test files (Mode 2) |
+| Agent | File | Model | Role | Used In |
+|-------|------|-------|------|---------|
+| Fix Planner | qa-fix-planner.md | Sonnet | Write implementation spec + TDD test plan in one pass | attack |
+| TDD Agent | qa-tdd.md | Sonnet | Write test files to disk (Mode 2 only) | implement |
+
+**Note:** Aggregation is performed inline by the orchestrator (no separate agent). The aggregator and solutions-architect agent files are retained for reference but are no longer spawned during the attack pipeline.
 
 ---
 
@@ -141,14 +143,14 @@ claude --plugin-dir /path/to/qa-swarm
 | Role | Model | Count | Rationale |
 |------|-------|-------|-----------|
 | Core QA agents | Haiku | 4 | Merged specialties reduce agent count while maintaining coverage. Haiku is fast and cheap for focused analysis. |
-| Optional QA agents | Sonnet | 0-6 | Focused scope, single lens. |
-| Final Aggregator | Sonnet | 1 | Synthesizes 4-10 agent reports, applies corroboration and ranking. Structured task suits Sonnet. |
-| Solutions Architect | Sonnet | 1 | Writes layered implementation spec from findings. Follows template. |
-| TDD Agent | Sonnet | 1 | Writing test code from known issues. Well-scoped. |
-| P0 Implementation Agent | Opus | 1 | Critical fixes need deep reasoning. One at a time. |
-| P1-P3 Implementation Agent | Sonnet | 1 | Batched fixes from spec. Follows prescribed steps. |
+| Optional QA agents | Haiku | 0-6 | Focused scope, single lens. Haiku with pre-read code is sufficient. |
+| Aggregation | (inline) | 0 | Orchestrator performs dedup, severity validation, and ranking inline. No agent spawn needed. |
+| Fix Planner | Sonnet | 1 | Writes both implementation spec and TDD test plan in one pass. |
+| P0 Implementation Agent | Opus | 1 | Critical fixes need deep reasoning. One at a time. (implement only) |
+| P1-P3 Implementation Agent | Sonnet | 1 | Batched fixes from spec. Follows prescribed steps. (implement only) |
+| TDD Writer | Sonnet | 1 | Writes test files to disk. Mode 2 only. (implement only) |
 
-**Total agents per attack run:** 7-13 (depending on optional agent count)
+**Total agents per attack run:** 5-11 (depending on optional agent count)
 
 ### Estimated Cost
 
@@ -163,11 +165,13 @@ claude --plugin-dir /path/to/qa-swarm
 ## Token Management
 
 1. **Structured output format** -- every QA agent returns findings in a strict JSON schema. No prose.
-2. **Scoped file lists** -- each agent gets only the files tagged relevant to its specialty, not the full codebase.
-3. **Findings cap** -- max 10-15 findings per agent, ranked by severity. Forces prioritization.
-4. **Inline dedup** -- orchestrator deduplicates findings before passing to aggregator, reducing input size.
-5. **Layered spec detail** -- Solutions Architect writes full detail for P0, strategic for P1, brief for P2-P3.
-6. **Single swarm** -- core + optional agents launch in one parallel batch, eliminating sequential overhead.
+2. **Pre-read & embed** -- all source files are read once in setup and embedded directly in agent prompts. Agents analyze inline code with zero Read tool calls, eliminating the biggest time bottleneck.
+3. **Scoped file contents** -- each agent gets only the file contents tagged relevant to its specialty, not the full codebase.
+4. **Findings cap** -- max 10-15 findings per agent, ranked by severity. Forces prioritization.
+5. **Inline aggregation** -- orchestrator performs dedup, severity validation, and ranking directly. No aggregator agent spawn.
+6. **Merged fix planner** -- single Sonnet agent produces both implementation spec and test plan, eliminating one agent spawn.
+7. **All-Haiku swarm** -- core and optional agents all use Haiku. Pre-read code compensates for smaller model by providing full context upfront.
+8. **Single swarm** -- core + optional agents launch in one parallel batch, eliminating sequential overhead.
 
 ---
 
@@ -253,45 +257,45 @@ Every QA agent returns findings in this format:
 **Output:** 3 files in `docs/qa-swarm/`
 **Skill file:** `skills/attack/SKILL.md`
 
-### Pipeline Steps (optimized -- 5 steps)
+### Pipeline Steps (optimized -- 5 steps, 3 key optimizations)
+
+**Optimizations applied:**
+1. **Pre-read & embed**: All source files are read in setup and embedded directly in agent prompts, eliminating agent file-reading overhead (40-60% swarm time saved)
+2. **Inline aggregation**: Orchestrator performs dedup, severity validation, and ranking directly -- no aggregator agent spawn (30-60s saved)
+3. **Merged fix planner**: Single Sonnet agent produces both implementation spec and test plan (15-30s saved)
 
 ```
-Step 1: SETUP
+Step 1: SETUP + PRE-READ
   - Parse user prompt
-  - Generate codebase map (file tree, key exports/signatures via first 50 lines of key files)
-  - Tag files by category (auth, api, db, io, state, config, logic, frontend, test, entry)
-  - Auto-detect project type from file extensions, names, and signatures
+  - Build file tree, tag files by category (auth, api, db, io, state, config, logic, frontend, test, entry)
+  - Auto-detect project type from file extensions and directory structure
   - Select optional agents based on project type
+  - PRE-READ all non-test source files (cap at 500 lines per file)
+  - Group file contents by tag for scoped embedding
   - Print cost estimate, codebase summary, and agent selection
   - Wait for user confirmation (Y/n, or adjust agents: "+logging -supply-chain")
-  - Track timestamps for per-phase timing
 
-Step 2: FULL SWARM (parallel, 4-10 agents)
-  - Launch ALL agents (4 core + selected optional) simultaneously via Agent tool
-  - Each receives: user prompt + scoped file list for its specialty + agent instructions
-  - Each reads scoped files, returns max 10-15 findings in structured JSON
-  - If any agent fails, log it and continue with remaining agents
+Step 2: SWARM (parallel, 4-10 Haiku agents)
+  - Launch ALL agents simultaneously via Agent tool
+  - Each receives: user prompt + scoped file CONTENTS embedded in prompt + agent instructions
+  - Agents analyze code directly from prompt -- NO Read tool calls needed
+  - Each returns max 10-15 findings in structured JSON
+  - If any agent fails, log it and continue
 
-Step 3: AGGREGATION (1 Sonnet agent)
-  - Orchestrator performs inline dedup before launching aggregator:
-    - Same file + line within 5 = duplicate
-    - Same file + function + similar title = duplicate
-    - Build flagged_by array for corroboration
-  - Launch aggregator with deduplicated findings + project type
+Step 3: INLINE AGGREGATION (no agent -- orchestrator does it)
+  - Merge all agent findings
+  - Dedup: same file + line within 5, or same file + function + similar title
   - Validate severity against confidence gates
-  - Apply corroboration scoring
-  - Produce ranked report in markdown
-  - Print findings summary table (all findings, sorted by severity then confidence)
+  - Validate confidence tags against evidence quality
+  - Apply corroboration scoring (3+ agents = boost, 2 = note, 1 = standalone)
+  - Format ranked report in markdown
+  - Print findings summary table
 
-Step 4: SPEC + TESTS (2 Sonnet agents, parallel)
-  - Solutions Architect (Sonnet): Writes layered implementation spec
-    - P0: implementation-ready detail (files, steps, code patterns, risk)
-    - P1: strategic detail (approach, grouping, dependencies)
-    - P2-P3: brief descriptions in table format
-  - TDD Agent (Sonnet, Mode 1): Writes test plan
-    - Audits existing tests for duplication before writing new ones
-    - Test cases for each finding, grouped by priority
-    - Complete test code ready to write to disk
+Step 4: FIX PLANNER (1 Sonnet agent)
+  - Single agent produces BOTH implementation spec AND test plan
+  - Reads actual source files for P0 verification only
+  - Audits existing tests for duplication
+  - Output uses delimiters for orchestrator to split into 2 files
 
 Step 5: SAVE + HANDOFF
   - docs/qa-swarm/YYYY-MM-DD-report.md
@@ -299,7 +303,6 @@ Step 5: SAVE + HANDOFF
   - docs/qa-swarm/YYYY-MM-DD-tests.md
   - Print per-phase timing breakdown
   - Print agent usage summary (Haiku/Sonnet counts)
-  - Print file paths for all 3 output files
   - Recommend: /clear then /qa-swarm:implement with the 3 file paths
 ```
 
@@ -672,8 +675,8 @@ Agent-specific constraints.
 
 ### Pipeline Agent Roles
 
-| Agent | Input | Output | Key Rules |
-|-------|-------|--------|-----------|
-| **Aggregator** | Deduplicated findings + project type | Final ranked report in markdown | Must validate severity against confidence gates; cannot add new findings; conservative ranking |
-| **Solutions Architect** | Ranked report + codebase access | Layered implementation spec | Must read actual code for P0 fixes only; simplest correct fix; cross-reference related findings |
-| **TDD Agent** | Ranked report + codebase access (Mode 1); test plan (Mode 2) | Test plan document (Mode 1); test files on disk (Mode 2) | Must audit existing tests for duplication first; every test must be runnable; no scope creep beyond findings |
+| Agent | Input | Output | Key Rules | Used In |
+|-------|-------|--------|-----------|---------|
+| **Aggregation** (inline) | All agent findings | Ranked report in markdown | Validate severity against confidence gates; conservative ranking; no new findings | attack (inline) |
+| **Fix Planner** | Ranked report + codebase access | Implementation spec + TDD test plan | Read actual code for P0 only; audit existing tests for duplication; output uses delimiters | attack |
+| **TDD Writer** | Test plan (Mode 2 only) | Test files on disk | Detect conventions from existing tests; every test must be runnable; no scope creep | implement |

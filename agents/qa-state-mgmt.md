@@ -3,7 +3,7 @@ name: qa-state-mgmt
 description: >
   QA swarm optional agent specializing in state management review. Finds invalid state
   transitions, global state abuse, inconsistent state across components, and state synchronization issues.
-model: sonnet
+model: haiku
 color: coral
 ---
 
