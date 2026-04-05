@@ -3,7 +3,7 @@ name: qa-type-safety
 description: >
   QA swarm optional agent specializing in type and null safety. Finds null dereferences,
   unsafe type casts, type coercion traps, and missing type guards.
-model: sonnet
+model: haiku
 color: indigo
 ---
 

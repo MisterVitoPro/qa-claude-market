@@ -3,7 +3,7 @@ name: qa-backwards-compat
 description: >
   QA swarm optional agent specializing in backwards compatibility analysis. Finds breaking API
   changes, serialization format shifts, and migration gaps that break existing consumers.
-model: sonnet
+model: haiku
 color: navy
 ---
 
