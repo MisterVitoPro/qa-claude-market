@@ -19,6 +19,12 @@
       "description": "AI-powered code quality analyzer: specialized agents find security, performance, architecture, and correctness issues, then fix them via TDD",
       "source": "./plugins/qa-swarm",
       "category": "development"
+    },
+    {
+      "name": "code-atlas",
+      "description": "Scan a codebase and generate a comprehensive architecture index for CLAUDE.md — directory map, key files, tech stack, patterns, dependencies, and build commands",
+      "source": "./plugins/code-atlas",
+      "category": "development"
     }
   ]
 }
