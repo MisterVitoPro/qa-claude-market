@@ -242,6 +242,10 @@ Assemble the architecture section with sentinel markers:
 <!-- code-atlas:start -->
 <!-- generated: {DATE} | commit: {SHORT_HASH} | plugin: code-atlas v1.0.0 -->
 
+## Codebase Exploration
+
+Before using the Explore agent or doing broad codebase searches, **always consult the Architecture section below first** (Directory Map, Key Files, Module Dependencies). It contains a pre-built map of the entire repository. Use it to orient yourself and target your exploration rather than scanning blindly. When spawning an Explore agent, include relevant architecture context in its prompt so it starts informed.
+
 ## Architecture
 
 ### Tech Stack
