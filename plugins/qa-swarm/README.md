@@ -1,6 +1,8 @@
-# QA Swarm Plugin
+# QA Swarm
 
 AI-powered code quality analyzer that finds security, performance, architecture, and correctness issues across your codebase using specialized agents -- then fixes them via TDD.
+
+Part of the [MisterVitoPro Plugin Marketplace](../../README.md).
 
 - **4 core agents** scan in parallel (security & error handling, performance & resources, correctness, architecture)
 - **Up to 6 optional agents** activate based on your project type (config review, type safety, supply chain, etc.)
@@ -12,7 +14,7 @@ AI-powered code quality analyzer that finds security, performance, architecture,
 
 ```bash
 # Install
-claude plugin marketplace add MisterVitoPro/qa-swarm
+claude plugin marketplace add MisterVitoPro/qa-swarm --plugin qa-swarm
 
 # Analyze your codebase
 /qa-swarm:attack "find bugs in the authentication and authorization flow"
@@ -88,15 +90,13 @@ All files are saved to `docs/qa-swarm/{date}-report.md`, `{date}-spec.md`, and `
 ## Installation
 
 ```bash
-claude plugin marketplace add MisterVitoPro/qa-swarm
-claude plugin install qa-swarm
-# Restart Claude Code to activate
+claude plugin marketplace add MisterVitoPro/qa-swarm --plugin qa-swarm
 ```
 
 Or load directly for a single session:
 
 ```bash
-claude --plugin-dir /path/to/qa-swarm
+claude --plugin-dir /path/to/plugins/qa-swarm
 ```
 
 ## Usage

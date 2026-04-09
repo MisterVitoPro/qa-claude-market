@@ -1,6 +1,8 @@
-# Code Atlas Plugin
+# Code Atlas
 
 Scan a codebase and generate a comprehensive architecture index for CLAUDE.md -- giving Claude a head start on understanding the project structure, patterns, and conventions.
+
+Part of the [MisterVitoPro Plugin Marketplace](../../README.md).
 
 Instead of exploring cold every session, Claude reads the architecture index and already knows where things are, what patterns to follow, and how to build and test the project.
 
