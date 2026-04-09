@@ -1,0 +1,19 @@
+{
+  "name": "code-atlas",
+  "description": "Scan a codebase and generate a comprehensive architecture index for CLAUDE.md — directory map, key files, tech stack, patterns, dependencies, and build commands",
+  "version": "1.0.0",
+  "license": "MIT",
+  "keywords": [
+    "architecture",
+    "codebase-map",
+    "documentation",
+    "claude-md",
+    "onboarding",
+    "code-indexing",
+    "repo-structure",
+    "auto-documentation",
+    "context-priming",
+    "developer-tools"
+  ],
+  "repository": "https://github.com/MisterVitoPro/qa-swarm"
+}
