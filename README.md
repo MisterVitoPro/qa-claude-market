@@ -32,10 +32,13 @@ claude plugin marketplace add MisterVitoPro/qa-swarm --plugin code-atlas
 
 ## Installation
 
-Install a specific plugin from this marketplace:
+Add this marketplace to Claude Code, then install plugins by name:
 
 ```bash
-# Install a plugin by name
+# Add the marketplace
+claude plugin marketplace add MisterVitoPro/qa-swarm
+
+# Install a specific plugin
 claude plugin marketplace add MisterVitoPro/qa-swarm --plugin <plugin-name>
 ```
 
