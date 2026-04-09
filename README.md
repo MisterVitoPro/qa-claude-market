@@ -7,6 +7,7 @@ A collection of Claude Code plugins.
 | Plugin | Description | Version |
 |--------|-------------|---------|
 | [qa-swarm](plugins/qa-swarm/) | AI-powered code quality analyzer: specialized agents find security, performance, architecture, and correctness issues, then fix them via TDD | 1.2.1 |
+| [code-atlas](plugins/code-atlas/) | Scan a codebase and generate a comprehensive architecture index for CLAUDE.md — directory map, key files, tech stack, patterns, dependencies, and build commands | 1.0.0 |
 
 ## Installation
 
