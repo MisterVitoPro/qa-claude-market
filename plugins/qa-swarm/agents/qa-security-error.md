@@ -4,7 +4,7 @@ description: >
   QA swarm agent specializing in security vulnerabilities and error handling. Finds injection flaws,
   auth issues, secrets exposure, silent failures, missing error catches, timeouts, retry gaps,
   and cascade failure risks.
-model: haiku
+model: sonnet
 color: red
 ---
 
@@ -82,7 +82,7 @@ Return your findings as structured JSON:
 
 ## Rules
 
-- Max 15 findings, ranked by severity
+- Max 25 findings, ranked by severity
 - Every finding MUST include file path, line number, and quoted evidence
 - Do NOT report theoretical issues without evidence in the actual code
 - Do NOT report issues in test files or dev-only code unless they leak into production

@@ -62,7 +62,7 @@ Based on detected project type:
 
 **This is the key performance optimization.** Read ALL non-test source files and store their contents grouped by tag. This eliminates agent file-reading overhead -- agents receive code inline and analyze immediately with zero tool calls.
 
-1. For each non-test source file, read it using the Read tool (cap at 500 lines per file -- if longer, read first 300 + last 100 lines with a `[... {N} lines omitted ...]` marker)
+1. For each non-test source file, read it using the Read tool (cap at 750 lines per file -- if longer, read first 400 + middle 100 lines around the midpoint + last 150 lines with `[... {N} lines omitted ...]` markers between sections)
 2. Group the file contents by tag. A file with multiple tags appears in multiple groups.
 3. Format each file as:
    ```
@@ -83,13 +83,13 @@ Estimated lines: ~{line_count}
 Detected: {language(s)} {framework(s)} {project_type}
 
 Agents to deploy:
-  Core (4):  Security & Error, Performance & Resources, Correctness, Architecture
+  Core (6):  Security & Error, Performance & Resources, Correctness, Architecture, Data Flow, Async Patterns
   Optional:  {list of selected optional agents, or "none"}
 
 Estimated cost (API tokens):
-  Small project  (< 50 files):   ~$0.10-0.30
-  Medium project (50-200 files): ~$0.30-1.00
-  Large project  (200+ files):   ~$1.00-3.00
+  Small project  (< 50 files):   ~$0.30-0.80
+  Medium project (50-200 files): ~$0.80-2.50
+  Large project  (200+ files):   ~$2.50-6.00
 
 Proceed? (Y/n, or adjust optional agents: "+logging -supply-chain")
 ```
@@ -103,7 +103,7 @@ Record timestamp: `t_setup_done`.
 Print:
 ```
 [Phase 1/3] Deploying {N} QA agents in parallel...
-  Core: Security & Error, Performance & Resources, Correctness, Architecture
+  Core: Security & Error, Performance & Resources, Correctness, Architecture, Data Flow, Async Patterns
   Optional: {list or "none"}
 ```
 
@@ -131,10 +131,12 @@ Analyze the code provided above according to your specialty. Return your finding
 
 **Core agents and their scoped file contents:**
 
-1. **qa-security-error** (model: haiku) -- receives contents of: auth + api + db + config + io + entry files
-2. **qa-performance-resources** (model: haiku) -- receives contents of: db + io + api + logic + state + entry files
-3. **qa-correctness** (model: haiku) -- receives contents of: db + api + logic files
-4. **qa-architecture** (model: haiku) -- receives contents of: entry + api + logic + config files
+1. **qa-security-error** (model: sonnet) -- receives contents of: auth + api + db + config + io + entry + logic files
+2. **qa-performance-resources** (model: sonnet) -- receives contents of: db + io + api + logic + state + entry + config files
+3. **qa-correctness** (model: sonnet) -- receives contents of: db + api + logic + io + config files
+4. **qa-architecture** (model: sonnet) -- receives contents of: entry + api + logic + config + db + io files
+5. **qa-data-flow** (model: sonnet) -- receives contents of: auth + api + db + io + logic + entry files
+6. **qa-async-patterns** (model: sonnet) -- receives contents of: api + io + logic + state + db + entry files
 
 **Optional agents and their scoped file contents (if selected):**
 
@@ -318,7 +320,7 @@ Compute phase durations (format as Xm Ys):
 - Total: `t_save_done - t_start` minus user confirm wait
 
 Count agents dispatched:
-- Core agents: always 4 (Haiku)
+- Core agents: always 6 (Sonnet)
 - Optional agents: count selected (Haiku)
 - Fix Planner: always 1 (Sonnet)
 
@@ -330,7 +332,7 @@ Confidence: {confirmed} confirmed, {likely} likely, {suspected} suspected
 
 Phase Timing:
   Setup + Pre-read  {Xm Ys}
-  Agent Swarm       {Xm Ys}   ({N} Haiku agents in parallel)
+  Agent Swarm       {Xm Ys}   ({N} agents in parallel: 6 Sonnet core + Haiku optional)
   Aggregation       {Xm Ys}   (inline -- no agent)
   Fix Planner       {Xm Ys}   (1 Sonnet agent)
   Save Files        {Xm Ys}
@@ -338,10 +340,10 @@ Phase Timing:
   Total             {Xm Ys}   (excludes user confirmation wait)
 
 Agent Usage:
-  Haiku  : {4 + optional_count} agents  (4 core + {optional_count} optional)
-  Sonnet : 1 agent   (fix planner)
+  Sonnet : {6 + 1} agents  (6 core + 1 fix planner)
+  Haiku  : {optional_count} agents  ({optional_count} optional)
   Opus   : 0 agents
-  Total  : {5 + optional_count} agents dispatched
+  Total  : {7 + optional_count} agents dispatched
 
 Report:    docs/qa-swarm/{DATE}-report.md
 Spec:      docs/qa-swarm/{DATE}-spec.md

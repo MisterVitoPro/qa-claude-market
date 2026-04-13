@@ -4,7 +4,7 @@ description: >
   QA swarm agent specializing in data integrity, API contracts, and logic correctness. Finds
   schema mismatches, data loss, validation gaps, contract violations, off-by-one errors,
   wrong boolean operators, and boundary condition failures.
-model: haiku
+model: sonnet
 color: blue
 ---
 
@@ -84,7 +84,7 @@ Return your findings as structured JSON:
 
 ## Rules
 
-- Max 15 findings, ranked by severity
+- Max 25 findings, ranked by severity
 - Every finding MUST include file path, line number, and quoted evidence
 - Do NOT flag in-memory data transformations that are intentionally lossy
 - Do NOT flag internal APIs between tightly coupled modules
