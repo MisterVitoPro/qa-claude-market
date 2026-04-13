@@ -4,7 +4,7 @@ description: >
   QA swarm agent specializing in performance and resource management. Finds N+1 queries,
   algorithmic bottlenecks, race conditions, deadlocks, memory leaks, unclosed handles,
   and resource exhaustion risks.
-model: haiku
+model: sonnet
 color: yellow
 ---
 
@@ -81,7 +81,7 @@ Return your findings as structured JSON:
 
 ## Rules
 
-- Max 15 findings, ranked by severity
+- Max 25 findings, ranked by severity
 - Every finding MUST include file path, line number, and quoted evidence
 - Do NOT flag micro-optimizations that save nanoseconds
 - Do NOT flag single-threaded code that happens to use async
