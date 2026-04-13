@@ -12,7 +12,7 @@ This is a **multi-plugin marketplace** repository. Each plugin lives in its own 
 
 | Plugin | Version | Description |
 |--------|---------|-------------|
-| `qa-swarm` | 1.2.1 | AI-powered code quality analyzer with parallel agent swarm and TDD-driven fixes |
+| `qa-swarm` | 1.3.0 | AI-powered code quality analyzer with parallel agent swarm and TDD-driven fixes |
 | `code-atlas` | 1.1.0 | Architecture index generator for CLAUDE.md -- directory map, tech stack, patterns, dependencies |
 
 ### Directory Layout
@@ -66,9 +66,9 @@ Each plugin has its own version in `plugins/<name>/.claude-plugin/plugin.json`. 
 ```
 .claude-plugin/             # Marketplace registry -- lists all plugins with source paths
 plugins/                    # Root directory containing all plugins
-  qa-swarm/                 # AI-powered code quality analyzer (v1.2.1)
+  qa-swarm/                 # AI-powered code quality analyzer (v1.3.0)
     .claude-plugin/         # Plugin manifest and metadata
-    agents/                 # 14 QA agent definitions (security, perf, correctness, architecture, etc.)
+    agents/                 # 16 QA agent definitions (security, perf, correctness, architecture, data flow, async, etc.)
     skills/                 # User-facing commands: attack (analyze), implement (fix)
     docs/                   # Master spec, design plans, implementation plans
   code-atlas/               # Architecture index generator (v1.0.0)
@@ -83,8 +83,8 @@ plugins/                    # Root directory containing all plugins
 |------|------|-------------|
 | `.claude-plugin/marketplace.json` | Config | Central plugin registry -- lists all plugins with names, sources, and categories |
 | `CLAUDE.md` | Config | Project instructions, repository structure, versioning strategy |
-| `plugins/qa-swarm/.claude-plugin/plugin.json` | Config | QA Swarm manifest (v1.2.1, keywords, license) |
-| `plugins/qa-swarm/skills/attack/SKILL.md` | Entry point | Orchestrates QA swarm: setup, deploy 4-10 agents, aggregate, plan fixes |
+| `plugins/qa-swarm/.claude-plugin/plugin.json` | Config | QA Swarm manifest (v1.3.0, keywords, license) |
+| `plugins/qa-swarm/skills/attack/SKILL.md` | Entry point | Orchestrates QA swarm: setup, deploy 6-12 agents, aggregate, plan fixes |
 | `plugins/qa-swarm/skills/implement/SKILL.md` | Entry point | Implements fixes from attack output via TDD (red-green loop) |
 | `plugins/qa-swarm/agents/qa-aggregator.md` | Core module | Merges findings, applies P0-P3 ranking, confidence tags, corroboration scoring |
 | `plugins/qa-swarm/agents/qa-fix-planner.md` | Core module | Produces implementation spec and TDD test plan from ranked report |
@@ -103,7 +103,7 @@ plugins/                    # Root directory containing all plugins
 - **Skill definitions:** Markdown in `skills/<name>/SKILL.md` with frontmatter (`name`, `description`, `argument-hint`)
 - **Hook definitions:** Markdown in `hooks/<name>/HOOK.md` with `trigger` field in frontmatter
 - **Naming:** kebab-case for plugin/directory names; kebab-case with colon prefix for skill names (`qa-swarm:attack`)
-- **Model assignment:** Haiku for lightweight analysis agents; Sonnet for complex aggregation/planning; Opus for implementation
+- **Model assignment:** Sonnet for core analysis agents; Haiku for optional analysis agents; Sonnet for aggregation/planning; Opus for implementation
 - **Orchestration:** Skills deploy multiple agents in parallel, aggregate results inline or via dedicated agent
 - **Output format:** Agents return structured JSON; skills produce Markdown reports with specs/plans
 - **Versioning:** Independent per-plugin in `plugin.json`; git tags as `<plugin-name>/v<version>`
@@ -114,7 +114,7 @@ plugins/                    # Root directory containing all plugins
 marketplace.json -> [qa-swarm, code-atlas]
 
 qa-swarm pipeline:
-  skills/attack -> agents (4 core + up to 6 optional, parallel)
+  skills/attack -> agents (6 core + up to 6 optional, parallel)
                -> inline aggregation
                -> agents/qa-fix-planner (spec + tests)
                -> docs/qa-swarm/{date}-*.md (output files)
