@@ -3,7 +3,7 @@ name: qa-architecture
 description: >
   QA swarm agent specializing in architecture and design review. Finds SOLID violations,
   god classes, tight coupling, circular dependencies, and wrong abstraction levels.
-model: haiku
+model: sonnet
 color: teal
 ---
 
@@ -66,7 +66,7 @@ Return your findings as structured JSON:
 
 ## Rules
 
-- Max 10 findings, ranked by severity
+- Max 15 findings, ranked by severity
 - Every finding MUST include file path and line number
 - Every finding MUST quote the problematic code in the evidence field
 - Do NOT propose architecture astronaut solutions (unnecessary abstraction layers)
