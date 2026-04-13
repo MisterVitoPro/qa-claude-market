@@ -4,8 +4,8 @@ AI-powered code quality analyzer that finds security, performance, architecture,
 
 Part of the [MisterVitoPro Plugin Marketplace](../../README.md).
 
-- **4 core agents** scan in parallel (security & error handling, performance & resources, correctness, architecture)
-- **Up to 6 optional agents** activate based on your project type (config review, type safety, supply chain, etc.)
+- **6 core Sonnet agents** scan in parallel (security & error handling, performance & resources, correctness, architecture, data flow & taint analysis, async & concurrency patterns)
+- **Up to 6 optional Haiku agents** activate based on your project type (config review, type safety, supply chain, etc.)
 - Source files are **pre-read and embedded** in agent prompts for zero-overhead analysis
 - Findings are **deduplicated, ranked P0-P3**, tagged with confidence levels, and **corroborated** across agents
 - Fixes are implemented **test-first** -- failing tests are written before code is changed
@@ -25,11 +25,11 @@ claude plugin marketplace add MisterVitoPro/qa-swarm --plugin qa-swarm
 
 ## Why QA Swarm?
 
-Most code review approaches give you one lens at a time. QA Swarm runs 4-10 specialized agents **in parallel**, each with a distinct expertise. When 3+ agents independently flag the same issue, you know it's real.
+Most code review approaches give you one lens at a time. QA Swarm runs 6-12 specialized agents **in parallel**, each with a distinct expertise. When 3+ agents independently flag the same issue, you know it's real.
 
 | | QA Swarm | Manual Review | Linters (ESLint, etc.) | GitHub Code Scanning |
 |---|----------|---------------|------------------------|----------------------|
-| **Parallel analysis** | 4-10 agents | 1 reviewer | 1-2 tools | 1 tool |
+| **Parallel analysis** | 6-12 agents | 1 reviewer | 1-2 tools | 1 tool |
 | **Cross-specialty** | Security + perf + architecture + more, simultaneously | Depends on reviewer | Single lens per rule | Single lens |
 | **Implements fixes** | Yes, TDD-driven | Reviewer suggests, you implement | No | No |
 | **Corroboration** | Flags issues found by multiple agents | No | No | No |
@@ -48,7 +48,7 @@ After running `/qa-swarm:attack`, you get a ranked report like this:
 # QA Swarm Report
 **Date:** 2026-04-02
 **Prompt:** "find bugs in the authentication and authorization flow"
-**Agents deployed:** 7 (4 core + 3 optional)
+**Agents deployed:** 9 (6 core + 3 optional)
 
 ## Summary
 - P0 Critical: 2 findings
@@ -162,7 +162,7 @@ All output is saved to `docs/qa-swarm/` in your project:
 <details>
 <summary><h2>Agent Roster</h2></summary>
 
-### Core Agents (always active -- Haiku)
+### Core Agents (always active -- Sonnet)
 
 | Agent | Specialty |
 |-------|-----------|
@@ -170,6 +170,8 @@ All output is saved to `docs/qa-swarm/` in your project:
 | Performance & Resources | N+1 queries, bottlenecks, race conditions, deadlocks, memory leaks, unclosed handles, unbounded growth |
 | Correctness | Schema mismatches, data loss, contract violations, off-by-one, wrong operators, boundary failures |
 | Architecture & Design | SOLID violations, coupling, god classes, wrong abstractions, circular dependencies |
+| Data Flow & Taint Analysis | Source-to-sink tracing, unsanitized input, trust boundary crossings, encoding mismatches, data lifecycle issues |
+| Async & Concurrency Patterns | Unhandled rejections, fire-and-forget, async race conditions, event listener leaks, deadlocks, missing cancellation |
 
 ### Optional Agents (activated by project type -- Haiku)
 
@@ -198,7 +200,7 @@ Step 1: Setup + Pre-read
   - Pre-read ALL source files (embedded in agent prompts)
 
 Step 2: Swarm (parallel)
-  - Launch 4-10 Haiku agents with code embedded inline
+  - Launch 6-12 agents (6 Sonnet core + Haiku optional) with code embedded inline
   - Zero Read tool calls -- agents analyze immediately
 
 Step 3: Inline Aggregation (no agent spawn)
@@ -216,11 +218,11 @@ Step 5: Save + Handoff
 
 | Role | Model | Count |
 |------|-------|-------|
-| Core QA agents | Haiku | 4 |
+| Core QA agents | Sonnet | 6 |
 | Optional QA agents | Haiku | 0-6 |
 | Fix Planner | Sonnet | 1 |
 | Aggregation | (inline) | 0 |
-| **Total (attack)** | | **5-11** |
+| **Total (attack)** | | **7-13** |
 
 | Role | Model | Count |
 |------|-------|-------|
@@ -228,12 +230,13 @@ Step 5: Save + Handoff
 | P0 Implementation | Opus | per finding |
 | P1-P3 Implementation | Sonnet | per priority |
 
-### Key Optimizations (v1.2.0)
+### Key Optimizations (v1.3.0)
 
 1. **Pre-read & embed** -- source files read once in setup, embedded directly in agent prompts. Eliminates ~40-60 Read tool call round-trips across agents.
 2. **Inline aggregation** -- orchestrator performs dedup and ranking directly instead of spawning an aggregator agent.
 3. **Merged fix planner** -- single agent produces both spec and test plan, eliminating a pipeline stage.
-4. **All-Haiku swarm** -- pre-read code compensates by giving Haiku full context upfront.
+4. **Sonnet core swarm** -- 6 Sonnet core agents provide deep analysis; Haiku optional agents keep costs lower for supplementary checks.
+5. **Expanded file visibility** -- agents receive broader cross-cutting file context (750-line cap with middle-section reads) for better detection of issues spanning multiple concerns.
 
 </details>
 

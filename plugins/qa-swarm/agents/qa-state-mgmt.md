@@ -65,7 +65,7 @@ Return your findings as structured JSON:
 
 ## Rules
 
-- Max 10 findings, ranked by severity
+- Max 15 findings, ranked by severity
 - Every finding MUST include file path and line number
 - Every finding MUST quote the problematic code in the evidence field
 - Do NOT flag simple local state in leaf components/functions

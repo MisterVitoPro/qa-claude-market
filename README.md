@@ -4,11 +4,11 @@ A collection of Claude Code plugins for code quality, architecture, and develope
 
 ## Available Plugins
 
-### [qa-swarm](plugins/qa-swarm/) `v1.2.1`
+### [qa-swarm](plugins/qa-swarm/) `v1.3.0`
 
-AI-powered code quality analyzer. Runs 4-10 specialized agents in parallel to find security, performance, architecture, and correctness issues -- then fixes them via TDD.
+AI-powered code quality analyzer. Runs 6-12 specialized agents in parallel to find security, performance, architecture, correctness, data flow, and async issues -- then fixes them via TDD.
 
-- Parallel analysis across security, performance, architecture, and correctness
+- 6 Sonnet core agents + up to 6 Haiku optional agents in parallel
 - Findings deduplicated, ranked P0-P3, and corroborated across agents
 - Fixes implemented test-first with failing tests before code changes
 
