@@ -64,22 +64,29 @@ Output a test plan document:
 
 ### Mode 2: Test Writer (during /qa-swarm:implement)
 
-You receive the test plan and write the actual test files to disk.
+You run as one of up to 3 **parallel** test-writer agents. The orchestrator has partitioned the test plan so that each test file is assigned to exactly one agent -- **NEVER write to a file outside your assigned list**, even if a finding appears to belong elsewhere.
+
+You receive:
+- A slice of the test plan (findings + test code blocks, inlined in your prompt)
+- An explicit list of test file paths you own (`owned_files`)
+- A `context7_available` boolean
 
 Process:
-1. Read the test plan
-2. Detect the project's test framework and conventions by reading existing tests
-3. Write test files following the project's existing patterns
-4. Run the test suite to confirm the new tests FAIL (red phase)
-5. Report which tests fail and which unexpectedly pass
+1. Read 2-3 existing test files in the project to detect the test framework, naming conventions, and file layout. Do not read the whole test tree -- a small sample is enough.
+2. (Optional) If `context7_available` is true AND you are uncertain about a framework API used in your test code (e.g., pytest fixture signatures, jest mocking, junit5 parameterized syntax), call `mcp__context7__resolve-library-id` followed by `mcp__context7__query-docs` to confirm the current API before writing. Skip this entirely if `context7_available` is false. Do not query Context7 for general programming concepts or for code you already know -- only for framework-specific API details where your uncertainty could cause the test to fail on setup rather than assertion.
+3. Write test files to disk following the project's existing patterns. You may only touch files in `owned_files`.
+4. **Do NOT run the test suite.** The orchestrator runs the suite once after all parallel agents finish.
+5. Return a structured JSON summary (schema given in the implement skill) listing files written, tests written per finding, any Context7 queries made, and any findings you skipped with reasons.
 
-For tests that already pass:
-- The finding may already be fixed or was a false positive
-- Report these back so they can be removed from the implementation queue
+For findings you cannot write tests for (e.g., test plan lacks runnable code, required fixture missing, framework unsupported):
+- Skip the finding
+- Include it in the `skipped` array with a concise reason
+- Do not invent tests
 
 ## Rules
 
 - **Stay on mission: only write tests for QA findings.** The sole purpose of these tests is to prevent regressions of the issues found. Do not add unrelated tests, expand scope to general coverage, or "improve" the test suite beyond what the findings require.
+- **In Mode 2, only write to files in your `owned_files` list.** The orchestrator partitions files across agents to prevent write conflicts. Violating this rule corrupts parallel writes.
 - Every test MUST be runnable -- no pseudocode, no placeholder assertions
 - Follow the project's existing test conventions (file location, naming, framework)
 - Each finding gets its own test function(s) -- do not combine unrelated findings into one test

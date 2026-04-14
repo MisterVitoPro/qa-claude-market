@@ -115,9 +115,11 @@ claude --plugin-dir /path/to/plugins/qa-swarm
 /qa-swarm:attack "find bugs in the authentication and authorization flow"
 ```
 
-After the swarm completes:
-1. Optionally run `/clear` to free up context (the swarm uses many tokens; clearing helps if your session is running low)
-2. Run `/qa-swarm:implement` with the generated file paths
+After the swarm completes, `/qa-swarm:attack` asks once whether to proceed to implementation. Selecting `Y` auto-hands off to `/qa-swarm:implement` in a **fresh-context subagent** (functionally equivalent to `/clear` + manual invocation, without the keystrokes). Selecting `n` stops so you can resume later with:
+
+```
+/qa-swarm:implement docs/qa-swarm/{DATE}-report.md docs/qa-swarm/{DATE}-spec.md docs/qa-swarm/{DATE}-tests.md
+```
 
 ### Implement Fixes
 
@@ -127,10 +129,11 @@ After the swarm completes:
 
 The implementation pipeline:
 1. Presents phases (P0-P3) -- you choose which to tackle
-2. Writes TDD tests that fail on current code (red phase)
-3. Implements fixes one at a time (P0) or batched (P1-P3)
-4. Loops until tests pass (green phase)
-5. Offers to continue with remaining phases
+2. Writes TDD tests in parallel across **3 test-writer agents** (files partitioned so no two agents write the same file); uses the Context7 MCP for current framework docs when available
+3. Runs the suite once to confirm the red phase
+4. Implements fixes one at a time (P0) or batched (P1-P3)
+5. Loops until tests pass (green phase)
+6. Offers to continue with remaining phases
 
 ## Priority and Confidence
 
@@ -226,7 +229,7 @@ Step 5: Save + Handoff
 
 | Role | Model | Count |
 |------|-------|-------|
-| TDD Writer | Sonnet | 1 |
+| TDD Writer | Sonnet | 3 (parallel, file-partitioned) |
 | P0 Implementation | Opus | per finding |
 | P1-P3 Implementation | Sonnet | per priority |
 
@@ -237,6 +240,12 @@ Step 5: Save + Handoff
 3. **Merged fix planner** -- single agent produces both spec and test plan, eliminating a pipeline stage.
 4. **Sonnet core swarm** -- 6 Sonnet core agents provide deep analysis; Haiku optional agents keep costs lower for supplementary checks.
 5. **Expanded file visibility** -- agents receive broader cross-cutting file context (750-line cap with middle-section reads) for better detection of issues spanning multiple concerns.
+
+### Key Optimizations (v1.4.0)
+
+1. **Fresh-context subagent handoff** -- `attack` auto-invokes `implement` in a subagent with zero context from the attack session. No manual `/clear` + re-invoke required.
+2. **3 parallel TDD writers** -- test files are partitioned so up to 3 `qa-tdd` agents write concurrently without conflicts. Suite runs once after all three finish.
+3. **Optional Context7 MCP** -- test-writer agents consult Context7 for current framework API docs when the MCP server is available; skip silently otherwise.
 
 </details>
 

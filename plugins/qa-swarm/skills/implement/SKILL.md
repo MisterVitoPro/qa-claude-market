@@ -134,28 +134,69 @@ Once the user selects phases, create the full task tree using TaskCreate:
    - `"Final test suite verification"`
    - `"Write results report to docs/qa-swarm/{DATE}-results.md"`
 
-## Step 3: TDD SETUP
+## Step 3: TDD SETUP (3 parallel test-writer agents)
 
 Mark the TDD Setup task as `in_progress`.
 
-Launch the qa-tdd agent (model: sonnet) in Mode 2 (Test Writer):
-- Pass it the test plan file, filtered to SELECTED PHASES ONLY
-- Instruct it to:
-  1. Read existing tests in the project to detect conventions (test framework, file location, naming)
-  2. Write the actual test files to disk following those conventions
-  3. Run the full test suite
-  4. Report which tests fail (expected) and which pass (unexpected)
+### 3a. Detect Context7 MCP availability
 
-After the TDD agent completes:
-- Tests that FAIL: these are in the implementation queue (good -- red phase)
-- Tests that PASS: remove the corresponding findings from the implementation queue and note them:
+Check whether the Context7 MCP server is available in this session by looking for the tools `mcp__context7__resolve-library-id` and `mcp__context7__query-docs`. Record the result as `context7_available: true | false`. You will pass this flag to each test-writer agent.
+
+If available, print: `Context7 MCP detected -- test-writer agents will use it for current framework docs.`
+If not available, print: `Context7 MCP not detected -- test-writer agents will rely on existing test conventions only.`
+
+### 3b. Partition the test plan across 3 agents
+
+1. Read the test plan file and filter to findings in the SELECTED PHASES ONLY. Skip any finding already marked `ALREADY COVERED` in the plan.
+2. Group the remaining findings by their `test_file_path`. Each group represents one test file's worth of work.
+3. Distribute the groups across up to 3 buckets, balanced by the total number of test cases per bucket. Rule: **each test file is assigned to exactly one bucket** -- no two agents ever write the same file (prevents write conflicts).
+4. If there are fewer than 3 distinct test files, use fewer agents (1 agent per file). Do not spawn empty agents.
+5. Name the buckets `slice-A`, `slice-B`, `slice-C`.
+
+Print a partition summary:
+```
+TDD partitioning:
+  slice-A: {N} findings across {M} test files
+  slice-B: {N} findings across {M} test files
+  slice-C: {N} findings across {M} test files
+```
+
+### 3c. Launch 3 qa-tdd agents in parallel
+
+Launch the test-writer agents **in a single message with multiple Agent tool calls** so they run concurrently. Each agent (model: sonnet, Mode 2) receives:
+
+- Its assigned slice of the test plan (only its bucket's findings + test code blocks, inlined into the prompt)
+- The list of test file paths it owns -- with an explicit instruction that it MUST NOT write to any file outside this list
+- The `context7_available` boolean
+- Conventions guidance: read 2-3 existing test files in the project to detect framework, naming, and file layout before writing
+- Instruction: DO NOT run the test suite. The orchestrator runs the suite once after all 3 agents finish.
+
+Each agent returns a structured JSON summary:
+```json
+{
+  "slice": "slice-A",
+  "files_written": ["tests/unit/test_auth.py", ...],
+  "tests_written": [{"finding_id": "P0-001", "test_name": "test_sql_injection_login", "file": "..."}],
+  "context7_queries": [{"library": "pytest", "purpose": "confirm fixture API"}],
+  "skipped": [{"finding_id": "...", "reason": "..."}]
+}
+```
+
+### 3d. Run the full test suite once
+
+After all 3 agents return, run the FULL test suite (detected test command for the project).
+
+Classify each new test:
+- **FAIL (expected)**: finding stays in the implementation queue -- red phase verified.
+- **PASS (unexpected)**: finding is likely already fixed or false positive. Remove from queue, print:
   ```
   Tests already passing (removed from queue):
     - {finding_id}: {title} -- likely already fixed or false positive
   ```
-  Mark those finding sub-tasks as `completed` with note: "Tests already passing -- likely already fixed or false positive."
+  Mark that finding's sub-task `completed` with the "already passing" note.
+- **ERRORED (did not run)**: treat as a TDD setup bug. Print the error, mark the sub-task `in_progress` with a note, and continue -- the fix agent in Step 4 may correct it.
 
-Update each remaining finding sub-task description to include the test file path now that TDD setup is done.
+Update each remaining finding sub-task description to include its test file path.
 
 Mark the TDD Setup task as `completed`.
 
