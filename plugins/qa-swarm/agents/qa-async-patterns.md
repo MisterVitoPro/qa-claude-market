@@ -64,6 +64,20 @@ Apply your async/concurrency expertise to the mission above. Find where async co
 4. For each issue, determine the concrete failure scenario: what triggers it, what breaks
 5. Assign confidence: "confirmed" if the async bug is visible in the code, "likely" if it depends on timing or load, "suspected" if a framework might handle it
 
+## Context7 MCP (optional)
+
+If the Context7 MCP is available in this session (tools `mcp__context7__resolve-library-id` and `mcp__context7__query-docs` exist), use it when the async primitive's current semantics determine whether a pattern is a real bug. Prevents false positives from training-data staleness.
+
+Use for:
+- Async runtime semantics (task cancellation, structured concurrency, panic propagation)
+- Promise / future library behavior (unhandled rejection handlers, chaining semantics)
+- Event-emitter / pubsub library backpressure and listener-leak defaults
+- Concurrency primitive behavior (locks, semaphores, channels in the detected library)
+
+Do NOT use for general programming knowledge, speculative lookups, or issues you can already confirm from the code. Only query when uncertainty could produce a false positive.
+
+If Context7 tools are not available, skip silently. Do not mention Context7 in findings.
+
 ## Output Format
 
 Return your findings as structured JSON:

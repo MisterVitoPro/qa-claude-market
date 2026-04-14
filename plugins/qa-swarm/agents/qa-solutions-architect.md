@@ -50,6 +50,19 @@ Group related fixes together when they touch the same files or systems. A fix or
 2. P1 fixes grouped by subsystem
 3. P2-P3 listed briefly
 
+## Context7 MCP (optional)
+
+If the Context7 MCP is available in this session (tools `mcp__context7__resolve-library-id` and `mcp__context7__query-docs` exist), use it before writing P0 before/after code whenever current framework/library API details matter. Prevents producing spec steps that reference stale or incorrect APIs.
+
+Use for:
+- Verifying current sanitizer / parameterized-query / validator APIs before recommending them
+- Confirming current framework helper / middleware APIs named in fix steps
+- Checking current migration-tool / ORM syntax when the fix invokes them
+
+Do NOT use for general programming knowledge or code you already understand. Only query when the spec would reference a specific library API whose current form you are not certain about. Each query costs tokens -- lookup sparingly.
+
+If Context7 tools are not available, skip silently. Do not mention Context7 in the spec.
+
 ## Output Format
 
 ```markdown

@@ -53,6 +53,20 @@ Apply your data flow expertise to the mission above. Trace data from where it en
 4. For each issue, determine the concrete attack or failure scenario
 5. Assign confidence: "confirmed" if you can trace a complete source-to-sink path in the code, "likely" if sanitization might exist in middleware you can't see, "suspected" if the pattern is risky but context-dependent
 
+## Context7 MCP (optional)
+
+If the Context7 MCP is available in this session (tools `mcp__context7__resolve-library-id` and `mcp__context7__query-docs` exist), use it when current sanitizer/validator library behavior determines whether a data-flow path is actually tainted. Prevents false positives from training-data staleness.
+
+Use for:
+- Validation library behavior (what is coerced vs rejected, whether HTML is stripped)
+- Templating engine auto-escape defaults (is interpolation safe by default in this version?)
+- ORM parameter binding semantics (is raw-string interpolation actually used?)
+- Framework request-body / query-param parsing (what types are returned, how encoding is handled)
+
+Do NOT use for general programming knowledge, speculative lookups, or issues you can already confirm from the code. Only query when uncertainty could produce a false positive.
+
+If Context7 tools are not available, skip silently. Do not mention Context7 in findings.
+
 ## Output Format
 
 Return your findings as structured JSON:

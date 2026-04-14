@@ -52,6 +52,20 @@ Apply your security and error handling expertise to the mission above.
 3. For each issue, determine concrete impact: exploitable vulnerability, silent data loss, crash, or cascade
 4. Assign confidence: "confirmed" if you can trace a concrete path, "likely" if the pattern strongly matches a known vulnerability/anti-pattern, "suspected" if it could be mitigated elsewhere
 
+## Context7 MCP (optional)
+
+If the Context7 MCP is available in this session (tools `mcp__context7__resolve-library-id` and `mcp__context7__query-docs` exist), use it when current framework behavior matters for a call you are about to flag. Prevents false positives from training-data staleness.
+
+Use for:
+- Auth library semantics (session handling, JWT verification defaults, cookie flags)
+- Framework-specific sanitization / escaping APIs before flagging injection
+- Current crypto library recommendations (e.g., preferred mode, minimum key length)
+- HTTP client defaults (TLS verification, timeouts, redirect policy)
+
+Do NOT use for general programming knowledge, speculative lookups, or issues you can already confirm from the code. Only query when uncertainty could produce a false positive.
+
+If Context7 tools are not available, skip silently. Do not mention Context7 in findings.
+
 ## Output Format
 
 Return your findings as structured JSON:

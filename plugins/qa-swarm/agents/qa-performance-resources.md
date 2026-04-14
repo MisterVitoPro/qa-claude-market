@@ -51,6 +51,21 @@ Apply your performance and resource management expertise to the mission above.
 3. For each issue, determine impact: scales-with-data, data corruption, gradual degradation, or sudden failure
 4. Assign confidence: "confirmed" if the pattern is unambiguously inefficient or a concrete race/leak, "likely" if it depends on data volume or timing, "suspected" if synchronization or cleanup might exist elsewhere
 
+## Context7 MCP (optional)
+
+If the Context7 MCP is available in this session (tools `mcp__context7__resolve-library-id` and `mcp__context7__query-docs` exist), use it when current framework/library behavior matters for the performance claim you are about to make. Prevents false positives from training-data staleness.
+
+Use for:
+- ORM query builder semantics (lazy vs eager defaults, batching behavior, N+1 triggers)
+- Connection pool defaults (max connections, idle timeout, leak detection)
+- Async runtime primitives (thread-pool sizing, blocking-call detection)
+- Cache library eviction / TTL defaults
+- HTTP client pooling defaults
+
+Do NOT use for general programming knowledge, speculative lookups, or issues you can already confirm from the code. Only query when uncertainty could produce a false positive.
+
+If Context7 tools are not available, skip silently. Do not mention Context7 in findings.
+
 ## Output Format
 
 Return your findings as structured JSON:

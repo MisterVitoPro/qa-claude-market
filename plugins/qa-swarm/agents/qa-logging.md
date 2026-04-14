@@ -35,6 +35,20 @@ Apply your observability expertise to the mission above. Find where the system g
 3. For each issue, determine whether it causes blind spots in production debugging
 4. Assign confidence: "confirmed" if the logging gap is visible, "likely" if logging exists but is incomplete, "suspected" if logging might be handled by a framework
 
+## Context7 MCP (optional)
+
+If the Context7 MCP is available in this session (tools `mcp__context7__resolve-library-id` and `mcp__context7__query-docs` exist), use it when logging-framework behavior determines whether an observability gap is real. Prevents false positives from training-data staleness.
+
+Use for:
+- Logging framework defaults (log levels, default sinks, structured output)
+- OpenTelemetry / tracing library instrumentation coverage
+- Framework built-in request/response logging (whether middleware already covers it)
+- Log redaction / masking API availability in the detected library
+
+Do NOT use for general programming knowledge, speculative lookups, or issues you can already confirm from the code. Only query when uncertainty could produce a false positive.
+
+If Context7 tools are not available, skip silently. Do not mention Context7 in findings.
+
 ## Output Format
 
 Return your findings as structured JSON:

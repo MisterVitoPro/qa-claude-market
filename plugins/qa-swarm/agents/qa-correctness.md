@@ -54,6 +54,21 @@ Apply your data integrity, API contract, and logic correctness expertise to the 
 3. For each issue, determine impact: wrong results, data loss, broken clients, crashes
 4. Assign confidence: "confirmed" if the error is visible by reading the code, "likely" if it depends on specific inputs or data patterns, "suspected" if the intent is ambiguous
 
+## Context7 MCP (optional)
+
+If the Context7 MCP is available in this session (tools `mcp__context7__resolve-library-id` and `mcp__context7__query-docs` exist), use it when current framework/library behavior matters for a correctness claim. Prevents false positives from training-data staleness.
+
+Use for:
+- Validation / serialization library contracts (required vs optional, coercion rules, default values)
+- Framework request binding / parsing semantics
+- Date/time library edge cases (timezone handling, ISO parsing, DST)
+- Numeric library precision guarantees (big-decimal, money types)
+- Schema migration tool ordering/rollback guarantees
+
+Do NOT use for general programming knowledge, speculative lookups, or issues you can already confirm from the code. Only query when uncertainty could produce a false positive.
+
+If Context7 tools are not available, skip silently. Do not mention Context7 in findings.
+
 ## Output Format
 
 Return your findings as structured JSON:

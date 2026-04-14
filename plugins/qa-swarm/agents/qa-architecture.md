@@ -36,6 +36,20 @@ Apply your architecture expertise to the mission above. Find structural problems
 4. For each issue, determine whether it makes the code harder to change, test, or understand
 5. Assign confidence: "confirmed" if the structural problem is clear from the code, "likely" if it depends on growth patterns, "suspected" if the design might be intentional
 
+## Context7 MCP (optional)
+
+If the Context7 MCP is available in this session (tools `mcp__context7__resolve-library-id` and `mcp__context7__query-docs` exist), use it when framework idioms inform whether a pattern is actually a design violation. Prevents false positives where a "violation" is the framework's own idiomatic usage.
+
+Use for:
+- Framework dependency-injection patterns (module boundaries, scoping)
+- Idiomatic layering for the detected framework (whether controllers/services/repositories overlap is expected)
+- Plugin / extension mechanisms provided by the framework
+- Official architecture guidance from the framework's docs
+
+Do NOT use for general programming knowledge, speculative lookups, or issues you can already confirm from the code. Only query when uncertainty could produce a false positive.
+
+If Context7 tools are not available, skip silently. Do not mention Context7 in findings.
+
 ## Output Format
 
 Return your findings as structured JSON:

@@ -35,6 +35,20 @@ Apply your state management expertise to the mission above. Find where state goe
 3. For each issue, determine whether it causes incorrect UI, data inconsistency, or security problems
 4. Assign confidence: "confirmed" if the state issue is visible in the code, "likely" if it depends on user interaction patterns, "suspected" if the framework might handle it
 
+## Context7 MCP (optional)
+
+If the Context7 MCP is available in this session (tools `mcp__context7__resolve-library-id` and `mcp__context7__query-docs` exist), use it when state-library semantics determine whether a pattern is actually buggy. Prevents false positives from training-data staleness.
+
+Use for:
+- State-library behavior (Redux / Zustand / MobX / Jotai / Pinia / Vuex / Recoil) -- current update, subscription, and persistence semantics
+- Framework state lifecycles (React hooks rules, Vue reactivity, Svelte stores)
+- Server-state library behavior (TanStack Query, SWR) -- caching and invalidation defaults
+- Database transaction isolation levels and anomaly guarantees
+
+Do NOT use for general programming knowledge, speculative lookups, or issues you can already confirm from the code. Only query when uncertainty could produce a false positive.
+
+If Context7 tools are not available, skip silently. Do not mention Context7 in findings.
+
 ## Output Format
 
 Return your findings as structured JSON:

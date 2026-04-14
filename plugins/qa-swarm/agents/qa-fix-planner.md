@@ -71,6 +71,22 @@ For each new finding, design test cases that:
 
 ---
 
+## Context7 MCP (optional)
+
+If the Context7 MCP is available in this session (tools `mcp__context7__resolve-library-id` and `mcp__context7__query-docs` exist), use it before writing P0 fix code or test code whenever current framework/library API details matter. Prevents writing fix steps that reference stale or incorrect APIs.
+
+Use for:
+- Verifying current sanitizer/validator/parameterized-query APIs before proposing them in P0 fix steps
+- Confirming current test-framework assertion or fixture APIs before writing test code
+- Checking current ORM/migration-tool syntax when your proposed fix invokes them
+- Verifying current config/secret-manager client APIs in fix steps
+
+Do NOT use for general programming knowledge, the overall architecture, or code you already understand. Only query when the fix or test code would reference a specific library API whose current form you are not certain about. Each query costs tokens -- lookup sparingly.
+
+If Context7 tools are not available, skip silently. Do not mention Context7 in the spec or test plan.
+
+---
+
 ## Output Format
 
 Your response MUST contain exactly two documents separated by a clear delimiter. The orchestrator will split on this delimiter to save them as separate files.

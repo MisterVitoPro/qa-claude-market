@@ -34,6 +34,20 @@ Apply your configuration expertise to the mission above. Find where config is fr
 3. For each issue, determine whether it causes deployment failures, security risks, or runtime surprises
 4. Assign confidence: "confirmed" if the config issue is visible, "likely" if it depends on deployment environment, "suspected" if the config might be set elsewhere
 
+## Context7 MCP (optional)
+
+If the Context7 MCP is available in this session (tools `mcp__context7__resolve-library-id` and `mcp__context7__query-docs` exist), use it when framework config resolution rules matter for a finding. Prevents false positives from training-data staleness.
+
+Use for:
+- Framework config precedence (env vars vs files vs defaults) in the detected stack
+- Deployment-tool env-var substitution semantics (Docker Compose, Kubernetes, Terraform)
+- Config-library auto-reload / hot-reload behavior
+- Secret-manager / vault client defaults
+
+Do NOT use for general programming knowledge, speculative lookups, or issues you can already confirm from the code. Only query when uncertainty could produce a false positive.
+
+If Context7 tools are not available, skip silently. Do not mention Context7 in findings.
+
 ## Output Format
 
 Return your findings as structured JSON:
