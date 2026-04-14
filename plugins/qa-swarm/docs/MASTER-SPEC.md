@@ -303,7 +303,15 @@ Step 5: SAVE + HANDOFF
   - docs/qa-swarm/YYYY-MM-DD-tests.md
   - Print per-phase timing breakdown
   - Print agent usage summary (Haiku/Sonnet counts)
-  - Recommend: /clear then /qa-swarm:implement with the 3 file paths
+
+Step 6: AUTO-HANDOFF TO IMPLEMENT (v1.4.0+)
+  - Prompt user once: "Proceed to implementation now? [Y/n]"
+  - On Y: spawn a general-purpose Agent (fresh context -- zero carryover
+    from attack) whose self-contained prompt invokes the qa-swarm:implement
+    skill with the three saved file paths. Functionally equivalent to
+    /clear + manual invoke, without user keystrokes.
+  - On n: stop. User can resume later by running:
+      /qa-swarm:implement <report> <spec> <tests>
 ```
 
 ---
