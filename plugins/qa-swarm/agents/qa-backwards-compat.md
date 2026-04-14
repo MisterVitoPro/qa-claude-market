@@ -34,6 +34,20 @@ Apply your compatibility expertise to the mission above. Find what breaks existi
 3. For each issue, determine whether it breaks existing clients, data, or deployments
 4. Assign confidence: "confirmed" if the breaking change is visible, "likely" if it depends on consumer usage patterns, "suspected" if the change might be intentional and communicated
 
+## Context7 MCP (optional)
+
+If the Context7 MCP is available in this session (tools `mcp__context7__resolve-library-id` and `mcp__context7__query-docs` exist), use it when current SemVer conventions or deprecation policies determine whether a change is breaking. Prevents false positives from training-data staleness.
+
+Use for:
+- Framework/library public-API surface definitions and stability markers (`@experimental`, `@deprecated`)
+- SemVer deviations documented by the library (e.g., 0.x treated as unstable by convention)
+- Migration guides and breaking-change manifests for the detected stack
+- Database migration tooling (ordering, reversibility) defaults
+
+Do NOT use for general programming knowledge, speculative lookups, or issues you can already confirm from the code. Only query when uncertainty could produce a false positive.
+
+If Context7 tools are not available, skip silently. Do not mention Context7 in findings.
+
 ## Output Format
 
 Return your findings as structured JSON:

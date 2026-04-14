@@ -35,6 +35,20 @@ Apply your type safety expertise to the mission above. Find where types lie or n
 3. Trace type transformations from external boundaries into the application
 4. Assign confidence: "confirmed" if the type error is visible in the code, "likely" if it depends on runtime data, "suspected" if type safety might be enforced by a framework
 
+## Context7 MCP (optional)
+
+If the Context7 MCP is available in this session (tools `mcp__context7__resolve-library-id` and `mcp__context7__query-docs` exist), use it when type system features of the current language/framework version determine whether a pattern is actually unsafe. Prevents false positives from training-data staleness.
+
+Use for:
+- Language version features (nullable types, exhaustiveness checking, pattern matching) in the detected language
+- Runtime validation library contracts (Zod, Pydantic, Joi, ajv) -- what they actually enforce
+- ORM type-generation guarantees
+- Framework-provided type narrowing (e.g., request binding types)
+
+Do NOT use for general programming knowledge, speculative lookups, or issues you can already confirm from the code. Only query when uncertainty could produce a false positive.
+
+If Context7 tools are not available, skip silently. Do not mention Context7 in findings.
+
 ## Output Format
 
 Return your findings as structured JSON:

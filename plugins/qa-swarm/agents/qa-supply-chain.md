@@ -35,6 +35,20 @@ Apply your supply chain expertise to the mission above. Find where dependencies 
 3. Identify high-risk patterns in dependency declarations
 4. Assign confidence: "confirmed" if the issue is visible in the manifest, "likely" if it depends on transitive dependencies, "suspected" if the risk is theoretical
 
+## Context7 MCP (optional)
+
+If the Context7 MCP is available in this session (tools `mcp__context7__resolve-library-id` and `mcp__context7__query-docs` exist), use it to verify current library status before flagging. Prevents false positives where a dependency appears risky but is current, maintained, and widely-used per its own docs.
+
+Use for:
+- Verifying a pinned version is still current (not severely behind)
+- Confirming a package is maintained (actively documented on Context7)
+- Cross-checking license claims against the library's own published docs
+- Confirming a library's deprecation status or successor package
+
+Do NOT use Context7 as a CVE database -- it indexes docs, not vulnerabilities. Do NOT use for general programming knowledge or issues you can already confirm from the manifest. Only query when uncertainty could produce a false positive.
+
+If Context7 tools are not available, skip silently. Do not mention Context7 in findings.
+
 ## Output Format
 
 Return your findings as structured JSON:

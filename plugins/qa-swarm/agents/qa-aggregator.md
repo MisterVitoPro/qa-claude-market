@@ -64,7 +64,15 @@ Corroboration effects:
 - 2 agents: note the corroboration but do not auto-boost
 - 1 agent: finding stands on its own evidence
 
-### 5. Produce Final Report
+### 5. Context7 MCP (optional, rarely applicable)
+
+If the Context7 MCP is available in this session (tools `mcp__context7__resolve-library-id` and `mcp__context7__query-docs` exist), you MAY use it to resolve conflicts between agent findings that hinge on current library behavior (e.g., one agent flags a pattern as a bug, another agent dismisses it as idiomatic -- the library's own docs break the tie).
+
+This is rare for aggregation. In most cases, you should aggregate based on the evidence already provided. Do NOT query Context7 for every finding.
+
+If Context7 tools are not available, skip silently.
+
+### 6. Produce Final Report
 
 Output the report in this markdown format:
 

@@ -12,7 +12,7 @@ This is a **multi-plugin marketplace** repository. Each plugin lives in its own 
 
 | Plugin | Version | Description |
 |--------|---------|-------------|
-| `qa-swarm` | 1.4.0 | AI-powered code quality analyzer: 6 Sonnet core agents + optional Haiku, 3-agent parallel TDD, fresh-context subagent handoff, optional Context7 |
+| `qa-swarm` | 1.4.1 | AI-powered code quality analyzer: 6 Sonnet core agents + optional Haiku, 3-agent parallel TDD, fresh-context subagent handoff, Context7 MCP baseline across all agents |
 | `code-atlas` | 1.1.0 | Architecture index generator for CLAUDE.md -- directory map, tech stack, patterns, dependencies |
 
 ### Directory Layout
@@ -66,7 +66,7 @@ Each plugin has its own version in `plugins/<name>/.claude-plugin/plugin.json`. 
 ```
 .claude-plugin/             # Marketplace registry -- lists all plugins with source paths
 plugins/                    # Root directory containing all plugins
-  qa-swarm/                 # AI-powered code quality analyzer (v1.4.0)
+  qa-swarm/                 # AI-powered code quality analyzer (v1.4.1)
     .claude-plugin/         # Plugin manifest and metadata
     agents/                 # 16 QA agent definitions (security, perf, correctness, architecture, data flow, async, etc.)
     skills/                 # User-facing commands: attack (analyze), implement (fix)
@@ -83,7 +83,7 @@ plugins/                    # Root directory containing all plugins
 |------|------|-------------|
 | `.claude-plugin/marketplace.json` | Config | Central plugin registry -- lists all plugins with names, sources, and categories |
 | `CLAUDE.md` | Config | Project instructions, repository structure, versioning strategy |
-| `plugins/qa-swarm/.claude-plugin/plugin.json` | Config | QA Swarm manifest (v1.4.0, keywords, license) |
+| `plugins/qa-swarm/.claude-plugin/plugin.json` | Config | QA Swarm manifest (v1.4.1, keywords, license) |
 | `plugins/qa-swarm/skills/attack/SKILL.md` | Entry point | Orchestrates QA swarm: setup, deploy 6-12 agents, aggregate, plan fixes, auto-handoff to implement in fresh-context subagent |
 | `plugins/qa-swarm/skills/implement/SKILL.md` | Entry point | Implements fixes from attack output via TDD (red-green loop) |
 | `plugins/qa-swarm/agents/qa-aggregator.md` | Core module | Merges findings, applies P0-P3 ranking, confidence tags, corroboration scoring |
