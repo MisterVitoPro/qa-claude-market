@@ -348,9 +348,41 @@ Agent Usage:
 Report:    docs/qa-swarm/{DATE}-report.md
 Spec:      docs/qa-swarm/{DATE}-spec.md
 Test Plan: docs/qa-swarm/{DATE}-tests.md
-
-Ready to implement fixes. Recommended:
-  1. Run /clear to free up context (the swarm used a lot of tokens)
-  2. Then run:
-     /qa-swarm:implement docs/qa-swarm/{DATE}-report.md docs/qa-swarm/{DATE}-spec.md docs/qa-swarm/{DATE}-tests.md
 ```
+
+## Step 6: AUTO-HANDOFF TO IMPLEMENT (fresh-context subagent)
+
+Immediately after printing the summary, auto-invoke the implement phase in a **fresh-context subagent**. The subagent starts with zero context from attack -- this is the functional equivalent of `/clear` before running implement, without requiring manual user action.
+
+Ask the user once:
+```
+Proceed to implementation now? [Y/n]
+(Selecting Y hands off to a fresh-context subagent running /qa-swarm:implement.
+ Selecting n stops here -- you can resume later by running:
+   /qa-swarm:implement docs/qa-swarm/{DATE}-report.md docs/qa-swarm/{DATE}-spec.md docs/qa-swarm/{DATE}-tests.md)
+```
+
+If the user declines (n), STOP.
+
+If the user confirms (Y or empty), spawn a `general-purpose` `Agent` with the following self-contained prompt (the subagent has no access to this session's context, so the prompt MUST stand alone):
+
+```
+You are executing the qa-swarm:implement skill in a fresh session.
+
+Invoke the Skill tool with:
+  skill: "qa-swarm:implement"
+  args: "{report_abs_path} {spec_abs_path} {tests_abs_path}"
+
+All three files already exist on disk. Read them fresh. Follow the skill
+exactly -- including phase selection (present the table, wait for user input
+via AskUserQuestion), TDD setup (3 parallel test-writer agents), phase
+execution, and final results report.
+
+When the skill completes, return a concise summary: phases run, issues fixed,
+issues unresolved, test pass/fail counts, and the path to the results file.
+Do not re-describe work the user already saw -- just the outcome.
+```
+
+Use absolute paths for the three files so the subagent's path resolution does not depend on any shared working-directory state.
+
+When the subagent returns, print its summary verbatim and STOP.
