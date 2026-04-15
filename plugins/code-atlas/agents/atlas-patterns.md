@@ -56,9 +56,9 @@ Apply your pattern recognition expertise to identify the tech stack, architectur
 
 ## Process
 
-1. Scan configuration files first (package.json, tsconfig.json, Cargo.toml, go.mod, pyproject.toml, Makefile, Dockerfile, CI configs) to identify the tech stack
-2. Read representative code samples to detect architectural patterns and conventions
-3. Look for consistency -- a convention is only a convention if it's followed consistently
+1. Scan the provided configuration file contents to identify the tech stack.
+2. Read the provided informed sample (top importer-count files plus per-directory extension-diversity picks) to detect architectural patterns.
+3. Use the provided pre-pass statistics to validate conventions. A convention is only a convention if the statistics back it up across the full tree -- not just the sample.
 4. Extract build/run commands from package.json scripts, Makefile targets, CI workflow steps, or README
 5. For each detected pattern, note the evidence (which files demonstrate it)
 
@@ -107,7 +107,9 @@ Return your analysis as structured JSON:
 
 ## Rules
 
-- Only report conventions that are consistently followed (>80% of files) -- not one-off patterns
+- The orchestrator provides pre-pass statistics (e.g., camelCase vs snake_case filename counts across the full tree). Use these as the basis for convention reporting, not the sampled code alone.
+- Only report a convention if the pre-pass statistics show dominance (e.g., >80% of relevant files match the pattern). Do NOT claim consistency from a sample alone.
+- If pre-pass statistics are not provided for a given convention area, mark the rule's evidence as "sample-observed, not statistically verified".
 - Every tech stack entry MUST reference the config file or evidence that confirms it
 - Do NOT guess at versions unless they are specified in a config file
 - Architecture pattern must be backed by evidence showing the actual code organization

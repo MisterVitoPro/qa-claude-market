@@ -42,12 +42,14 @@ Apply your dependency analysis expertise to map how modules in this codebase rel
 
 ## Process
 
-1. Parse all import/require statements from the provided source files
-2. Group imports by source module (directory level, not individual file level)
-3. Build a directed graph: module -> module dependencies
-4. Identify the most-imported files (count distinct importers)
-5. Check for circular dependency chains
-6. Summarize external dependencies by reading package manifests
+You receive the COMPLETE import graph for the repository. The orchestrator has already extracted imports from every source file via regex pass -- you are not working from a sample.
+
+1. The provided `import_graph` maps each file path to the list of paths/packages it imports. Internal imports are resolved to repo-relative paths; external imports are bare package names.
+2. The provided `importer_counts` gives the exact count of distinct files importing each internal path across the entire repository -- these numbers are accurate, not estimates.
+3. Group imports by directory-level module to produce `module_graph`.
+4. Rank `high_traffic_modules` by the provided `importer_counts`.
+5. Check for circular dependency chains across the full graph.
+6. Summarize external dependencies using package manifests plus the external entries in `import_graph`.
 
 ## Output Format
 
@@ -106,3 +108,5 @@ Valid `severity` values for circular_dependencies: critical, minor
 - Circular dependencies: only report real circular chains, not false positives from type-only imports
 - The `dependency_flow` field should be a one-line ASCII summary of the main dependency direction
 - Do NOT invent dependencies that are not evidenced by actual import statements
+- Importer counts in your output MUST come directly from the provided `importer_counts` data -- do not recompute from scratch
+- The `dependency_flow` one-liner should reflect the dominant direction observed in the full graph, not inferred from a subset
