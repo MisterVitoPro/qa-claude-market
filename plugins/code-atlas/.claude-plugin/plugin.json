@@ -1,7 +1,7 @@
 {
   "name": "code-atlas",
   "description": "Scan a codebase and generate a comprehensive architecture index for CLAUDE.md — directory map, key files, tech stack, patterns, dependencies, and build commands",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "license": "MIT",
   "keywords": [
     "architecture",
