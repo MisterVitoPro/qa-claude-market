@@ -13,7 +13,7 @@ This is a **multi-plugin marketplace** repository. Each plugin lives in its own 
 | Plugin | Version | Description |
 |--------|---------|-------------|
 | `qa-swarm` | 1.4.1 | AI-powered code quality analyzer: 6 Sonnet core agents + optional Haiku, 3-agent parallel TDD, fresh-context subagent handoff, Context7 MCP baseline across all agents |
-| `code-atlas` | 1.1.0 | Architecture index generator for CLAUDE.md -- directory map, tech stack, patterns, dependencies |
+| `code-atlas` | 1.2.0 | Architecture index generator -- writes .code-atlas/atlas.json and state.json, loaded by session-start hook. Directory map, tech stack, patterns, dependencies. |
 
 ### Directory Layout
 
