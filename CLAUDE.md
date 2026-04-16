@@ -14,6 +14,7 @@ This is a **multi-plugin marketplace** repository. Each plugin lives in its own 
 |--------|---------|-------------|
 | `qa-swarm` | 1.4.1 | AI-powered code quality analyzer: 6 Sonnet core agents + optional Haiku, 3-agent parallel TDD, fresh-context subagent handoff, Context7 MCP baseline across all agents |
 | `code-atlas` | 1.2.0 | Architecture index generator -- writes .code-atlas/atlas.json and state.json, loaded by session-start hook. Directory map, tech stack, patterns, dependencies. |
+| `plan-runner` | 0.1.0 | Run a Markdown implementation plan through a parallel agent swarm: analyze into waves, dispatch dev + verifier agents, aggregate bugs into a fix-plan, re-run on demand |
 
 ### Directory Layout
 
@@ -35,6 +36,15 @@ plugins/
     agents/
     skills/
     hooks/             # SessionStart hook for auto-staleness detection
+    README.md
+    LICENSE
+  plan-runner/         # Plan-driven parallel agent orchestrator with verification
+    .claude-plugin/
+      plugin.json
+    agents/            # 4 agents (analyzer, dev, verifier, aggregator)
+    skills/            # User-facing command: run
+    schemas/           # JSON Schemas for agent contracts
+    test-fixtures/     # Reference plans for smoke testing
     README.md
     LICENSE
 ```
@@ -76,6 +86,12 @@ plugins/                    # Root directory containing all plugins
     agents/                 # 3 analysis agents (structure, patterns, dependencies)
     skills/                 # User-facing commands: map (full scan), update (incremental)
     hooks/                  # SessionStart hook for auto-staleness detection
+  plan-runner/                # Plan-driven parallel agent orchestrator (v0.1.0)
+    .claude-plugin/
+    agents/                   # 4 agents (analyzer, dev, verifier, aggregator)
+    skills/                   # User-facing command: run
+    schemas/                  # JSON Schemas for agent contracts
+    test-fixtures/            # Reference plans for smoke testing
 ```
 
 ### Key Files
@@ -96,6 +112,12 @@ plugins/                    # Root directory containing all plugins
 | `plugins/code-atlas/agents/atlas-structure.md` | Core module | Directory tree analysis, key file identification, module boundaries |
 | `plugins/code-atlas/agents/atlas-patterns.md` | Core module | Tech stack detection, naming conventions, architectural patterns |
 | `plugins/code-atlas/agents/atlas-dependencies.md` | Core module | Import graph, high-traffic modules, circular dependency detection |
+| `plugins/plan-runner/.claude-plugin/plugin.json` | Config | Plan Runner manifest (v0.1.0, keywords, license) |
+| `plugins/plan-runner/skills/run/SKILL.md` | Entry point | Orchestrates pipeline: pre-flight, analyze, per-wave dev+verify, commit, aggregate, re-run handoff |
+| `plugins/plan-runner/agents/plan-analyzer.md` | Core module | Buckets free-form Markdown plan into file-disjoint waves of <=6 agents |
+| `plugins/plan-runner/agents/plan-dev.md` | Core module | Generic dev agent template; implements one task within owned files |
+| `plugins/plan-runner/agents/plan-verifier.md` | Core module | Generic verifier template; flags acceptance-criteria gaps as bug JSONs |
+| `plugins/plan-runner/agents/plan-aggregator.md` | Core module | Deduplicates bug JSONs, ranks P0-P3, generates bugs.md + fix-plan.md |
 
 ### Patterns & Conventions
 - **Architecture:** Multi-plugin marketplace -- each plugin is self-contained with manifest, agents, skills, and docs
@@ -111,7 +133,7 @@ plugins/                    # Root directory containing all plugins
 
 ### Module Dependencies
 ```
-marketplace.json -> [qa-swarm, code-atlas]
+marketplace.json -> [qa-swarm, code-atlas, plan-runner]
 
 qa-swarm pipeline:
   skills/attack -> agents (6 core + up to 6 optional, parallel)
@@ -130,6 +152,18 @@ code-atlas pipeline:
   skills/update -> CLAUDE.md (read + write)
   hooks/session-start -> CLAUDE.md (staleness check)
                       -> skills/update or skills/map (suggested)
+
+plan-runner pipeline:
+  skills/run -> agents/plan-analyzer (1, foreground)
+             -> per wave: agents/plan-dev (1-6, parallel background)
+                       -> per wave: agents/plan-verifier (1-6, parallel background)
+                       -> bugs/wave-W-agent-A.json files
+                       -> per-wave git commit
+             -> agents/plan-aggregator (1, foreground)
+             -> bugs.md + fix-plan.md (output files)
+             -> auto-handoff: fresh-context subagent -> /plan-runner:run fix-plan.md
+  schemas/ : validation contracts for analyzer/dev/verifier/manifest outputs
+  test-fixtures/ : reference plans for smoke testing
 ```
 
 No circular dependencies detected.
@@ -140,6 +174,7 @@ No circular dependencies detected.
 | `claude plugin marketplace add MisterVitoPro/qa-swarm` | Add the marketplace to Claude Code |
 | `claude plugin marketplace add MisterVitoPro/qa-swarm --plugin qa-swarm` | Install qa-swarm plugin |
 | `claude plugin marketplace add MisterVitoPro/qa-swarm --plugin code-atlas` | Install code-atlas plugin |
+| `claude plugin marketplace add MisterVitoPro/qa-swarm --plugin plan-runner` | Install plan-runner plugin |
 | `git tag <plugin-name>/v<version>` | Tag a plugin release |
 | `git push origin --tags` | Push release tags to remote |
 
