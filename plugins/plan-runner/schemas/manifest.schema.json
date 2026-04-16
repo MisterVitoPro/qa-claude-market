@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "manifest.schema.json",
+  "title": "Pipeline Manifest",
+  "type": "object",
+  "required": ["cycle", "input_plan", "started_at", "context7_available", "waves", "total_bugs"],
+  "properties": {
+    "cycle": {"type": "integer", "minimum": 1},
+    "input_plan": {"type": "string"},
+    "started_at": {"type": "string", "format": "date-time"},
+    "completed_at": {"type": ["string", "null"], "format": "date-time"},
+    "context7_available": {"type": "boolean"},
+    "waves": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["wave_id", "agents"],
+        "properties": {
+          "wave_id": {"type": "integer"},
+          "duration_seconds": {"type": ["integer", "null"]},
+          "agents": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["agent_id", "dev_status", "verifier_status", "bug_count"],
+              "properties": {
+                "agent_id": {"type": "string"},
+                "dev_status": {"type": "string"},
+                "verifier_status": {"type": "string"},
+                "bug_count": {"type": "integer"}
+              }
+            }
+          },
+          "commit_sha": {"type": ["string", "null"]},
+          "skipped_reason": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "total_bugs": {"type": "integer"},
+    "next_cycle_plan": {"type": ["string", "null"]}
+  }
+}
