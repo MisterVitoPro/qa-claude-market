@@ -1,0 +1,16 @@
+{
+  "name": "plan-runner",
+  "description": "Take a Markdown implementation plan, run it through a parallel agent swarm with per-wave verification, and generate a bug-fix plan for re-runs",
+  "version": "0.1.0",
+  "license": "MIT",
+  "keywords": [
+    "agent-orchestration",
+    "implementation-plan",
+    "parallel-agents",
+    "verification",
+    "swarm",
+    "tdd",
+    "developer-tools"
+  ],
+  "repository": "https://github.com/MisterVitoPro/qa-swarm"
+}

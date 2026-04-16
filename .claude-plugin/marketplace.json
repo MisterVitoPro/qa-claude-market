@@ -25,6 +25,12 @@
       "description": "Scan a codebase and generate a comprehensive architecture index for CLAUDE.md — directory map, key files, tech stack, patterns, dependencies, and build commands",
       "source": "./plugins/code-atlas",
       "category": "development"
+    },
+    {
+      "name": "plan-runner",
+      "description": "Take a Markdown implementation plan, run it through a parallel agent swarm with per-wave verification, and generate a bug-fix plan for re-runs",
+      "source": "./plugins/plan-runner",
+      "category": "development"
     }
   ]
 }
