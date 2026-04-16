@@ -124,7 +124,7 @@ docs/plan-runner/{DATE}/{cycle-N}/
   manifest.json              # pipeline metadata: input plan, waves, durations, statuses
 ```
 
-`{cycle-N}` defaults to `cycle-1`. If user accepts the fix-plan re-run, that becomes `cycle-2/`. Allows multiple cycles per day without overwriting.
+**Cycle numbering:** at startup, orchestrator scans `docs/plan-runner/{DATE}/` for existing `cycle-*` directories and uses the next integer (no existing cycles -> `cycle-1`, `cycle-1` exists -> `cycle-2`, etc). This works for both fresh runs and accepted re-runs without the user needing to specify a cycle number.
 
 ## Key file schemas
 
@@ -294,7 +294,7 @@ Wave 3 (1 agent):
   ...
 
 Uncovered plan sections: none
-Proceed? (Y/n, or "explain agent-2" for analyzer rationale)
+Proceed? (Y/n)
 ```
 
 If `n`, STOP. If `Y`, begin Wave 1.
@@ -335,6 +335,7 @@ If `n`, STOP. If `Y`, begin Wave 1.
 | Aggregator crashes | Bug JSONs are intact on disk. Print `Aggregator failed -- bug JSONs saved at {path}, run aggregation manually.` STOP. |
 | All bugs are P3 only | Aggregator generates fix-plan, user prompt adds a hint: `(All N bugs are P3 / low priority -- re-running is optional.)` |
 | User declines re-run | Print `Stopping. Bugs and fix-plan saved at {path}. Re-run later with /plan-runner:run {fix-plan path}.` |
+| User accepts re-run | Auto-handoff to a fresh-context subagent that invokes `/plan-runner:run {fix-plan path}`. Same pattern as `qa-swarm:attack` Step 6 -- preserves user attention without polluting the orchestrator's context with a second cycle's state. |
 
 ### Re-run convergence (no hard cap)
 
