@@ -147,7 +147,7 @@ Write the wave plan to `$cycle_dir/wave-plan.json`.
 
 Record `t_analyze_done = $(date +%s)`.
 
-## Step 3: USER CONFIRMATION
+## Step 3: DISPLAY WAVE PLAN
 
 Print the wave plan in human-readable form:
 
@@ -162,14 +162,12 @@ Wave 2 (<N> agents, parallel):
   ...
 
 Uncovered plan sections: <sections or "none">
-Estimated total agents: <total_dev + total_verifier + 2 (analyzer + aggregator)>
-
-Proceed? (Y/n)
+Estimated total agents: <total_dev + <W> verifiers + 2 (analyzer + aggregator)>
 ```
 
-Wait for user input. If `n`, STOP (the wave-plan.json is preserved on disk for inspection). If `Y`, continue.
+If `uncovered_plan_sections` is non-empty, print a warning that those sections will not be executed and the user can re-run with a revised plan after this cycle completes.
 
-If `uncovered_plan_sections` is non-empty, the prompt should make that visible -- the user may want to abort and revise the plan rather than execute a partial pipeline.
+Proceed automatically without waiting for user input.
 
 Record `t_confirmed = $(date +%s)`.
 
@@ -226,19 +224,24 @@ For each dev agent return:
 
 Wait for ALL dev agents in this wave to complete before proceeding.
 
-### 4b. Dispatch verifier agents (parallel, background)
+### 4b. Dispatch wave verifier (single agent, background)
 
 Print:
 ```
-[Wave <W>] All dev agents complete. Dispatching <N> verifiers...
+[Wave <W>] All dev agents complete. Dispatching wave verifier...
 ```
 
-For each dev agent that ran (regardless of dev_status), dispatch a verifier in parallel (single message, all `run_in_background: true`). Verifier prompt template:
+Dispatch ONE verifier for the entire wave. Include all dev agents' data in the prompt:
 
 ```
-You are being deployed as a verifier for plan-runner cycle <cycle_n>, wave <W>.
+You are being deployed as the wave verifier for plan-runner cycle <cycle_n>, wave <W>.
 
-agent_id: <agent_id (the dev agent's id)>
+wave_id: <W>
+
+AGENTS IN THIS WAVE:
+<for each dev agent, repeat this block:>
+---
+agent_id: <agent_id>
 task_title: <task_title>
 acceptance_criteria:
 <acceptance_criteria as bulleted list>
@@ -248,45 +251,44 @@ OWNED FILES (the dev agent was allowed to write these):
 
 DEV AGENT REPORTED:
 - status: <dev_status>
-- files_written: <dev's files_written>
-- files_unexpectedly_modified: <dev's files_unexpectedly_modified>
+- files_written: <dev's files_written joined with newlines>
+- files_unexpectedly_modified: <dev's files_unexpectedly_modified joined with newlines>
 - concerns: <dev's concerns joined with newlines>
+---
+<end repeat>
 
 <inline the full content of plugins/plan-runner/agents/plan-verifier.md here as your instructions>
 
 Return only the JSON bug report, nothing else.
 ```
 
-Use `model: sonnet` for all verifiers.
+Use `model: sonnet`.
 
-If the dev_status was `BLOCKED`, the verifier still runs but is told the dev was blocked -- it should produce a single bug entry capturing the blockage:
+Wait for the verifier to complete.
 
+### 4c. Write bug JSON
+
+Parse the verifier's return. If parse fails, synthesize:
 ```json
-{"agent_id": "<id>", "task_title": "<title>", "verifier_status": "BUGS_FOUND", "bugs": [{"bug_id": "<id>-bug-1", "severity": "P0", "category": "missing_requirement", "title": "Dev agent BLOCKED: <reason>", "file": "<owned_files[0]>", "line": null, "evidence": "Dev agent could not start", "expected": "Dev agent should complete the task", "suggested_fix": "<dev's concerns or 'investigate why agent was blocked'>"}]}
+{"wave_id": <W>, "verifier_status": "UNVERIFIABLE", "agent_statuses": {}, "bugs": [{"bug_id": "wave-<W>-bug-1", "severity": "P2", "category": "incorrect_implementation", "title": "Wave verifier returned non-JSON output", "file": "n/a", "line": null, "evidence": "<truncated raw output>", "expected": "Valid JSON bug report", "suggested_fix": "Re-run verification manually"}]}
 ```
 
-The orchestrator can synthesize this synthetic bug report itself instead of dispatching a verifier for BLOCKED dev agents (saves a dispatch). Decide based on simplicity: synthesize for BLOCKED, dispatch verifier for all other statuses.
-
-Wait for ALL verifiers in this wave to complete.
-
-### 4c. Write bug JSONs
-
-For each verifier return:
-1. Parse the JSON. If parse fails, synthesize a fallback `{"agent_id": "<id>", "task_title": "<title>", "verifier_status": "UNVERIFIABLE", "bugs": [{"bug_id": "<id>-bug-1", "severity": "P2", "category": "incorrect_implementation", "title": "Verifier returned non-JSON output", "file": "n/a", "line": null, "evidence": "<truncated raw output>", "expected": "Valid JSON bug report", "suggested_fix": "Re-run verification manually"}]}`.
-2. Write the JSON to `$cycle_dir/bugs/wave-<W>-agent-<A>.json` (use the agent_id to derive A).
+Write the JSON to `$cycle_dir/bugs/wave-<W>.json`.
 
 ### 4d. Render wave dashboard
 
-Print a wave summary table:
+Print a wave summary table. The "Verify" and "Bugs" columns reflect the single wave verifier result (the verifier_status and total bugs across all agents):
 
 ```
 Wave <W>/<total_W> complete (<duration>s)
 ============================================================
- Agent | Task                       | Dev          | Verify     | Bugs
--------|----------------------------|--------------|------------|-----
-   1   | <task_title>               | DONE         | CLEAN      |  0
-   2   | <task_title>               | DONE         | BUGS_FOUND |  2
-   3   | <task_title>               | BLOCKED      | (synth)    |  1
+ Agent | Task                       | Dev          | Status per agent
+-------|----------------------------|--------------|------------------
+   1   | <task_title>               | DONE         | <agent_statuses[agent_id]>
+   2   | <task_title>               | DONE         | <agent_statuses[agent_id]>
+   3   | <task_title>               | BLOCKED      | <agent_statuses[agent_id] or N/A>
+-------|----------------------------|--------------|-----------------
+Wave verifier: <verifier_status>   Total bugs: <bugs array length>
 ============================================================
 ```
 
@@ -336,8 +338,10 @@ Append a wave entry to `$cycle_dir/manifest.json`:
   "wave_id": <W>,
   "duration_seconds": <wave duration>,
   "agents": [
-    {"agent_id": "<id>", "dev_status": "<status>", "verifier_status": "<status>", "bug_count": <N>}
+    {"agent_id": "<id>", "dev_status": "<status>"}
   ],
+  "wave_verifier_status": "<verifier_status>",
+  "wave_bug_count": <total bugs in wave>,
   "commit_sha": "<sha or null>",
   "skipped_reason": "<reason or null>"
 }
@@ -457,7 +461,7 @@ plan-runner cycle <cycle_n> complete -- no bugs found.
 ==========================================================
 Waves: <W>
 Dev agents: <total dev agents>
-Verifier agents: <total verifier agents>
+Wave verifiers: <W> (1 per wave)
 Commits: <count of waves with non-null commit_sha>
 Duration: <total elapsed in Xm Ys>
 

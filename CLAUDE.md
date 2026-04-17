@@ -14,7 +14,7 @@ This is a **multi-plugin marketplace** repository. Each plugin lives in its own 
 |--------|---------|-------------|
 | `qa-swarm` | 1.4.1 | AI-powered code quality analyzer: 6 Sonnet core agents + optional Haiku, 3-agent parallel TDD, fresh-context subagent handoff, Context7 MCP baseline across all agents |
 | `code-atlas` | 1.2.0 | Architecture index generator -- writes .code-atlas/atlas.json and state.json, loaded by session-start hook. Directory map, tech stack, patterns, dependencies. |
-| `plan-runner` | 0.1.0 | Run a Markdown implementation plan through a parallel agent swarm: analyze into waves, dispatch dev + verifier agents, aggregate bugs into a fix-plan, re-run on demand |
+| `plan-runner` | 0.2.0 | Run a Markdown implementation plan through a parallel agent swarm: analyze into waves, dispatch dev + verifier agents, aggregate bugs into a fix-plan, re-run on demand |
 
 ### Directory Layout
 
@@ -61,6 +61,8 @@ plugins/
 
 Each plugin has its own version in `plugins/<name>/.claude-plugin/plugin.json`. When a plugin version is changed and pushed to main, create a git tag matching `<plugin-name>/v<version>` (e.g., `git tag qa-swarm/v1.2.1`) and push it (`git push origin --tags`).
 
+**Before pushing any code or opening a PR that touches a plugin, always bump that plugin's version first** (in `plugins/<name>/.claude-plugin/plugin.json` and the version table in this file), then commit the bump as part of the branch before pushing.
+
 <!-- code-atlas:start -->
 <!-- generated: 2026-04-09 | commit: d9feed2 | plugin: code-atlas v1.0.0 -->
 
@@ -86,7 +88,7 @@ plugins/                    # Root directory containing all plugins
     agents/                 # 3 analysis agents (structure, patterns, dependencies)
     skills/                 # User-facing commands: map (full scan), update (incremental)
     hooks/                  # SessionStart hook for auto-staleness detection
-  plan-runner/                # Plan-driven parallel agent orchestrator (v0.1.0)
+  plan-runner/                # Plan-driven parallel agent orchestrator (v0.2.0)
     .claude-plugin/
     agents/                   # 4 agents (analyzer, dev, verifier, aggregator)
     skills/                   # User-facing command: run
