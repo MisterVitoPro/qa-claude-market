@@ -61,6 +61,8 @@ plugins/
 
 Each plugin has its own version in `plugins/<name>/.claude-plugin/plugin.json`. When a plugin version is changed and pushed to main, create a git tag matching `<plugin-name>/v<version>` (e.g., `git tag qa-swarm/v1.2.1`) and push it (`git push origin --tags`).
 
+**Before pushing any code or opening a PR that touches a plugin, always bump that plugin's version first** (in `plugins/<name>/.claude-plugin/plugin.json` and the version table in this file), then commit the bump as part of the branch before pushing.
+
 <!-- code-atlas:start -->
 <!-- generated: 2026-04-09 | commit: d9feed2 | plugin: code-atlas v1.0.0 -->
 
