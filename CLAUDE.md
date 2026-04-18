@@ -14,7 +14,7 @@ This is a **multi-plugin marketplace** repository. Each plugin lives in its own 
 |--------|---------|-------------|
 | `qa-swarm` | 1.4.1 | AI-powered code quality analyzer: 6 Sonnet core agents + optional Haiku, 3-agent parallel TDD, fresh-context subagent handoff, Context7 MCP baseline across all agents |
 | `code-atlas` | 1.2.0 | Architecture index generator -- writes .code-atlas/atlas.json and state.json, loaded by session-start hook. Directory map, tech stack, patterns, dependencies. |
-| `plan-runner` | 0.2.0 | Run a Markdown implementation plan through a parallel agent swarm: analyze into waves, dispatch dev + verifier agents, aggregate bugs into a fix-plan, re-run on demand |
+| `plan-runner` | 0.3.0 | Run a Markdown implementation plan through a parallel agent swarm: analyze into waves, dispatch dev + verifier agents, aggregate bugs into a fix-plan, re-run on demand |
 
 ### Directory Layout
 
@@ -88,7 +88,7 @@ plugins/                    # Root directory containing all plugins
     agents/                 # 3 analysis agents (structure, patterns, dependencies)
     skills/                 # User-facing commands: map (full scan), update (incremental)
     hooks/                  # SessionStart hook for auto-staleness detection
-  plan-runner/                # Plan-driven parallel agent orchestrator (v0.2.0)
+  plan-runner/                # Plan-driven parallel agent orchestrator (v0.3.0)
     .claude-plugin/
     agents/                   # 4 agents (analyzer, dev, verifier, aggregator)
     skills/                   # User-facing command: run

@@ -430,7 +430,7 @@ Run plan-runner again with the generated fix-plan to address these bugs?
 (Y/n)
 ```
 
-If `n`: print `Stopping. Bugs and fix-plan saved at <cycle_dir>. Re-run later with /plan-runner:run <fix-plan path>.` STOP.
+If `n`: print `Stopping fix-plan re-run. Proceeding to PR step.` Proceed to Step 8.
 
 If `Y` (or empty default): dispatch a `general-purpose` Agent with this self-contained prompt:
 
@@ -468,7 +468,71 @@ Duration: <total elapsed in Xm Ys>
 Manifest: <path to manifest.json>
 ```
 
-Update manifest `completed_at` and write to disk. STOP.
+Update manifest `completed_at` and write to disk. Proceed to Step 8.
+
+## Step 8: OPEN PR
+
+Determine the current branch:
+
+```bash
+git branch --show-current
+```
+
+Push the branch to origin:
+
+```bash
+git push -u origin <branch>
+```
+
+Build the PR title and body from pipeline state:
+
+- **Title:** `plan-runner: <plan file basename> (cycle <cycle_n>)`
+- **Body:**
+
+```
+## Summary
+<bulleted list of task_title values from the wave plan, one per line>
+
+## plan-runner stats
+- Cycles: <cycle_n>
+- Waves: <W>
+- Dev agents: <total dev agents dispatched>
+- Bugs found: <total_bugs>
+
+Generated with plan-runner
+```
+
+Check whether `gh` is available:
+
+```bash
+gh --version
+```
+
+**If `gh` is available**, create the PR:
+
+```bash
+gh pr create --title "<title>" --body "$(cat <<'EOF'
+<body>
+EOF
+)"
+```
+
+Print the PR URL returned by `gh pr create`. STOP.
+
+**If `gh` is not available**, print:
+
+```
+Branch pushed to origin/<branch>.
+
+Open a PR with the following details:
+
+Title: <title>
+
+Body:
+<body>
+```
+
+STOP.
 
 ## Phase Timing Summary (always print before STOP unless STOP was an early-exit error)
 
@@ -479,6 +543,7 @@ Phase Timing:
   User confirm     (excluded from total)
   Wave execution   <Xm Ys>   (<W> waves)
   Aggregation      <Xm Ys>   (skipped if 0 bugs)
+  Open PR          <Xm Ys>
   --------------------------------
   Total            <Xm Ys>
 ```
