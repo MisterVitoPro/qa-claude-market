@@ -1,4 +1,4 @@
-# MisterVitoPro Plugin Marketplace
+# QA Plugin Marketplace
 
 A collection of Claude Code plugins for code quality, architecture, and developer productivity.
 
