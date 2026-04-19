@@ -2,7 +2,7 @@
   "name": "mistervitopro-plugin-marketplace",
   "metadata": {
     "description": "A collection of Claude Code plugins by MisterVitoPro",
-    "repository": "https://github.com/MisterVitoPro/qa-swarm",
+    "repository": "https://github.com/MisterVitoPro/qa-claude-market",
     "tags": [
       "marketplace",
       "plugins",

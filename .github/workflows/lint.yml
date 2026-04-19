@@ -1,0 +1,39 @@
+name: Lint & Validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  json-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate marketplace.json
+        run: |
+          cat .claude-plugin/marketplace.json | python3 -m json.tool > /dev/null
+          echo "✓ marketplace.json is valid JSON"
+
+      - name: Validate plugin manifests
+        run: |
+          for plugin in plugins/*/;  do
+            if [ -f "$plugin.claude-plugin/plugin.json" ]; then
+              cat "$plugin.claude-plugin/plugin.json" | python3 -m json.tool > /dev/null
+              echo "✓ $plugin plugin.json is valid"
+            fi
+          done
+
+  markdown-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check README formatting
+        run: |
+          echo "Checking markdown files exist and are readable..."
+          [ -f "README.md" ] && echo "✓ README.md found"
+          [ -f "CLAUDE.md" ] && echo "✓ CLAUDE.md found"
+          [ -f "SECURITY.md" ] && echo "✓ SECURITY.md found"

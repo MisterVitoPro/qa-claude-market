@@ -1,0 +1,14 @@
+# Repository Code Owners
+# Maintainers responsible for review and approval
+
+* @MisterVitoPro
+
+# Plugin-specific owners
+/plugins/qa-swarm/ @MisterVitoPro
+/plugins/code-atlas/ @MisterVitoPro
+/plugins/plan-runner/ @MisterVitoPro
+
+# Marketplace & docs
+/.claude-plugin/ @MisterVitoPro
+/README.md @MisterVitoPro
+/CLAUDE.md @MisterVitoPro
