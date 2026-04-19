@@ -20,3 +20,8 @@ Desktop.ini
 dist/
 build/
 out/
+
+# Generated artifacts
+.code-atlas/
+docs/plan-runner/
+docs/qa-swarm/

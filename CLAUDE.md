@@ -9,7 +9,7 @@ Multi-plugin marketplace repository. Each plugin lives under `plugins/` with its
 | Plugin | Version | Description |
 |--------|---------|-------------|
 | `qa-swarm` | 1.4.1 | AI-powered code quality analyzer: 6 Sonnet core agents + optional Haiku, 3-agent parallel TDD, fresh-context subagent handoff, Context7 MCP baseline across all agents |
-| `code-atlas` | 1.2.0 | Architecture index generator -- writes .code-atlas/atlas.json and state.json, loaded by session-start hook. Directory map, tech stack, patterns, dependencies. |
+| `code-atlas` | 2.0.0 | Architecture index generator with semantic graph -- writes .code-atlas/atlas.json, state.json, and graph-schema.json, loaded by session-start hook. Queryable via /code-atlas:query. Directory map, tech stack, patterns, dependencies. |
 | `plan-runner` | 0.3.0 | Run a Markdown implementation plan through a parallel agent swarm: analyze into waves, dispatch dev + verifier agents, aggregate bugs into a fix-plan, re-run on demand |
 
 ### Directory Layout
@@ -18,7 +18,7 @@ Multi-plugin marketplace repository. Each plugin lives under `plugins/` with its
 .claude-plugin/marketplace.json              # central registry
 plugins/
   qa-swarm/.claude-plugin/plugin.json        # manifest (v1.4.1)
-  code-atlas/.claude-plugin/plugin.json      # manifest (v1.2.0)
+  code-atlas/.claude-plugin/plugin.json      # manifest (v2.0.0)
   plan-runner/.claude-plugin/plugin.json     # manifest (v0.3.0)
 ```
 
@@ -52,10 +52,10 @@ plugins/                    # Root directory containing all plugins
     agents/                 # 16 QA agent definitions (security, perf, correctness, architecture, data flow, async, etc.)
     skills/                 # User-facing commands: attack (analyze), implement (fix)
     docs/                   # Master spec, design plans, implementation plans
-  code-atlas/               # Architecture index generator (v1.0.0)
+  code-atlas/               # Architecture index generator with semantic graph (v2.0.0)
     .claude-plugin/         # Plugin manifest and metadata
-    agents/                 # 3 analysis agents (structure, patterns, dependencies)
-    skills/                 # User-facing commands: map (full scan), update (incremental)
+    agents/                 # 4 analysis agents (structure, patterns, dependencies, graph synthesizer)
+    skills/                 # User-facing commands: map (full scan), update (incremental), query (graph interrogation)
     hooks/                  # SessionStart hook for auto-staleness detection
   plan-runner/                # Plan-driven parallel agent orchestrator (v0.3.0)
     .claude-plugin/

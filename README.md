@@ -15,10 +15,11 @@ AI-powered code quality analyzer. Runs 6-12 specialized agents in parallel to fi
 
 ### [code-atlas](plugins/code-atlas/) ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fqa-claude-market%2Fmain%2Fplugins%2Fcode-atlas%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&color=blue)
 
-Scans a codebase and generates a comprehensive architecture index for CLAUDE.md -- directory map, key files, tech stack, patterns, dependencies, and build commands.
+Scans a codebase and generates a comprehensive architecture index with semantic graph and query capability -- directory map, key files, tech stack, patterns, dependencies, and build commands.
 
 - 3 agents scan structure, patterns, and dependencies in parallel
-- Incremental updates detect changes via `git diff` and re-scan only what changed
+- Semantic graph with queryable knowledge base via `/code-atlas:query` for dependency analysis
+- Incremental updates detect changes via hash-diffing and re-scan only what changed
 - SessionStart hook auto-detects stale indexes and prompts for updates
 
 ### [plan-runner](plugins/plan-runner/) ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fqa-claude-market%2Fmain%2Fplugins%2Fplan-runner%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&color=blue)

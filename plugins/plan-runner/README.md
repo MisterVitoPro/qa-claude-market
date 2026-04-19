@@ -45,6 +45,10 @@ docs/plan-runner/{DATE}/cycle-{N}/
 - Clean working tree (you can override, but commits are per-wave)
 - Optional: Context7 MCP server for current framework docs (auto-detected; skipped if absent)
 
+## Auto-Setup
+
+On first session start, a hook automatically adds `docs/plan-runner/` to `.gitignore` (if a `.gitignore` exists). Generated output is not committed and remains local to the working tree.
+
 ## Design
 
 Full design spec at `docs/superpowers/specs/2026-04-15-plan-runner-design.md` (in the source repo).
