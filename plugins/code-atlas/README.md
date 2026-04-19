@@ -1,5 +1,7 @@
 # Code Atlas
 
+![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fqa-claude-market%2Fmain%2Fplugins%2Fcode-atlas%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&color=blue)
+
 Scan a codebase and generate a comprehensive architecture index as JSON artifacts under `.code-atlas/` -- giving Claude a head start on understanding the project structure, patterns, and conventions.
 
 Part of the [MisterVitoPro Plugin Marketplace](../../README.md).
@@ -214,7 +216,7 @@ See [docs/query-language-reference.md](docs/query-language-reference.md) for the
 
 ## Version
 
-v2.0.0
+Version is dynamically sourced from `plugin.json`. See badge at top of README.
 
 ## License
 
