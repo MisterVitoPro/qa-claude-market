@@ -1,0 +1,37 @@
+{
+  "wave_id": 2,
+  "verifier_status": "BUGS_FOUND",
+  "agent_statuses": {
+    "wave-2-agent-1": "VERIFIED",
+    "wave-2-agent-2": "VERIFIED",
+    "wave-2-agent-3": "VERIFIED",
+    "wave-2-agent-4": "VERIFIED",
+    "wave-2-agent-5": "VERIFIED",
+    "wave-2-agent-6": "FAILED"
+  },
+  "bugs": [
+    {
+      "bug_id": "wave-2-bug-1",
+      "severity": "P1",
+      "category": "documentation_inaccuracy",
+      "title": "graph-schema.json description in README is misleading",
+      "file": "plugins/code-atlas/README.md",
+      "line": null,
+      "evidence": "README 'What's New in v2.0' section describes graph-schema.json as 'a formal JSON Schema at .code-atlas/graph-schema.json that describes the full shape of both atlas.json and state.json'. This is factually incorrect.",
+      "expected": "graph-schema.json is the semantic dependency graph containing annotated nodes (modules/files with roles, criticality, stability, test_coverage) and edges (dependencies with type, strength, directionality, impact). It is not a JSON Schema descriptor.",
+      "suggested_fix": "Replace the misleading description with: 'v2.0 generates a semantic dependency graph at .code-atlas/graph-schema.json with annotated modules/files (roles, criticality, stability, test_coverage) and dependency edges (type, strength, directionality, impact). Use /code-atlas:query to interrogate it.'"
+    },
+    {
+      "bug_id": "wave-2-bug-2",
+      "severity": "P2",
+      "category": "incomplete_documentation",
+      "title": "README query types table omits transitive_dependents operation",
+      "file": "plugins/code-atlas/README.md",
+      "line": null,
+      "evidence": "The 'Supported query types' table in 'What's New in v2.0' lists only filter, dependencies_of, and dependents_of. The fourth operation transitive_dependents is fully implemented and documented in query-executor.ts and query/SKILL.md but missing from README table.",
+      "expected": "All four supported query operations should be listed in the README's query types table.",
+      "suggested_fix": "Add row to query types table: | `transitive_dependents` | List all modules that transitively depend on the given file (upstream consumer set) |"
+    }
+  ],
+  "summary": "Wave 2: 5 agents verified clean (graph-generator, query-executor, schema-validator, query skill, update skill docs). 1 agent failed (README): 2 documentation bugs found. Both are in the README.md file created by wave-2-agent-6. 1 P1 (graph-schema.json description factually incorrect) and 1 P2 (transitive_dependents operation missing from table)."
+}

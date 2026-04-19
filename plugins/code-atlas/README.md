@@ -115,8 +115,8 @@ The hook NEVER writes files, NEVER launches agents, and NEVER runs diffs. Target
 ```json
 {
   "_header": {
-    "schema_version": 1,
-    "plugin_version": "1.2.0",
+    "schema_version": 2,
+    "plugin_version": "2.0.0",
     "generated_at": "2026-04-14T23:00:00Z",
     "baseline_commit": "abc1234",
     "scan_root": "."
@@ -148,9 +148,72 @@ The hook NEVER writes files, NEVER launches agents, and NEVER runs diffs. Target
 }
 ```
 
+## What's New in v2.0
+
+### graph-schema.json
+
+v2.0 ships a formal JSON Schema at `.code-atlas/graph-schema.json` that describes the full shape of both `atlas.json` and `state.json`. Validators, editors, and downstream tooling can reference this schema for autocomplete and lint checks.
+
+### /code-atlas:query
+
+A new interactive query skill lets you interrogate the architecture index without reading raw JSON:
+
+```bash
+/code-atlas:query
+```
+
+Supported query types:
+
+| Query Type | Description |
+|------------|-------------|
+| `filter` | Return files or directories matching a predicate (e.g. category, path glob, role) |
+| `dependencies_of` | List every module that the given file imports, transitively or direct-only |
+| `dependents_of` | List every module that imports the given file (reverse dependency lookup) |
+
+See [docs/query-language-reference.md](docs/query-language-reference.md) for the full query syntax.
+
+### Example Queries
+
+**Filter -- find all entry-point files**
+
+```
+/code-atlas:query filter role=entry_point
+```
+
+**dependencies_of -- direct imports of a module**
+
+```
+/code-atlas:query dependencies_of src/controllers/user.ts --depth 1
+```
+
+**dependents_of -- everything that depends on a shared utility**
+
+```
+/code-atlas:query dependents_of src/utils/logger.ts
+```
+
+---
+
+## Migrating from v1.2 to v2.0
+
+### Breaking Changes
+
+- `_header.schema_version` is now `2` in both `atlas.json` and `state.json`. Tools that hard-code `schema_version: 1` must be updated.
+- `atlas.json` no longer includes the raw `import_graph` key at the top level; it has moved exclusively to `state.json`. If you were reading `import_graph` from `atlas.json` directly, switch to `state.json` or use `/code-atlas:query`.
+
+### Migration Steps
+
+1. Delete your existing `.code-atlas/` directory (or run `/code-atlas:map` -- it will overwrite).
+2. Run `/code-atlas:map` to regenerate both artifacts at schema v2.
+3. Verify `_header.schema_version` is `2` in the new `atlas.json`.
+4. If you have scripts that read `atlas.json.import_graph`, update them to read from `state.json.import_graph` instead.
+5. Optionally validate the output against the new `.code-atlas/graph-schema.json`.
+
+---
+
 ## Version
 
-v1.2.0
+v2.0.0
 
 ## License
 

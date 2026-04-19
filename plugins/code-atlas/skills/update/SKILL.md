@@ -3,7 +3,8 @@ name: code-atlas:update
 description: >
   Incrementally update the architecture index in .code-atlas/. Detects changes via
   file-hash diffing against state.json (resilient to rebases and branch switches) and
-  updates only what changed. Pass "full" to force a complete re-scan. Triggers on:
+  updates only what changed. Pass "full" to force a complete re-scan. Regenerates
+  graph-schema.json at appropriate depth depending on change scope. Triggers on:
   update architecture, refresh code map, sync architecture index.
 argument-hint: "<optional: 'full' to force complete re-scan>"
 ---
@@ -12,9 +13,17 @@ You are performing an incremental update of the Code Atlas architecture index.
 
 Arguments: **"{$ARGUMENTS}"**
 
-Reference: `plugins/code-atlas/docs/schema-reference.md` defines the shape of `atlas.json` and `state.json`.
+Reference: `plugins/code-atlas/docs/schema-reference.md` defines the shape of `atlas.json`, `state.json`, and `graph-schema.json`.
 
 This skill reads and writes ONLY to `.code-atlas/`. It does NOT modify CLAUDE.md.
+
+## Graph-Schema Regeneration
+
+During each update strategy, `graph-schema.json` is regenerated to reflect the current state of the codebase. The depth of regeneration corresponds to the update scope:
+
+- **Micro-Update**: Targeted node re-analysis for changed modules only. Edges touching changed modules are recomputed. Semantic metadata (role, criticality, stability, test_coverage) is re-assigned to affected nodes.
+- **Targeted Update**: Full recomputation for changed areas and directory boundaries. The `graph-synthesizer` agent re-analyzes all changed modules and new directories for semantic metadata.
+- **Full Re-scan**: Complete graph regeneration across the entire codebase. All nodes are re-analyzed with fresh semantic metadata and all edges are reconstructed.
 
 ## Step 1: LOAD BASELINE
 
@@ -96,18 +105,24 @@ Evaluate these rows in order; first match wins.
    - Recompute `high_traffic` top-10 from new `importer_counts`.
    - Update `directory_map` for any added/deleted directories (add a default "source" entry for new ones, remove entries for deleted ones).
    - Update `key_files` if any added file matches an entry-point or config filename pattern; remove entries for deleted key files.
-6. Update both files' `_header.generated_at` and `_header.baseline_commit`.
-7. Update `state.json.last_run`:
+6. **Update `graph-schema.json` (targeted node re-analysis)**:
+   - For each changed module (added, deleted, or with changed imports):
+     - Re-analyze semantic metadata: role, criticality (via updated `importer_counts`), stability, test_coverage
+     - Recompute edges: incoming and outgoing edges touching the changed module
+     - Update the affected nodes in the graph schema
+   - Preserve nodes and edges not affected by the changes
+7. Update both files' `_header.generated_at` and `_header.baseline_commit`.
+8. Update `state.json.last_run`:
    - `strategy`: "micro"
    - `agents_used`: 0
    - `files_scanned`: size of `current_index`
    - `files_hashed`: same
    - `duration_seconds`: elapsed time
-8. Write both files.
-9. Print:
-   ```
-   Micro-update complete. {N} files re-indexed, no agents needed.
-   ```
+9. Write atlas.json, state.json, and graph-schema.json.
+10. Print:
+    ```
+    Micro-update complete. {N} files re-indexed, graph-schema updated for {N} modules.
+    ```
 
 ### Strategy B: Targeted Update (1 agent)
 
@@ -129,16 +144,26 @@ Evaluate these rows in order; first match wins.
    - Remove deleted directory annotations
    - Update `key_files` from agent output
 4. Update `atlas.json.directory_map`, `atlas.json.key_files`, and `atlas.json.module_boundaries` from the merged output (applying caps).
-5. Update `state.json.last_run`:
+5. **Launch the `graph-synthesizer` agent for changed modules**:
+   - Provide: `key_set` (all changed modules + added directories), `import_graph`, `importer_counts` (updated), `file_tree`, `test_file_index`, optional `docstring_index` and `recency_index`
+   - Agent re-analyzes semantic metadata (role, criticality, stability, test_coverage) for all changed modules
+   - Agent returns updated node annotations
+6. **Update `graph-schema.json` with full recomputation for changed areas**:
+   - Use agent output to update nodes affected by structural changes
+   - Recompute all edges touching changed modules
+   - Add new nodes for added directories/modules
+   - Remove nodes for deleted directories/modules
+   - Preserve unchanged portions of the graph
+7. Update `state.json.last_run`:
    - `strategy`: "targeted"
-   - `agents_used`: 1
-6. Write both files.
-7. Print:
+   - `agents_used`: 2 (atlas-structure + graph-synthesizer)
+8. Write atlas.json, state.json, and graph-schema.json.
+9. Print:
    ```
-   Targeted update complete. Re-analyzed {N} changed areas.
+   Targeted update complete. Re-analyzed {N} changed areas, graph-schema updated with full semantic re-analysis.
    ```
 
-### Strategy C: Full Re-scan (3 agents)
+### Strategy C: Full Re-scan (3+ agents)
 
 **Conditions (ANY):**
 
@@ -149,7 +174,11 @@ Evaluate these rows in order; first match wins.
 
 **Action:**
 
-Run the full `/code-atlas:map` pipeline (Steps 1-5 from the map skill). This overwrites both artifacts.
+Run the full `/code-atlas:map` pipeline (Steps 1-5 from the map skill). This overwrites all three artifacts:
+
+- `atlas.json` — updated summary (curated and capped)
+- `state.json` — updated full cache with complete import graph and metadata
+- `graph-schema.json` — completely regenerated semantic dependency graph with all nodes and edges re-analyzed via the `graph-synthesizer` agent for fresh semantic metadata across the entire codebase
 
 ## Step 5: SUMMARY
 
@@ -160,10 +189,16 @@ Strategy:    {Micro | Targeted | Full}
 Baseline:    {stored_commit} -> {current_commit}
 Changes:     {N} added, {N} deleted, {N} changed, {N} renamed
 
+Artifacts Updated:
+  - atlas.json:        curated summary
+  - state.json:        full cache with import graph
+  - graph-schema.json: semantic dependency graph
+
 {If agents were used:}
 Agents:      {N}
 Time:        {Xm Ys}
 
-.code-atlas/atlas.json and .code-atlas/state.json are now current.
-The session-start hook will load the updated atlas.json next session.
+All three artifacts (.atlas.json, state.json, graph-schema.json) are now current.
+The session-start hook will load atlas.json next session.
+To query the semantic dependency graph: /code-atlas:query
 ```
