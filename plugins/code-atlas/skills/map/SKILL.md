@@ -2,8 +2,9 @@
 name: code-atlas:map
 description: >
   Scan the repository and generate a comprehensive architecture index as JSON artifacts
-  under .code-atlas/. Produces atlas.json (curated summary Claude reads at session start)
-  and state.json (internal cache with full import graph, file hashes, raw agent outputs).
+  under .code-atlas/. Produces atlas.json (curated summary Claude reads at session start),
+  state.json (internal cache with full import graph, file hashes, raw agent outputs),
+  and graph-schema.json (semantic dependency graph queryable via /code-atlas:query).
   Appends .code-atlas/ to .gitignore if present. Run this once on a new codebase to give
   Claude a head start. Triggers on: map codebase, generate architecture, index the repo,
   document structure, create code map.
@@ -16,7 +17,7 @@ If the user provided a scoping argument: **"{$ARGUMENTS}"** — use it to narrow
 
 This skill writes ONLY to `.code-atlas/` and (once) to `.gitignore`. It does NOT modify CLAUDE.md.
 
-Reference: `plugins/code-atlas/docs/schema-reference.md` defines the exact shape of `atlas.json` and `state.json`.
+Reference: `plugins/code-atlas/docs/schema-reference.md` defines the exact shape of `atlas.json`, `state.json`, and `graph-schema.json`.
 
 Follow this pipeline exactly. Do not skip steps.
 
@@ -225,7 +226,8 @@ Print:
 1. Create the `.code-atlas/` directory if it does not exist: `mkdir -p .code-atlas` via Bash.
 2. Write `atlas.json` using the Write tool (pretty-printed, 2-space indent).
 3. Write `state.json` using the Write tool (pretty-printed, 2-space indent).
-4. Update `last_run.duration_seconds` in `state.json` after the writes complete: recompute as current time minus `t_start` and rewrite `state.json`. (One extra Write is acceptable; alternatively, defer the write until after timing is computed.)
+4. Write `graph-schema.json` using the Write tool (pretty-printed, 2-space indent). This file contains the semantic dependency graph with annotated nodes and edges, queryable via the `/code-atlas:query` skill.
+5. Update `last_run.duration_seconds` in `state.json` after the writes complete: recompute as current time minus `t_start` and rewrite `state.json`. (One extra Write is acceptable; alternatively, defer the write until after timing is computed.)
 
 ### 4a. Append to .gitignore
 
@@ -266,8 +268,9 @@ Compute phase durations (format as Xm Ys):
 Code Atlas -- Complete
 ========================
 Artifacts written:
-  .code-atlas/atlas.json   ({N} bytes, curated summary)
-  .code-atlas/state.json   ({N} bytes, full cache)
+  .code-atlas/atlas.json       ({N} bytes, curated summary)
+  .code-atlas/state.json       ({N} bytes, full cache)
+  .code-atlas/graph-schema.json ({N} bytes, semantic dependency graph)
 
 Sections in atlas.json:
   - Tech Stack          ({N} tools detected)
@@ -276,6 +279,11 @@ Sections in atlas.json:
   - High Traffic        ({N} modules)
   - Conventions         ({N} rules)
   - Build Commands      ({N} commands)
+
+Graph Schema:
+  - Nodes               ({N} modules/files)
+  - Edges               ({N} dependencies)
+  - Queryable via       /code-atlas:query
 
 Phase Timing:
   Scan + Index        {Xm Ys}
@@ -287,4 +295,5 @@ Phase Timing:
 ```
 
 The session-start hook will load atlas.json into context on future sessions.
+To query the semantic dependency graph: /code-atlas:query
 To update after structural changes: /code-atlas:update

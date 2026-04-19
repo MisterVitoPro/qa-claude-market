@@ -1,0 +1,26 @@
+{
+  "wave_id": 1,
+  "verifier_status": "BUGS_FOUND",
+  "agent_statuses": {
+    "wave-1-agent-1": "VERIFIED",
+    "wave-1-agent-2": "VERIFIED",
+    "wave-1-agent-3": "VERIFIED",
+    "wave-1-agent-4": "VERIFIED",
+    "wave-1-agent-5": "VERIFIED",
+    "wave-1-agent-6": "VERIFIED"
+  },
+  "bugs": [
+    {
+      "bug_id": "wave-1-bug-1",
+      "severity": "P2",
+      "category": "acceptance_criteria_not_met",
+      "title": "role value 'route_definition' in graph-synthesizer.md is absent from NodeRole union in graph-schema.ts",
+      "file": "plugins/code-atlas/src/types/graph-schema.ts",
+      "line": null,
+      "evidence": "graph-synthesizer.md defines 'route_definition' as a valid role value in its decision heuristics and output schema specification. However, graph-schema.ts NodeRole union type only includes: entry_point, core_module, utility, config, middleware, model, public_api, internal. The value 'route_definition' is not present.",
+      "expected": "Every role value emitted by the synthesizer agent must be a member of the NodeRole union in graph-schema.ts. All 9 role values should be consistently defined across both files.",
+      "suggested_fix": "Add 'route_definition' to the NodeRole union type in plugins/code-atlas/src/types/graph-schema.ts. This is the semantic role for route/router definition files (API endpoints, route handlers). Update the NodeRole union type from: 'entry_point' | 'core_module' | 'utility' | 'config' | 'middleware' | 'model' | 'public_api' | 'internal' to: 'entry_point' | 'core_module' | 'utility' | 'config' | 'middleware' | 'model' | 'public_api' | 'route_definition' | 'internal'"
+    }
+  ],
+  "summary": "All 6 Wave 1 agents completed and verified. Files created: graph-schema.ts, query-operations.ts, index.ts, graph-synthesizer.md, query-language-reference.md, graph-schema-example.json, plus updates to plugin.json and map skill documentation. One P2 cross-agent schema inconsistency found: NodeRole union missing 'route_definition' value used by synthesizer agent."
+}

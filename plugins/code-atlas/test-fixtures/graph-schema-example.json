@@ -1,0 +1,293 @@
+{
+  "_header": {
+    "schema_version": 2,
+    "plugin_version": "2.0.0",
+    "generated_at": "2026-04-19T00:00:00.000Z",
+    "baseline_commit": "a1b2c3d",
+    "scan_root": "."
+  },
+  "nodes": {
+    "src/server": {
+      "type": "file",
+      "role": "entry_point",
+      "criticality": "critical",
+      "stability": "stable",
+      "test_coverage": "well_tested",
+      "description": "HTTP server entry point — bootstraps Express, registers routes and middleware"
+    },
+    "src/auth": {
+      "type": "module",
+      "files": [
+        "src/auth/index.ts",
+        "src/auth/middleware.ts",
+        "src/auth/service.ts"
+      ],
+      "role": "middleware",
+      "criticality": "critical",
+      "stability": "stable",
+      "test_coverage": "well_tested",
+      "description": "Authentication layer — JWT verification, session middleware, user identity resolution"
+    },
+    "src/api": {
+      "type": "module",
+      "files": [
+        "src/api/index.ts",
+        "src/api/users.ts",
+        "src/api/projects.ts",
+        "src/api/health.ts"
+      ],
+      "role": "core_module",
+      "criticality": "high",
+      "stability": "evolving",
+      "test_coverage": "partial",
+      "description": "REST API route definitions — user, project, and health endpoints"
+    },
+    "src/models": {
+      "type": "module",
+      "files": [
+        "src/models/user.ts",
+        "src/models/project.ts",
+        "src/models/base.ts"
+      ],
+      "role": "model",
+      "criticality": "high",
+      "stability": "stable",
+      "test_coverage": "well_tested",
+      "description": "Data models and ORM entity definitions for user and project entities"
+    },
+    "src/utils/logger": {
+      "type": "file",
+      "role": "utility",
+      "criticality": "medium",
+      "stability": "stable",
+      "test_coverage": "partial",
+      "description": "Structured logger utility — wraps pino with request correlation IDs"
+    },
+    "src/config": {
+      "type": "file",
+      "role": "config",
+      "criticality": "critical",
+      "stability": "stable",
+      "test_coverage": "untested",
+      "description": "Application configuration — reads environment variables, validates required keys at startup"
+    },
+    "src/db": {
+      "type": "module",
+      "files": [
+        "src/db/index.ts",
+        "src/db/connection.ts",
+        "src/db/migrations.ts"
+      ],
+      "role": "core_module",
+      "criticality": "critical",
+      "stability": "stable",
+      "test_coverage": "partial",
+      "description": "Database connection pool and migration runner — manages PostgreSQL lifecycle"
+    },
+    "src/cache": {
+      "type": "module",
+      "files": [
+        "src/cache/index.ts",
+        "src/cache/redis.ts"
+      ],
+      "role": "utility",
+      "criticality": "medium",
+      "stability": "evolving",
+      "test_coverage": "untested",
+      "description": "Redis cache abstraction — get/set/invalidate with TTL support"
+    },
+    "src/events": {
+      "type": "module",
+      "files": [
+        "src/events/index.ts",
+        "src/events/emitter.ts",
+        "src/events/handlers.ts"
+      ],
+      "role": "internal",
+      "criticality": "low",
+      "stability": "experimental",
+      "test_coverage": "untested",
+      "description": "Internal event bus — experimental pub/sub system for decoupling side effects"
+    },
+    "src/public-api": {
+      "type": "module",
+      "files": [
+        "src/public-api/index.ts",
+        "src/public-api/v1.ts"
+      ],
+      "role": "public_api",
+      "criticality": "high",
+      "stability": "stable",
+      "test_coverage": "well_tested",
+      "description": "Versioned public API facade — stable contract exposed to external consumers"
+    }
+  },
+  "edges": [
+    {
+      "source": "src/server",
+      "target": "src/auth",
+      "type": "direct_import",
+      "strength": "core",
+      "directionality": "required",
+      "impact": "breaking_change_risk"
+    },
+    {
+      "source": "src/server",
+      "target": "src/api",
+      "type": "direct_import",
+      "strength": "core",
+      "directionality": "required",
+      "impact": "breaking_change_risk"
+    },
+    {
+      "source": "src/server",
+      "target": "src/config",
+      "type": "direct_import",
+      "strength": "core",
+      "directionality": "required",
+      "impact": "breaking_change_risk"
+    },
+    {
+      "source": "src/server",
+      "target": "src/db",
+      "type": "direct_import",
+      "strength": "core",
+      "directionality": "required",
+      "impact": "breaking_change_risk"
+    },
+    {
+      "source": "src/api",
+      "target": "src/auth",
+      "type": "direct_import",
+      "strength": "core",
+      "directionality": "required",
+      "impact": "breaking_change_risk"
+    },
+    {
+      "source": "src/api",
+      "target": "src/models",
+      "type": "direct_import",
+      "strength": "core",
+      "directionality": "required",
+      "impact": "ripple_effect_magnitude"
+    },
+    {
+      "source": "src/api",
+      "target": "src/utils/logger",
+      "type": "direct_import",
+      "strength": "utility",
+      "directionality": "required",
+      "impact": ""
+    },
+    {
+      "source": "src/api",
+      "target": "src/cache",
+      "type": "dynamic_import",
+      "strength": "optional",
+      "directionality": "conditional",
+      "impact": ""
+    },
+    {
+      "source": "src/auth",
+      "target": "src/models",
+      "type": "direct_import",
+      "strength": "core",
+      "directionality": "required",
+      "impact": "ripple_effect_magnitude"
+    },
+    {
+      "source": "src/auth",
+      "target": "src/utils/logger",
+      "type": "direct_import",
+      "strength": "utility",
+      "directionality": "required",
+      "impact": ""
+    },
+    {
+      "source": "src/auth",
+      "target": "src/config",
+      "type": "direct_import",
+      "strength": "core",
+      "directionality": "required",
+      "impact": "breaking_change_risk"
+    },
+    {
+      "source": "src/models",
+      "target": "src/db",
+      "type": "composition",
+      "strength": "core",
+      "directionality": "required",
+      "impact": "breaking_change_risk"
+    },
+    {
+      "source": "src/models",
+      "target": "src/utils/logger",
+      "type": "direct_import",
+      "strength": "utility",
+      "directionality": "required",
+      "impact": ""
+    },
+    {
+      "source": "src/db",
+      "target": "src/config",
+      "type": "direct_import",
+      "strength": "core",
+      "directionality": "required",
+      "impact": "breaking_change_risk"
+    },
+    {
+      "source": "src/public-api",
+      "target": "src/api",
+      "type": "inheritance",
+      "strength": "core",
+      "directionality": "required",
+      "impact": "breaking_change_risk"
+    },
+    {
+      "source": "src/public-api",
+      "target": "src/auth",
+      "type": "direct_import",
+      "strength": "core",
+      "directionality": "required",
+      "impact": "breaking_change_risk"
+    },
+    {
+      "source": "src/events",
+      "target": "src/models",
+      "type": "sideeffect",
+      "strength": "optional",
+      "directionality": "conditional",
+      "impact": ""
+    },
+    {
+      "source": "src/events",
+      "target": "src/utils/logger",
+      "type": "direct_import",
+      "strength": "utility",
+      "directionality": "required",
+      "impact": ""
+    },
+    {
+      "source": "src/cache",
+      "target": "src/config",
+      "type": "configuration",
+      "strength": "core",
+      "directionality": "required",
+      "impact": ""
+    },
+    {
+      "source": "src/api",
+      "target": "src/events",
+      "type": "dynamic_import",
+      "strength": "optional",
+      "directionality": "circular",
+      "impact": ""
+    }
+  ],
+  "metadata": {
+    "total_nodes": 10,
+    "total_edges": 20,
+    "key_modules_analyzed": 10,
+    "circular_dependency_count": 1
+  }
+}

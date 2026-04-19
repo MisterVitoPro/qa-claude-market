@@ -1,7 +1,7 @@
 {
   "name": "code-atlas",
-  "description": "Scan a codebase and generate a comprehensive architecture index for CLAUDE.md — directory map, key files, tech stack, patterns, dependencies, and build commands",
-  "version": "1.2.0",
+  "description": "Scan a codebase and generate a comprehensive architecture index with graph-schema and query capability — directory map, key files, tech stack, patterns, dependencies, build commands, and queryable knowledge graph",
+  "version": "2.0.0",
   "license": "MIT",
   "keywords": [
     "architecture",
@@ -13,7 +13,14 @@
     "repo-structure",
     "auto-documentation",
     "context-priming",
-    "developer-tools"
+    "developer-tools",
+    "graph-schema",
+    "knowledge-graph"
   ],
-  "repository": "https://github.com/MisterVitoPro/qa-swarm"
+  "repository": "https://github.com/MisterVitoPro/qa-swarm",
+  "skills": [
+    "map",
+    "update",
+    "query"
+  ]
 }

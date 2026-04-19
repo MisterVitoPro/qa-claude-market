@@ -1,0 +1,290 @@
+{
+  "source_plan": "plugins/code-atlas/docs/2026-04-19-v2.0-implementation-plan.md",
+  "context7_available": true,
+  "waves": [
+    {
+      "wave_id": 1,
+      "rationale": "Foundation: type definitions, semantic analyzer agent, test fixture, and documentation that have no dependencies",
+      "agents": [
+        {
+          "agent_id": "wave-1-agent-1",
+          "task_title": "Create graph-schema.json type definitions",
+          "task_excerpt": "## Task 1: Create graph-schema.json type definitions\n\n**Files:**\n- Create: `plugins/code-atlas/src/types/graph-schema.ts`\n- Create: `plugins/code-atlas/src/types/query-operations.ts`",
+          "owned_files": [
+            "plugins/code-atlas/src/types/graph-schema.ts",
+            "plugins/code-atlas/src/types/query-operations.ts"
+          ],
+          "acceptance_criteria": [
+            "TypeScript interfaces for GraphSchema, GraphNode, GraphEdge created with all required fields",
+            "Query operation types defined (DependenciesOfQuery, DependentsOfQuery, FilterQuery, TransitiveDependentsQuery)",
+            "All semantic properties (role, criticality, stability, test_coverage) represented",
+            "Types exported from index.ts"
+          ],
+          "recommended_model": "sonnet",
+          "complexity_signals": ["TypeScript-only, no external dependencies, straightforward interface definitions"]
+        },
+        {
+          "agent_id": "wave-1-agent-2",
+          "task_title": "Create semantic metadata analyzer agent",
+          "task_excerpt": "## Task 3: Create semantic metadata analyzer agent\n\n**Files:**\n- Create: `plugins/code-atlas/agents/graph-synthesizer.md`",
+          "owned_files": [
+            "plugins/code-atlas/agents/graph-synthesizer.md"
+          ],
+          "acceptance_criteria": [
+            "Agent definition written in Markdown with YAML frontmatter",
+            "Documents analysis logic for role, criticality, stability, test_coverage assignment",
+            "Clear heuristics provided (entry_point detection, importer_count thresholds)",
+            "Output schema specified (JSON array of metadata objects)",
+            "Instructions include description synthesis from directory structure"
+          ],
+          "recommended_model": "sonnet",
+          "complexity_signals": ["Documentation task, Markdown with agent logic specification"]
+        },
+        {
+          "agent_id": "wave-1-agent-3",
+          "task_title": "Create query language reference documentation",
+          "task_excerpt": "## Task 6: Create query language reference documentation\n\n**Files:**\n- Create: `plugins/code-atlas/docs/query-language-reference.md`",
+          "owned_files": [
+            "plugins/code-atlas/docs/query-language-reference.md"
+          ],
+          "acceptance_criteria": [
+            "Comprehensive guide to query syntax",
+            "All four operations explained with syntax, fields, examples",
+            "Response format documented",
+            "Common use cases (find critical modules, understand dependencies)",
+            "Edge property explanations",
+            "Constraints and limitations listed"
+          ],
+          "recommended_model": "sonnet",
+          "complexity_signals": ["Documentation task, no code implementation"]
+        },
+        {
+          "agent_id": "wave-1-agent-4",
+          "task_title": "Create test fixture",
+          "task_excerpt": "## Task 10: Create test fixture\n\n**Files:**\n- Create: `plugins/code-atlas/test-fixtures/graph-schema-example.json`",
+          "owned_files": [
+            "plugins/code-atlas/test-fixtures/graph-schema-example.json"
+          ],
+          "acceptance_criteria": [
+            "Valid graph-schema.json with 5+ nodes, 5+ edges",
+            "Demonstrates all semantic properties (roles, criticality levels, stability)",
+            "Shows all edge types and properties",
+            "Passes schema validator",
+            "Used by integration and fixture tests"
+          ],
+          "recommended_model": "sonnet",
+          "complexity_signals": ["JSON fixture creation based on schema definition"]
+        },
+        {
+          "agent_id": "wave-1-agent-5",
+          "task_title": "Update plugin manifest to v2.0.0",
+          "task_excerpt": "## Task 11: Update plugin manifest to v2.0.0\n\n**Files:**\n- Modify: `plugins/code-atlas/.claude-plugin/plugin.json`",
+          "owned_files": [
+            "plugins/code-atlas/.claude-plugin/plugin.json"
+          ],
+          "acceptance_criteria": [
+            "Version bumped to 2.0.0",
+            "Query skill registered in skills array",
+            "Description updated to mention graph-schema and query capability",
+            "All three skills listed (map, update, query)"
+          ],
+          "recommended_model": "haiku",
+          "complexity_signals": ["Simple JSON update, version bump and skill registration"]
+        },
+        {
+          "agent_id": "wave-1-agent-6",
+          "task_title": "Update map skill documentation",
+          "task_excerpt": "## Task 12: Update map skill documentation\n\n**Files:**\n- Modify: `plugins/code-atlas/skills/map/SKILL.md`",
+          "owned_files": [
+            "plugins/code-atlas/skills/map/SKILL.md"
+          ],
+          "acceptance_criteria": [
+            "Output artifacts section documents three files (atlas.json, state.json, graph-schema.json)",
+            "graph-schema.json described as semantic dependency graph",
+            "Notes that graph-schema is queryable via /code-atlas:query",
+            "No breaking changes to existing documentation"
+          ],
+          "recommended_model": "haiku",
+          "complexity_signals": ["Documentation update, add new artifact section"]
+        }
+      ]
+    },
+    {
+      "wave_id": 2,
+      "rationale": "Core implementations: graph generator, query executor, schema validator, skill and docs depending on type definitions from Wave 1",
+      "agents": [
+        {
+          "agent_id": "wave-2-agent-1",
+          "task_title": "Implement graph-schema.json generation",
+          "task_excerpt": "## Task 2: Implement graph-schema.json generation\n\n**Files:**\n- Create: `plugins/code-atlas/src/graph-generator.ts`\n- Create: `plugins/code-atlas/src/graph-generator.test.ts`",
+          "owned_files": [
+            "plugins/code-atlas/src/graph-generator.ts",
+            "plugins/code-atlas/src/graph-generator.test.ts"
+          ],
+          "acceptance_criteria": [
+            "generateGraphSchema function accepts state.json, semantic metadata, config",
+            "Returns valid GraphSchema with nodes, edges, metadata populated",
+            "Edges annotated with type, strength, directionality, impact",
+            "Unit tests pass for generation logic",
+            "Handles missing/unresolvable modules gracefully"
+          ],
+          "recommended_model": "sonnet",
+          "complexity_signals": ["Graph synthesis logic, depends on Task 1 types", "Multiple helper functions for edge annotation"]
+        },
+        {
+          "agent_id": "wave-2-agent-2",
+          "task_title": "Implement query executor",
+          "task_excerpt": "## Task 4: Implement query executor\n\n**Files:**\n- Create: `plugins/code-atlas/src/query-executor.ts`\n- Create: `plugins/code-atlas/src/query-executor.test.ts`",
+          "owned_files": [
+            "plugins/code-atlas/src/query-executor.ts",
+            "plugins/code-atlas/src/query-executor.test.ts"
+          ],
+          "acceptance_criteria": [
+            "parseQuery: converts JSON string to QueryOperation",
+            "validateQuery: checks operation and required fields",
+            "executeQuery: routes to appropriate operation handler",
+            "executeDependenciesOf: BFS traversal following outgoing edges",
+            "executeDependentsOf: BFS traversal following incoming edges",
+            "executeFilter: matches nodes by properties",
+            "executeTransitiveDependents: transitive dependent search with max_depth",
+            "All tests pass; handles circular deps safely"
+          ],
+          "recommended_model": "opus",
+          "complexity_signals": ["Graph traversal algorithms", "Four distinct query operations", "Circular dependency handling", "Depends on Task 1 types"]
+        },
+        {
+          "agent_id": "wave-2-agent-3",
+          "task_title": "Create schema validator",
+          "task_excerpt": "## Task 9: Create schema validator\n\n**Files:**\n- Create: `plugins/code-atlas/src/schema-validator.ts`\n- Create: `plugins/code-atlas/src/schema-validator.test.ts`",
+          "owned_files": [
+            "plugins/code-atlas/src/schema-validator.ts",
+            "plugins/code-atlas/src/schema-validator.test.ts"
+          ],
+          "acceptance_criteria": [
+            "validateGraphSchema function checks header, nodes, edges, metadata",
+            "Validates all required fields present",
+            "Tests against valid fixture (passes)",
+            "Tests against invalid schemas (fails appropriately)",
+            "Returns { valid: bool, errors: string[] }"
+          ],
+          "recommended_model": "sonnet",
+          "complexity_signals": ["Schema validation logic", "Depends on Task 1 types and Task 10 fixture"]
+        },
+        {
+          "agent_id": "wave-2-agent-4",
+          "task_title": "Create /code-atlas:query skill definition",
+          "task_excerpt": "## Task 5: Create /code-atlas:query skill definition\n\n**Files:**\n- Create: `plugins/code-atlas/skills/query/SKILL.md`",
+          "owned_files": [
+            "plugins/code-atlas/skills/query/SKILL.md"
+          ],
+          "acceptance_criteria": [
+            "Skill YAML frontmatter with name, title, description, model, color",
+            "Documents all four query operations with JSON examples",
+            "Node properties table (role, criticality, stability, test_coverage)",
+            "Edge properties table (type, strength, directionality, impact)",
+            "Response format shown with example output",
+            "Common use cases documented"
+          ],
+          "recommended_model": "sonnet",
+          "complexity_signals": ["Skill documentation", "Depends on Task 6 (query language reference)"]
+        },
+        {
+          "agent_id": "wave-2-agent-5",
+          "task_title": "Update update skill documentation",
+          "task_excerpt": "## Task 13: Update update skill documentation\n\n**Files:**\n- Modify: `plugins/code-atlas/skills/update/SKILL.md`",
+          "owned_files": [
+            "plugins/code-atlas/skills/update/SKILL.md"
+          ],
+          "acceptance_criteria": [
+            "Incremental update strategy includes graph-schema regeneration",
+            "Explains micro/targeted/full update strategies also apply to graph",
+            "Notes changed modules re-analyzed for semantic metadata",
+            "Clear on which update type triggers what level of graph regeneration"
+          ],
+          "recommended_model": "haiku",
+          "complexity_signals": ["Documentation update to existing skill"]
+        },
+        {
+          "agent_id": "wave-2-agent-6",
+          "task_title": "Update README with v2.0 content",
+          "task_excerpt": "## Task 14: Update README with v2.0 content\n\n**Files:**\n- Modify: `plugins/code-atlas/README.md`",
+          "owned_files": [
+            "plugins/code-atlas/README.md"
+          ],
+          "acceptance_criteria": [
+            "Version section updated to v2.0.0",
+            "What's New section documents graph-schema.json and /code-atlas:query",
+            "Migration notes for upgrading from v1.2",
+            "Three example queries provided (filter, dependencies_of, dependents_of)",
+            "Link to query-language-reference.md added"
+          ],
+          "recommended_model": "sonnet",
+          "complexity_signals": ["README update", "Depends on Task 6 (query examples)"]
+        }
+      ]
+    },
+    {
+      "wave_id": 3,
+      "rationale": "Extended test coverage: query executor extended tests and integration tests depending on completed implementations from Waves 1-2",
+      "agents": [
+        {
+          "agent_id": "wave-3-agent-1",
+          "task_title": "Implement query executor tests (extended coverage)",
+          "task_excerpt": "## Task 7: Implement query executor tests\n\n**Files:**\n- Modify: `plugins/code-atlas/src/query-executor.test.ts` (extend with complete coverage)",
+          "owned_files": [
+            "plugins/code-atlas/src/query-executor.test.ts"
+          ],
+          "acceptance_criteria": [
+            "Unit tests for all four operations",
+            "Mock graph fixture used consistently",
+            "Edge cases: missing modules, empty results, circular deps",
+            "Filter operation tests with multiple conditions",
+            "Transitive traversal depth tests",
+            "All tests pass"
+          ],
+          "recommended_model": "sonnet",
+          "complexity_signals": ["Extends Task 4 tests", "Depends on Task 4 and Task 10"]
+        },
+        {
+          "agent_id": "wave-3-agent-2",
+          "task_title": "Create integration test",
+          "task_excerpt": "## Task 8: Create integration test\n\n**Files:**\n- Create: `plugins/code-atlas/src/integration.test.ts`",
+          "owned_files": [
+            "plugins/code-atlas/src/integration.test.ts"
+          ],
+          "acceptance_criteria": [
+            "End-to-end test loading reference fixture and running queries",
+            "Tests dependents_of, dependencies_of, filter, transitive_dependents",
+            "Validates matched nodes and edges in results",
+            "Tests missing module handling",
+            "Test passes"
+          ],
+          "recommended_model": "sonnet",
+          "complexity_signals": ["Integration test", "Depends on Tasks 2, 4, 9, 10"]
+        }
+      ]
+    },
+    {
+      "wave_id": 4,
+      "rationale": "Final verification and release: verify all work, run tests, tag and push",
+      "agents": [
+        {
+          "agent_id": "wave-4-agent-1",
+          "task_title": "Final version and commit",
+          "task_excerpt": "## Task 15: Final version and commit\n\n**Files:**\n- Verify all changes committed\n- Tag release",
+          "owned_files": [],
+          "acceptance_criteria": [
+            "All 15 tasks' files created/modified and verified",
+            "No uncommitted changes",
+            "Code tests pass (npm test)",
+            "git tag code-atlas/v2.0.0 created",
+            "Changes pushed to origin"
+          ],
+          "recommended_model": "haiku",
+          "complexity_signals": ["Verification and release", "Depends on all 14 prior tasks"]
+        }
+      ]
+    }
+  ],
+  "uncovered_plan_sections": []
+}
