@@ -152,7 +152,7 @@ The hook NEVER writes files, NEVER launches agents, and NEVER runs diffs. Target
 
 ### graph-schema.json
 
-v2.0 ships a formal JSON Schema at `.code-atlas/graph-schema.json` that describes the full shape of both `atlas.json` and `state.json`. Validators, editors, and downstream tooling can reference this schema for autocomplete and lint checks.
+v2.0 ships `graph-schema.json`: a semantic dependency graph with annotated modules/files (roles, criticality, stability, test_coverage) and dependency edges (type, strength, directionality, impact), queryable via `/code-atlas:query`.
 
 ### /code-atlas:query
 
@@ -169,6 +169,7 @@ Supported query types:
 | `filter` | Return files or directories matching a predicate (e.g. category, path glob, role) |
 | `dependencies_of` | List every module that the given file imports, transitively or direct-only |
 | `dependents_of` | List every module that imports the given file (reverse dependency lookup) |
+| `transitive_dependents` | Find all modules that transitively depend on a given module (full upstream consumer set) |
 
 See [docs/query-language-reference.md](docs/query-language-reference.md) for the full query syntax.
 

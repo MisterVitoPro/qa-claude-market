@@ -40,6 +40,7 @@ export type NodeRole =
   | "middleware"
   | "model"
   | "public_api"
+  | "route_definition"
   | "internal";
 
 /**
