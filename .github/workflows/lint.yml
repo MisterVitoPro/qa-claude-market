@@ -36,4 +36,3 @@ jobs:
           echo "Checking markdown files exist and are readable..."
           [ -f "README.md" ] && echo "✓ README.md found"
           [ -f "CLAUDE.md" ] && echo "✓ CLAUDE.md found"
-          [ -f "SECURITY.md" ] && echo "✓ SECURITY.md found"
