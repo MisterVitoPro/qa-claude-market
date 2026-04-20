@@ -1,0 +1,32 @@
+{
+  "generated_at": "2026-04-19T18:00:00Z",
+  "jupiter_version": "0.1.0",
+  "mode": "module",
+  "root": "docs/master-spec/",
+  "buckets": {
+    "qa-swarm": {
+      "summary": "Multi-agent QA analyzer with TDD fix pipeline",
+      "files": [
+        {
+          "path": "qa-swarm/MASTER-SPEC.md",
+          "loc": 814,
+          "topics": ["agents", "bug-aggregation", "tdd"],
+          "sections": [
+            { "heading": "## Architecture", "line": 42, "loc": 180 }
+          ],
+          "split_candidate": true,
+          "split_reason": "exceeds 800 LOC; 3 top-level sections >=150 LOC each",
+          "cross_refs": ["../code-atlas/graph-language.md"]
+        }
+      ],
+      "gaps_count": 7
+    }
+  },
+  "split_candidates": ["qa-swarm/MASTER-SPEC.md"],
+  "total_loc": 4603,
+  "scan_summary": {
+    "public_surface_found": 34,
+    "configs_found": 12,
+    "behavioral_gaps_found": 0
+  }
+}

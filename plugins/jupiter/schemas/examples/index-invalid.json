@@ -1,0 +1,14 @@
+{
+  "generated_at": "2026-04-19T18:00:00Z",
+  "jupiter_version": "0.1.0",
+  "mode": "hybrid",
+  "root": "docs/master-spec/",
+  "buckets": {},
+  "split_candidates": [],
+  "total_loc": 0,
+  "scan_summary": {
+    "public_surface_found": 0,
+    "configs_found": 0,
+    "behavioral_gaps_found": 0
+  }
+}
