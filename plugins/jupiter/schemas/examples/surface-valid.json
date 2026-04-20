@@ -1,0 +1,25 @@
+{
+  "per_module": {
+    "code-atlas": {
+      "public_surface": [
+        {
+          "name": "atlas-dependencies",
+          "kind": "agent",
+          "location": "plugins/code-atlas/agents/atlas-dependencies.md",
+          "one_line_summary": "Extracts module dependency graph from import statements",
+          "confidence": "high"
+        }
+      ],
+      "configs": [
+        {
+          "name": "CODE_ATLAS_MAX_DEPTH",
+          "kind": "env_var",
+          "location": ".env.example:12",
+          "one_line_summary": "Maximum recursion depth for graph synthesis",
+          "confidence": "high"
+        }
+      ],
+      "behavioral_gaps": []
+    }
+  }
+}

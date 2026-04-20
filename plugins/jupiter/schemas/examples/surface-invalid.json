@@ -1,0 +1,17 @@
+{
+  "per_module": {
+    "code-atlas": {
+      "public_surface": [
+        {
+          "name": "atlas-dependencies",
+          "kind": "agent",
+          "location": "plugins/code-atlas/agents/atlas-dependencies.md",
+          "one_line_summary": "Extracts module dependency graph from import statements"
+        }
+      ],
+      "configs": [],
+      "behavioral_gaps": []
+    }
+  },
+  "unknown_field": true
+}
