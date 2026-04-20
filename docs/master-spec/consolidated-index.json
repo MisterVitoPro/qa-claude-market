@@ -1,0 +1,221 @@
+{
+  "generated_at": "2026-04-20T05:05:23Z",
+  "jupiter_version": "0.1.0",
+  "mode": "module",
+  "root": "docs/master-spec/",
+  "consolidated_files": [
+    "docs/master-spec/CONSOLIDATED-code-atlas.md",
+    "docs/master-spec/CONSOLIDATED-jupiter.md",
+    "docs/master-spec/CONSOLIDATED-plan-runner.md",
+    "docs/master-spec/CONSOLIDATED-qa-swarm.md",
+    "docs/master-spec/CONSOLIDATED-shared.md"
+  ],
+  "buckets": {
+    "code-atlas": {
+      "summary": "surface-only bucket; 31 undocumented entries",
+      "source_file": "docs/master-spec/CONSOLIDATED-code-atlas.md",
+      "sections": [],
+      "gaps_count": 31
+    },
+    "jupiter": {
+      "summary": "adopt / jupiter / surface-scanner",
+      "source_file": "docs/master-spec/CONSOLIDATED-jupiter.md",
+      "sections": [
+        {
+          "anchor": "#readme",
+          "original_path": "plugins/jupiter/README.md",
+          "heading": "## README",
+          "line": 7,
+          "loc": 60,
+          "topics": [
+            "jupiter",
+            "adopt",
+            "rewrite",
+            "surface-scanner",
+            "index",
+            "spec-consolidation"
+          ]
+        },
+        {
+          "anchor": "#2026-04-19-jupiter-plugin-design",
+          "original_path": "plugins/jupiter/docs/superpowers/specs/2026-04-19-jupiter-plugin-design.md",
+          "heading": "## 2026-04-19-jupiter-plugin-design",
+          "line": 67,
+          "loc": 411,
+          "topics": [
+            "jupiter",
+            "spec-consolidation",
+            "surface-scanner",
+            "adopt",
+            "index",
+            "incremental"
+          ]
+        },
+        {
+          "anchor": "#2026-04-19-jupiter-plugin",
+          "original_path": "plugins/jupiter/docs/superpowers/plans/2026-04-19-jupiter-plugin.md",
+          "heading": "## 2026-04-19-jupiter-plugin",
+          "line": 478,
+          "loc": 2491,
+          "topics": [
+            "implementation-plan",
+            "jupiter",
+            "schemas",
+            "adopt",
+            "rewrite",
+            "surface-scanner"
+          ]
+        }
+      ],
+      "gaps_count": 10
+    },
+    "plan-runner": {
+      "summary": "agents / plan-runner / verification",
+      "source_file": "docs/master-spec/CONSOLIDATED-plan-runner.md",
+      "sections": [
+        {
+          "anchor": "#readme",
+          "original_path": "plugins/plan-runner/README.md",
+          "heading": "## README",
+          "line": 7,
+          "loc": 62,
+          "topics": [
+            "plan-runner",
+            "agents",
+            "waves",
+            "verification",
+            "installation"
+          ]
+        },
+        {
+          "anchor": "#2026-04-15-plan-runner-design",
+          "original_path": "plugins/plan-runner/docs/superpowers/specs/2026-04-15-plan-runner-design.md",
+          "heading": "## 2026-04-15-plan-runner-design",
+          "line": 69,
+          "loc": 419,
+          "topics": [
+            "plan-runner",
+            "agents",
+            "parallel",
+            "waves",
+            "verification",
+            "bug-aggregation",
+            "orchestration"
+          ]
+        },
+        {
+          "anchor": "#2026-04-15-plan-runner",
+          "original_path": "plugins/plan-runner/docs/superpowers/plans/2026-04-15-plan-runner.md",
+          "heading": "## 2026-04-15-plan-runner",
+          "line": 488,
+          "loc": 1640,
+          "topics": [
+            "implementation-plan",
+            "plan-runner",
+            "agents",
+            "waves",
+            "verification",
+            "schemas"
+          ]
+        }
+      ],
+      "gaps_count": 14
+    },
+    "qa-swarm": {
+      "summary": "agents / tdd / orchestration",
+      "source_file": "docs/master-spec/CONSOLIDATED-qa-swarm.md",
+      "sections": [
+        {
+          "anchor": "#2026-04-02-qa-swarm-plugin-design",
+          "original_path": "plugins/qa-swarm/docs/superpowers/specs/2026-04-02-qa-swarm-plugin-design.md",
+          "heading": "## 2026-04-02-qa-swarm-plugin-design",
+          "line": 7,
+          "loc": 518,
+          "topics": [
+            "qa",
+            "agents",
+            "orchestration",
+            "security",
+            "priority",
+            "tdd",
+            "multi-agent"
+          ]
+        },
+        {
+          "anchor": "#master-spec",
+          "original_path": "plugins/qa-swarm/docs/MASTER-SPEC.md",
+          "heading": "## MASTER-SPEC",
+          "line": 525,
+          "loc": 694,
+          "topics": [
+            "qa",
+            "agents",
+            "tdd",
+            "priority",
+            "aggregation",
+            "security",
+            "orchestration"
+          ]
+        },
+        {
+          "anchor": "#readme",
+          "original_path": "plugins/qa-swarm/README.md",
+          "heading": "## README",
+          "line": 1219,
+          "loc": 260,
+          "topics": [
+            "qa",
+            "agents",
+            "security",
+            "tdd",
+            "parallel",
+            "installation"
+          ]
+        },
+        {
+          "anchor": "#2026-04-02-qa-swarm-plugin",
+          "original_path": "plugins/qa-swarm/docs/superpowers/plans/2026-04-02-qa-swarm-plugin.md",
+          "heading": "## 2026-04-02-qa-swarm-plugin",
+          "line": 1479,
+          "loc": 2711,
+          "topics": [
+            "implementation-plan",
+            "agents",
+            "tdd",
+            "orchestration",
+            "plugin-scaffold"
+          ]
+        }
+      ],
+      "gaps_count": 22
+    },
+    "shared": {
+      "summary": "code-atlas / installation / marketplace",
+      "source_file": "docs/master-spec/CONSOLIDATED-shared.md",
+      "sections": [
+        {
+          "anchor": "#readme",
+          "original_path": "README.md",
+          "heading": "## README",
+          "line": 7,
+          "loc": 97,
+          "topics": [
+            "marketplace",
+            "plugins",
+            "installation",
+            "qa-swarm",
+            "code-atlas",
+            "plan-runner"
+          ]
+        }
+      ],
+      "gaps_count": 3
+    }
+  },
+  "total_loc": 9498,
+  "scan_summary": {
+    "public_surface_found": 60,
+    "configs_found": 20,
+    "behavioral_gaps_found": 0
+  }
+}
