@@ -125,3 +125,13 @@ Internal operational cache. Unbounded.
 - External: bare package name (e.g. `express`, not `node_modules/express/index.js`).
 - Relative: join with importing file's directory, then lexical-normalize.
 - Unresolvable (e.g. aliased imports with no tsconfig): keep as-written.
+
+<!-- jupiter:surface-begin -->
+## Undocumented surface (auto-generated)
+
+- **code-atlas:map** (`plugins/code-atlas/skills/map/SKILL.md`) - Full repo scan producing atlas.json, state.json, graph-schema.json under .code-atlas/ <!-- TODO: expand -->
+- **code-atlas:query** (`plugins/code-atlas/skills/query/SKILL.md`) - Query graph-schema.json via JSON operation objects: dependencies_of, dependents_of, filter, transitive_dependents <!-- TODO: expand -->
+- **code-atlas:update** (`plugins/code-atlas/skills/update/SKILL.md`) - Incremental atlas update using file-hash diffing against state.json; pass 'full' to force rescan <!-- TODO: expand -->
+- **generateGraphSchema** (`plugins/code-atlas/src/graph-generator.ts:249`) - Synthesizes graph-schema.json GraphSchema from state.json data and graph-synthesizer agent metadata <!-- TODO: expand -->
+
+<!-- jupiter:surface-end -->

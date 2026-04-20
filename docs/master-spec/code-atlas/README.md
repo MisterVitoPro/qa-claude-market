@@ -221,3 +221,12 @@ Version is dynamically sourced from `plugin.json`. See badge at top of README.
 ## License
 
 MIT
+
+<!-- jupiter:surface-begin -->
+## Undocumented surface (auto-generated)
+
+- **atlas-dependencies** (`plugins/code-atlas/agents/atlas-dependencies.md`) - Haiku agent: traces imports to build module dependency graph, detect circular deps, summarize externals <!-- TODO: expand -->
+- **session_start** (`plugins/code-atlas/hooks/session-start/HOOK.md`) - SessionStart hook: loads .code-atlas/atlas.json into session context; suggests /code-atlas:map if missing <!-- TODO: expand -->
+- **parseQuery** (`plugins/code-atlas/src/query-executor.ts:87`) - Parses a JSON query string into a ParseResult (success/failure) for the Code Atlas query language <!-- TODO: expand -->
+
+<!-- jupiter:surface-end -->
