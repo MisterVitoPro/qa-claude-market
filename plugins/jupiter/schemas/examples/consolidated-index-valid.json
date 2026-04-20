@@ -1,0 +1,30 @@
+{
+  "generated_at": "2026-04-19T18:00:00Z",
+  "jupiter_version": "0.1.0",
+  "mode": "module",
+  "root": "docs/master-spec/",
+  "consolidated_files": ["CONSOLIDATED-qa-swarm.md", "CONSOLIDATED-code-atlas.md"],
+  "buckets": {
+    "qa-swarm": {
+      "summary": "Multi-agent QA analyzer",
+      "source_file": "CONSOLIDATED-qa-swarm.md",
+      "sections": [
+        {
+          "anchor": "#master-spec",
+          "original_path": "plugins/qa-swarm/docs/MASTER-SPEC.md",
+          "heading": "## MASTER-SPEC",
+          "line": 12,
+          "loc": 690,
+          "topics": ["qa", "agents", "tdd"]
+        }
+      ],
+      "gaps_count": 7
+    }
+  },
+  "total_loc": 4603,
+  "scan_summary": {
+    "public_surface_found": 34,
+    "configs_found": 12,
+    "behavioral_gaps_found": 0
+  }
+}

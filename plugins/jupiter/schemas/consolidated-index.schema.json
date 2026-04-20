@@ -1,0 +1,78 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Jupiter Consolidated Spec Index",
+  "type": "object",
+  "required": [
+    "generated_at",
+    "jupiter_version",
+    "mode",
+    "root",
+    "consolidated_files",
+    "buckets",
+    "total_loc",
+    "scan_summary"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "generated_at": { "type": "string", "format": "date-time" },
+    "jupiter_version": { "type": "string" },
+    "mode": { "enum": ["module", "feature"] },
+    "root": { "type": "string" },
+    "consolidated_files": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "buckets": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["summary", "source_file", "sections", "gaps_count"],
+        "additionalProperties": false,
+        "properties": {
+          "summary": { "type": "string" },
+          "source_file": { "type": "string" },
+          "sections": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "anchor",
+                "original_path",
+                "heading",
+                "line",
+                "loc",
+                "topics"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "anchor": { "type": "string" },
+                "original_path": { "type": "string" },
+                "heading": { "type": "string" },
+                "line": { "type": "integer", "minimum": 1 },
+                "loc": { "type": "integer", "minimum": 0 },
+                "topics": { "type": "array", "items": { "type": "string" } }
+              }
+            }
+          },
+          "gaps_count": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "total_loc": { "type": "integer", "minimum": 0 },
+    "scan_summary": {
+      "type": "object",
+      "required": [
+        "public_surface_found",
+        "configs_found",
+        "behavioral_gaps_found"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "public_surface_found": { "type": "integer", "minimum": 0 },
+        "configs_found": { "type": "integer", "minimum": 0 },
+        "behavioral_gaps_found": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

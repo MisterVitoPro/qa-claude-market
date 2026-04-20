@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Jupiter Surface Inventory",
+  "type": "object",
+  "required": ["per_module"],
+  "additionalProperties": false,
+  "properties": {
+    "per_module": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["public_surface", "configs", "behavioral_gaps"],
+        "additionalProperties": false,
+        "properties": {
+          "public_surface": { "$ref": "#/definitions/entry_array" },
+          "configs": { "$ref": "#/definitions/entry_array" },
+          "behavioral_gaps": { "$ref": "#/definitions/entry_array" }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "entry_array": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "kind", "location", "one_line_summary", "confidence"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "kind": { "type": "string" },
+          "location": { "type": "string" },
+          "one_line_summary": { "type": "string" },
+          "confidence": { "enum": ["high", "low"] }
+        }
+      }
+    }
+  }
+}

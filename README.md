@@ -31,6 +31,15 @@ Takes a free-form Markdown implementation plan and runs it through a parallel ag
 - Aggregator deduplicates bugs, ranks P0-P3, and produces a `fix-plan.md` for re-runs
 - Per-wave git commits keep history clean and bisectable
 
+### [jupiter](plugins/jupiter/) ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fqa-claude-market%2Fmain%2Fplugins%2Fjupiter%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&color=blue)
+
+Consolidates scattered specs into a canonical master-spec tree with a navigable index, and appends stubs for undocumented public surface found in code.
+
+- adopt command reorganizes spec files in place around a chosen root
+- rewrite command consolidates all specs to a single file with optional cleanup
+- index.json flags split candidates for review
+- surface scanner appends stubs for undocumented agents, skills, CLIs, and configs
+
 ## Installation
 
 Add the marketplace to Claude Code and install plugins individually:
@@ -43,6 +52,7 @@ claude plugin marketplace add MisterVitoPro/qa-claude-market
 claude plugin marketplace add MisterVitoPro/qa-claude-market --plugin qa-swarm
 claude plugin marketplace add MisterVitoPro/qa-claude-market --plugin code-atlas
 claude plugin marketplace add MisterVitoPro/qa-claude-market --plugin plan-runner
+claude plugin marketplace add MisterVitoPro/qa-claude-market --plugin jupiter
 ```
 
 Or add the marketplace once, then install each plugin by name:
@@ -62,6 +72,10 @@ claude plugin marketplace add MisterVitoPro/qa-claude-market --plugin code-atlas
 
 claude plugin marketplace add MisterVitoPro/qa-claude-market --plugin plan-runner
 /plan-runner:run my-plan.md
+
+claude plugin marketplace add MisterVitoPro/qa-claude-market --plugin jupiter
+/jupiter:adopt specs/
+/jupiter:rewrite specs/
 ```
 
 ## Contributing a Plugin

@@ -1,0 +1,15 @@
+{
+  "name": "jupiter",
+  "description": "Consolidate scattered specs into a canonical master-spec tree with a navigable index, and append stubs for undocumented public surface found in code",
+  "version": "0.1.0",
+  "license": "MIT",
+  "keywords": [
+    "specs",
+    "documentation",
+    "consolidation",
+    "index",
+    "codebase-scan",
+    "developer-tools"
+  ],
+  "repository": "https://github.com/MisterVitoPro/qa-claude-market"
+}

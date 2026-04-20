@@ -1,0 +1,96 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Jupiter Master Spec Index",
+  "type": "object",
+  "required": [
+    "generated_at",
+    "jupiter_version",
+    "mode",
+    "root",
+    "buckets",
+    "split_candidates",
+    "total_loc",
+    "scan_summary"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "generated_at": { "type": "string", "format": "date-time" },
+    "jupiter_version": { "type": "string" },
+    "mode": { "enum": ["module", "feature"] },
+    "root": { "type": "string" },
+    "buckets": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["summary", "files", "gaps_count"],
+        "additionalProperties": false,
+        "properties": {
+          "summary": { "type": "string" },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "path",
+                "loc",
+                "topics",
+                "sections",
+                "split_candidate",
+                "cross_refs"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "path": { "type": "string" },
+                "loc": { "type": "integer", "minimum": 0 },
+                "topics": { "type": "array", "items": { "type": "string" } },
+                "sections": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["heading", "line", "loc"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "heading": { "type": "string" },
+                      "line": { "type": "integer", "minimum": 1 },
+                      "loc": { "type": "integer", "minimum": 0 }
+                    }
+                  }
+                },
+                "split_candidate": { "type": "boolean" },
+                "split_reason": { "type": "string" },
+                "cross_refs": { "type": "array", "items": { "type": "string" } }
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "properties": { "split_candidate": { "const": true } },
+                    "required": ["split_candidate"]
+                  },
+                  "then": { "required": ["split_reason"] },
+                  "else": { "not": { "required": ["split_reason"] } }
+                }
+              ]
+            }
+          },
+          "gaps_count": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "split_candidates": { "type": "array", "items": { "type": "string" } },
+    "total_loc": { "type": "integer", "minimum": 0 },
+    "scan_summary": {
+      "type": "object",
+      "required": [
+        "public_surface_found",
+        "configs_found",
+        "behavioral_gaps_found"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "public_surface_found": { "type": "integer", "minimum": 0 },
+        "configs_found": { "type": "integer", "minimum": 0 },
+        "behavioral_gaps_found": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}
