@@ -59,7 +59,7 @@ claude
 ```
 
 Expected:
-- Module detection reports `module`
+- Module detection prints `Module detection: module (signal: 2)` (three `plugin.json` files trip signal 2)
 - `docs/master-spec/index.json` exists and validates against `schemas/index.schema.json`
 - Four buckets: `alpha`, `beta`, `gamma`, `shared`
 - `docs/master-spec/gamma/_surface.md` exists (no existing spec in gamma)
@@ -92,7 +92,7 @@ claude
 ```
 
 Expected:
-- Module detection reports `feature`
+- Module detection prints `Module detection: feature (signal: no signal matched)` (single root `package.json`, no nested manifests)
 - Buckets use `features/<name>/` layout
 - `rotateKey`, `DATABASE_URL`, `API_KEY`, and `LOG_LEVEL` appear as surface stubs
 - `healthCheck` appears as a stub (not mentioned in ui-design.md)

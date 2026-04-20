@@ -74,6 +74,8 @@ For each target output file:
 
    ```
 
+   Do NOT demote headings inside any `<!-- jupiter:surface-begin --> ... <!-- jupiter:surface-end -->` block. If the spec already contains such a block from a prior `jupiter:adopt` run, copy its contents through verbatim -- the block will be regenerated in full by step 3.4 below.
+
 4. After all specs in a bucket, append the surface stubs for that bucket using the matching rule from `jupiter:adopt` Step 4c. Inline stubs live inside the same `<!-- jupiter:surface-begin -->` / `<!-- jupiter:surface-end -->` markers, within the consolidated file.
 5. In multi-module mode, repeat for each bucket -- one output file per bucket.
 

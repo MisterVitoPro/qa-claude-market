@@ -9,5 +9,3 @@ token; `logout` invalidates it.
 
 - POST /login
 - POST /logout
-
-Note: the rotateKey function exists in src/auth.js but is not covered here.

@@ -59,7 +59,17 @@
                 "split_candidate": { "type": "boolean" },
                 "split_reason": { "type": "string" },
                 "cross_refs": { "type": "array", "items": { "type": "string" } }
-              }
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "properties": { "split_candidate": { "const": true } },
+                    "required": ["split_candidate"]
+                  },
+                  "then": { "required": ["split_reason"] },
+                  "else": { "not": { "required": ["split_reason"] } }
+                }
+              ]
             }
           },
           "gaps_count": { "type": "integer", "minimum": 0 }
