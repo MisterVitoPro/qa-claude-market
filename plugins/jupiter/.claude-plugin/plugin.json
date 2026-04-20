@@ -1,7 +1,7 @@
 {
   "name": "jupiter",
   "description": "Consolidate scattered specs into a canonical master-spec tree with a navigable index, and append stubs for undocumented public surface found in code",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "license": "MIT",
   "keywords": [
     "specs",

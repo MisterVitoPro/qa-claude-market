@@ -6,14 +6,21 @@ description: >
   agents, dispatch dev + verifier agents per wave, commit per wave, aggregate bugs at
   the end, and prompt to re-run with the generated fix-plan. Use when the user has a
   Markdown plan they want executed with built-in verification and bug-driven re-planning.
-argument-hint: "<path-to-plan.md>"
+argument-hint: "<path-to-plan.md> [--verbose]"
 ---
 
-You are orchestrating a plan-runner pipeline cycle. The user's plan path is:
+You are orchestrating a plan-runner pipeline cycle. The user's arguments are:
 
 **"{$ARGUMENTS}"**
 
 Follow this pipeline exactly. Do not skip steps.
+
+## Argument parsing
+
+Tokenize `{$ARGUMENTS}` on whitespace. The first non-flag token is the plan path. Flags:
+- `--verbose` -- if present, the analyzer emits per-wave `rationale` and per-agent `complexity_signals`. If absent, those fields are omitted (default; smaller analyzer output).
+
+Set `verbose = true | false` based on the flag. Strip flags before using the plan path.
 
 ## Timing
 
@@ -73,6 +80,25 @@ Continue anyway? (Y/n)
 
 Wait for user input. If `n` (or empty default), STOP. If `Y`, continue.
 
+### 1c-bis. Pick analyzer model (structure heuristic)
+
+Before dispatching the analyzer, compute a cheap structure score on the plan contents:
+
+- `task_boundary_count` = number of lines matching `^## ` OR `^### Task` OR `^Task \d+:` (case-sensitive).
+- `path_token_count` = number of tokens matching `(?:[\w.-]+/)+[\w.-]+\.[A-Za-z0-9]{1,5}` (path segments with a file extension).
+
+Use the Bash tool with `awk` / `grep -c` to count -- do NOT read the plan into your own context twice.
+
+Decision:
+- If `task_boundary_count >= 2` AND `path_token_count >= 2` AND `path_token_count >= task_boundary_count`: set `analyzer_model = "haiku"`. The plan is well-structured; DAG inference is mostly mechanical.
+- Otherwise: set `analyzer_model = "sonnet"`.
+
+Print one of:
+```
+Plan structure detected (N task markers, M explicit paths) -- using haiku for analyzer.
+Plan is free-form -- using sonnet for analyzer.
+```
+
 ### 1d. Detect Context7 MCP
 
 Check whether the tools `mcp__context7__resolve-library-id` and `mcp__context7__query-docs` are available in this session. Set `context7_available = true | false`.
@@ -106,17 +132,26 @@ Print:
 [Phase 1/4] Analyzing plan and computing wave plan...
 ```
 
-Dispatch ONE plan-analyzer agent with the full plan contents inlined:
+Prepare the plan contents with 1-indexed line-number prefixes. Using Bash:
+
+```bash
+awk '{printf "%4d\t%s\n", NR, $0}' "<plan path>"
+```
+
+Capture the result as `PLAN_WITH_LINES`.
+
+Dispatch ONE plan-analyzer agent with the prefixed plan inlined:
 
 ```
 You are being deployed as the plan-analyzer for plan-runner cycle <cycle_n>.
 
 Source plan path: <plan path>
 Context7 available: <bool>
+Verbose: <verbose>
 
-PLAN CONTENTS:
+PLAN CONTENTS (1-indexed line-number prefixes):
 <<<
-<full plan file contents inlined here>
+<PLAN_WITH_LINES inlined here>
 >>>
 
 <inline the full content of plugins/plan-runner/agents/plan-analyzer.md here as your instructions>
@@ -124,15 +159,16 @@ PLAN CONTENTS:
 Return only the JSON wave plan, nothing else.
 ```
 
-Run the agent in foreground (you need its output to proceed). Use `model: sonnet` regardless of analyzer's recommended_model field (that field applies to dev agents).
+Run the agent in foreground (you need its output to proceed). Use `model: <analyzer_model>` from step 1c-bis (that field applies to the analyzer itself; per-task `recommended_model` applies to dev agents downstream).
 
 When the agent returns, parse the JSON. If parsing fails:
 - Retry ONCE with: "Your previous response could not be parsed as JSON. Return ONLY a single JSON object matching wave-plan.schema.json, with no prose before or after."
 - If second attempt also fails, print the agent's raw output and STOP.
 
 Validate the wave plan:
-1. Conforms to `plugins/plan-runner/schemas/wave-plan.schema.json` (use Python+jsonschema if available; otherwise structural check: required fields present, agent counts <=6, file paths unique within each wave).
+1. Conforms to `plugins/plan-runner/schemas/wave-plan.schema.json` (use Python+jsonschema if available; otherwise structural check: required fields present, agent counts <=6, file paths unique within each wave). Note that `rationale` and `complexity_signals` are optional -- do NOT fail validation if they are absent.
 2. Within each wave, the union of `owned_files` across all agents has no duplicates.
+3. Every agent has a `task_excerpt_lines` matching `^[0-9]+-[0-9]+$` where START <= END and END <= total lines in the plan file.
 
 If validation fails, print the failure reason and STOP. Do NOT auto-retry beyond what is specified above (avoid infinite loops).
 
@@ -195,12 +231,9 @@ You are being deployed as a dev agent for plan-runner cycle <cycle_n>, wave <W>.
 
 agent_id: <agent_id>
 task_title: <task_title>
+plan_path: <absolute path to the source plan>
+task_excerpt_lines: <task_excerpt_lines>
 context7_available: <bool>
-
-TASK EXCERPT:
-<<<
-<task_excerpt>
->>>
 
 OWNED FILES (you may write only these):
 <owned_files joined with newlines>
@@ -212,6 +245,8 @@ ACCEPTANCE CRITERIA:
 
 Return only the JSON status, nothing else.
 ```
+
+The dev agent reads the task prose from `plan_path` using the line range -- the orchestrator does not inline the task text. This keeps dev prompts small and lets multiple agents in a wave share one cached plan read.
 
 Use the `recommended_model` from the wave-plan for each agent.
 

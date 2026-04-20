@@ -5,7 +5,7 @@ description: >
   surface (agents, skills, CLI commands, exports, hooks, MCP tools) and
   configuration (env vars, schemas, manifest fields). Optionally performs a
   deeper pass over nontrivial behavior. Returns strict JSON for the orchestrator.
-model: sonnet
+model: haiku
 color: cyan
 ---
 

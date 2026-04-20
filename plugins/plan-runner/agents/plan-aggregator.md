@@ -4,7 +4,7 @@ description: >
   plan-runner pipeline agent that reads all per-wave bug JSONs from a pipeline run,
   deduplicates and ranks bugs (P0-P3), produces a human-readable bugs.md summary, and
   generates a free-form Markdown fix-plan.md that is valid input for a re-run of /plan-runner:run.
-model: sonnet
+model: haiku
 color: red
 ---
 

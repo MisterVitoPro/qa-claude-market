@@ -10,8 +10,8 @@ Multi-plugin marketplace repository. Each plugin lives under `plugins/` with its
 |--------|---------|-------------|
 | `qa-swarm` | 1.4.1 | AI-powered code quality analyzer: 6 Sonnet core agents + optional Haiku, 3-agent parallel TDD, fresh-context subagent handoff, Context7 MCP baseline across all agents |
 | `code-atlas` | 2.0.0 | Architecture index generator with semantic graph -- writes .code-atlas/atlas.json, state.json, and graph-schema.json, loaded by session-start hook. Queryable via /code-atlas:query. Directory map, tech stack, patterns, dependencies. |
-| `plan-runner` | 0.3.0 | Run a Markdown implementation plan through a parallel agent swarm: analyze into waves, dispatch dev + verifier agents, aggregate bugs into a fix-plan, re-run on demand |
-| `jupiter` | 0.1.0 | Consolidate scattered specs into a canonical master-spec tree -- adopt command reorganizes in place; rewrite command consolidates to single file with optional cleanup; index.json flags split candidates; surface scanner appends stubs for undocumented agents/skills/CLIs/configs |
+| `plan-runner` | 0.4.0 | Run a Markdown implementation plan through a parallel agent swarm: analyze into waves, dispatch dev + verifier agents, aggregate bugs into a fix-plan, re-run on demand |
+| `jupiter` | 0.1.1 | Consolidate scattered specs into a canonical master-spec tree -- adopt command reorganizes in place; rewrite command consolidates to single file with optional cleanup; index.json flags split candidates; surface scanner appends stubs for undocumented agents/skills/CLIs/configs |
 
 ### Directory Layout
 
@@ -20,8 +20,8 @@ Multi-plugin marketplace repository. Each plugin lives under `plugins/` with its
 plugins/
   qa-swarm/.claude-plugin/plugin.json        # manifest (v1.4.1)
   code-atlas/.claude-plugin/plugin.json      # manifest (v2.0.0)
-  plan-runner/.claude-plugin/plugin.json     # manifest (v0.3.0)
-  jupiter/.claude-plugin/plugin.json         # manifest (v0.1.0)
+  plan-runner/.claude-plugin/plugin.json     # manifest (v0.4.0)
+  jupiter/.claude-plugin/plugin.json         # manifest (v0.1.1)
 ```
 
 ## Adding a Plugin
@@ -59,13 +59,13 @@ plugins/                    # Root directory containing all plugins
     agents/                 # 4 analysis agents (structure, patterns, dependencies, graph synthesizer)
     skills/                 # User-facing commands: map (full scan), update (incremental), query (graph interrogation)
     hooks/                  # SessionStart hook for auto-staleness detection
-  plan-runner/                # Plan-driven parallel agent orchestrator (v0.3.0)
+  plan-runner/                # Plan-driven parallel agent orchestrator (v0.4.0)
     .claude-plugin/
     agents/                   # 4 agents (analyzer, dev, verifier, aggregator)
     skills/                   # User-facing command: run
     schemas/                  # JSON Schemas for agent contracts
     test-fixtures/            # Reference plans for smoke testing
-  jupiter/                  # Spec consolidation + codebase surface scanner (v0.1.0)
+  jupiter/                  # Spec consolidation + codebase surface scanner (v0.1.1)
     .claude-plugin/         # Plugin manifest and metadata
     agents/                 # 2 pipeline agents (spec-cataloger, surface-scanner)
     skills/                 # User-facing commands: adopt, rewrite

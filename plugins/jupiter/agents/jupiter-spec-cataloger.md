@@ -5,7 +5,7 @@ description: >
   per-module doc dirs, extracts path/loc/mtime/headings/topics, proposes a
   module-or-feature bucket layout, and returns a strict JSON catalog for the
   orchestrator to act on.
-model: sonnet
+model: haiku
 color: purple
 ---
 
