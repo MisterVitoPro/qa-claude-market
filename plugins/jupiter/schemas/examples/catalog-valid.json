@@ -1,0 +1,25 @@
+{
+  "mode": "module",
+  "specs": [
+    {
+      "path": "plugins/qa-swarm/docs/MASTER-SPEC.md",
+      "loc": 690,
+      "mtime": "2026-04-10T12:00:00Z",
+      "topics": ["qa", "agents", "tdd", "aggregation"],
+      "bucket": "qa-swarm",
+      "headings": [
+        { "heading": "## Architecture", "line": 42, "loc": 180 }
+      ],
+      "cross_refs": ["plugins/code-atlas/docs/2026-04-14-v1.2-design.md"]
+    }
+  ],
+  "proposed_layout": {
+    "qa-swarm": ["plugins/qa-swarm/docs/MASTER-SPEC.md"]
+  },
+  "cross_refs": [
+    {
+      "from": "plugins/qa-swarm/docs/MASTER-SPEC.md",
+      "to": "plugins/code-atlas/docs/2026-04-14-v1.2-design.md"
+    }
+  ]
+}
