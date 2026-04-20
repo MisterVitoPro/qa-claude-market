@@ -31,6 +31,12 @@
       "description": "Take a Markdown implementation plan, run it through a parallel agent swarm with per-wave verification, and generate a bug-fix plan for re-runs",
       "source": "./plugins/plan-runner",
       "category": "development"
+    },
+    {
+      "name": "jupiter",
+      "description": "Consolidate scattered specs into a canonical master-spec tree with a navigable index, and append stubs for undocumented public surface found in code",
+      "source": "./plugins/jupiter",
+      "category": "development"
     }
   ]
 }
