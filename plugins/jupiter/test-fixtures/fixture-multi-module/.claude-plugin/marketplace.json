@@ -1,0 +1,8 @@
+{
+  "name": "jupiter-test-multi",
+  "plugins": [
+    { "name": "alpha", "source": "./plugins/alpha" },
+    { "name": "beta", "source": "./plugins/beta" },
+    { "name": "gamma", "source": "./plugins/gamma" }
+  ]
+}
