@@ -1,0 +1,18 @@
+{
+  "description": "Code Atlas SessionStart hook: loads .code-atlas/atlas.json into session context as a read-only architecture primer.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/session-start.js\"",
+            "timeout": 10,
+            "statusMessage": "Loading Code Atlas index..."
+          }
+        ]
+      }
+    ]
+  }
+}

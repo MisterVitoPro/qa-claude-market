@@ -9,8 +9,8 @@ Multi-plugin marketplace repository. Each plugin lives under `plugins/` with its
 | Plugin | Version | Description |
 |--------|---------|-------------|
 | `qa-swarm` | 1.4.1 | AI-powered code quality analyzer: 6 Sonnet core agents + optional Haiku, 3-agent parallel TDD, fresh-context subagent handoff, Context7 MCP baseline across all agents |
-| `code-atlas` | 2.0.0 | Architecture index generator with semantic graph -- writes .code-atlas/atlas.json, state.json, and graph-schema.json, loaded by session-start hook. Queryable via /code-atlas:query. Directory map, tech stack, patterns, dependencies. |
-| `plan-runner` | 0.4.0 | Run a Markdown implementation plan through a parallel agent swarm: analyze into waves, dispatch dev + verifier agents, aggregate bugs into a fix-plan, re-run on demand |
+| `code-atlas` | 2.0.1 | Architecture index generator with semantic graph -- writes .code-atlas/atlas.json, state.json, and graph-schema.json, loaded by session-start hook. Queryable via /code-atlas:query. Directory map, tech stack, patterns, dependencies. |
+| `plan-runner` | 0.4.1 | Run a Markdown implementation plan through a parallel agent swarm: analyze into waves, dispatch dev + verifier agents, aggregate bugs into a fix-plan, re-run on demand |
 | `jupiter` | 0.1.1 | Consolidate scattered specs into a canonical master-spec tree -- adopt command reorganizes in place; rewrite command consolidates to single file with optional cleanup; index.json flags split candidates; surface scanner appends stubs for undocumented agents/skills/CLIs/configs |
 
 ### Directory Layout
@@ -19,8 +19,8 @@ Multi-plugin marketplace repository. Each plugin lives under `plugins/` with its
 .claude-plugin/marketplace.json              # central registry
 plugins/
   qa-swarm/.claude-plugin/plugin.json        # manifest (v1.4.1)
-  code-atlas/.claude-plugin/plugin.json      # manifest (v2.0.0)
-  plan-runner/.claude-plugin/plugin.json     # manifest (v0.4.0)
+  code-atlas/.claude-plugin/plugin.json      # manifest (v2.0.1)
+  plan-runner/.claude-plugin/plugin.json     # manifest (v0.4.1)
   jupiter/.claude-plugin/plugin.json         # manifest (v0.1.1)
 ```
 
