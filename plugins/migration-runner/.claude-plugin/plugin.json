@@ -1,0 +1,23 @@
+{
+  "name": "migration-runner",
+  "description": "Vulnerability-aware dependency upgrade orchestrator. Detects outdated packages across npm, Python, Go, Rust, Java, Kotlin, and C# ecosystems; recommends the safest-yet-most-recent version per package using OSV.dev; executes upgrades wave-by-wave with build/typecheck/test verification and clean git rollback on failure.",
+  "version": "0.1.0",
+  "license": "MIT",
+  "keywords": [
+    "dependency-management",
+    "vulnerability-scanning",
+    "package-upgrade",
+    "osv",
+    "supply-chain-security",
+    "multi-ecosystem",
+    "npm",
+    "python",
+    "go",
+    "rust",
+    "maven",
+    "gradle",
+    "nuget",
+    "developer-tools"
+  ],
+  "repository": "https://github.com/MisterVitoPro/qa-claude-market"
+}
