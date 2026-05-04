@@ -1,0 +1,5 @@
+{
+  "dependencies": [
+    { "name": "serde", "project": "1.0.180", "compat": "1.0.180", "latest": "1.0.210", "kind": "Normal", "platform": null }
+  ]
+}
