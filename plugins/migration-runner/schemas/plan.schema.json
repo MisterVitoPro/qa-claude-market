@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "migration-runner plan.json",
+  "type": "object",
+  "required": ["schema_version", "generated_at", "soak_days", "allow_major", "waves", "available_majors"],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "soak_days": { "type": "integer", "minimum": 0 },
+    "allow_major": { "type": "boolean" },
+    "waves": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["wave_index", "ecosystem", "manifest_path", "package", "from_version", "to_version", "risk", "rationale", "depends_on_waves"],
+        "properties": {
+          "wave_index": { "type": "integer", "minimum": 1 },
+          "ecosystem": { "enum": ["npm", "python", "go", "rust", "java", "kotlin", "csharp"] },
+          "manifest_path": { "type": "string" },
+          "package": { "type": "string" },
+          "from_version": { "type": "string" },
+          "to_version": { "type": "string" },
+          "risk": { "enum": ["normal", "elevated", "major-required"] },
+          "rationale": { "type": "string" },
+          "depends_on_waves": { "type": "array", "items": { "type": "integer" } }
+        }
+      }
+    },
+    "available_majors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["ecosystem", "package", "from_version", "to_version", "rationale"],
+        "properties": {
+          "ecosystem": { "type": "string" },
+          "package": { "type": "string" },
+          "from_version": { "type": "string" },
+          "to_version": { "type": "string" },
+          "rationale": { "type": "string" }
+        }
+      }
+    }
+  }
+}

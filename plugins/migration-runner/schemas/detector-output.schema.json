@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "migration-detector agent output",
+  "type": "object",
+  "required": ["ecosystem", "manifest_path", "outdated"],
+  "properties": {
+    "ecosystem": { "enum": ["npm", "python", "go", "rust", "java", "kotlin", "csharp"] },
+    "manifest_path": { "type": "string" },
+    "outdated": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "current"],
+        "properties": {
+          "name": { "type": "string" },
+          "current": { "type": "string" },
+          "latest_known": { "type": "string" }
+        }
+      }
+    }
+  }
+}

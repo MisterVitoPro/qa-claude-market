@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "migration-runner state.json",
+  "type": "object",
+  "required": ["plan_generated_at", "waves"],
+  "properties": {
+    "plan_generated_at": { "type": "string", "format": "date-time" },
+    "waves": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["wave_index", "package", "status"],
+        "properties": {
+          "wave_index": { "type": "integer", "minimum": 1 },
+          "package": { "type": "string" },
+          "status": { "enum": ["pending", "completed", "failed"] },
+          "commit_sha": { "type": "string" },
+          "verifier_log": { "type": "string" }
+        }
+      }
+    }
+  }
+}

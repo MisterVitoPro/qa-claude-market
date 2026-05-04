@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "migration-verifier agent output",
+  "type": "object",
+  "required": ["status"],
+  "properties": {
+    "status": { "enum": ["pass", "fail"] },
+    "failed_step": { "enum": ["build", "typecheck", "test", null] },
+    "stdout_tail": { "type": "string" },
+    "full_output_path": { "type": "string" }
+  }
+}
