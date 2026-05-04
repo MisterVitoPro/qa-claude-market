@@ -21,10 +21,11 @@ You are a focused detector that produces a single JSON object describing outdate
    ```
    node "${CLAUDE_PLUGIN_ROOT}/scripts/adapter.js" <ECOSYSTEM> detect
    ```
-   If the command prints empty output, return:
+   If the command prints empty output or returns null, return:
    ```json
-   { "ecosystem": "<ECOSYSTEM>", "manifest_path": null, "outdated": [] }
+   { "ecosystem": "<ECOSYSTEM>", "manifest_path": "", "outdated": [] }
    ```
+   Use an empty string `""` (never `null`) for `manifest_path` when no manifest is found. This satisfies `detector-output.schema.json`.
 
 2. Otherwise, get the outdated list:
    ```
@@ -45,7 +46,8 @@ You are a focused detector that produces a single JSON object describing outdate
 - Output ONLY the JSON object. No prose. No code fences in your final response.
 - If a command exits non-zero, capture the stderr and return:
   ```json
-  { "ecosystem": "<ECOSYSTEM>", "manifest_path": null, "outdated": [], "error": "<stderr trimmed to 500 chars>" }
+  { "ecosystem": "<ECOSYSTEM>", "manifest_path": "", "outdated": [], "error": "<stderr trimmed to 500 chars>" }
   ```
+  Use an empty string `""` (never `null`) for `manifest_path` in error cases.
 - Do not edit any files. Do not call any other tools beyond Bash.
 - Validate your output against `${CLAUDE_PLUGIN_ROOT}/schemas/detector-output.schema.json` mentally before returning.

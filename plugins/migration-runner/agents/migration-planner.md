@@ -41,7 +41,16 @@ You are the planner. Take the merged outdated list from N detectors and produce 
    Each call returns `{ target, rationale, risk, skipped }`.
 
 5. **Build the plan**:
-   - For each package where `target` is not null: append a wave object to `waves` with the next `wave_index`, the chosen `to_version`, the `rationale`, and `depends_on_waves: []`.
+   - For each package where `target` is not null: append a wave object to `waves` with ALL required fields:
+     - `wave_index`: next integer (1-based, incrementing)
+     - `ecosystem`: the package's ecosystem (e.g. `"npm"`)
+     - `manifest_path`: the manifest_path from the detector output for this ecosystem
+     - `package`: the package name
+     - `from_version`: the current version from the detector output
+     - `to_version`: the chosen `target` version from the ranker
+     - `risk`: the risk value from the ranker (`"normal"`, `"elevated"`, or `"major-required"`)
+     - `rationale`: the rationale string from the ranker
+     - `depends_on_waves`: `[]` (filled in by step 6 after topological sort)
    - For each package whose ranker returned `risk: "major-required"` (or any cross-major version exists when ALLOW_MAJOR is false): append an entry to `available_majors` with the highest available major.
 
 6. **Topologically sort waves** within each ecosystem so common dependency parents go first. Heuristic for v0.1: for npm, upgrade `react` before `react-dom`, `vue` before `vue-router`, `@types/X` after `X`. For other ecosystems, use insertion order. Encode the rule as a small per-ecosystem ordering hint.
@@ -49,7 +58,13 @@ You are the planner. Take the merged outdated list from N detectors and produce 
 7. **Order ecosystems** in the final waves list: Go, Rust, Python, npm, Java, Kotlin, C#.
 
 8. **Write** the two output files to the user's repo:
-   - `docs/migration-runner/plan.json` — schema in `${CLAUDE_PLUGIN_ROOT}/schemas/plan.schema.json`.
+   - `docs/migration-runner/plan.json` — schema in `${CLAUDE_PLUGIN_ROOT}/schemas/plan.schema.json`. The JSON object MUST include ALL of the following top-level fields:
+     - `schema_version`: the string `"1.0"` (required literal)
+     - `generated_at`: current ISO 8601 timestamp (e.g. `"2026-05-03T14:00:00Z"`)
+     - `soak_days`: integer from the SOAK_DAYS input
+     - `allow_major`: boolean from the ALLOW_MAJOR input
+     - `waves`: the ordered waves array from steps 5–7
+     - `available_majors`: the array from step 5 (may be empty `[]`)
    - `docs/migration-runner/migration-plan.md` — human-readable, grouped by ecosystem; one section per package showing from/to, rationale, risk, OSV advisory IDs, and a "Skipped versions" subsection. Append "Available major upgrades (not planned)" appendix when `available_majors` is non-empty.
 
 9. **If a stale `docs/migration-runner/fix-plan.md` exists**, print one line warning: `previous run halted on <package>; this plan supersedes it.` Then delete `.migration-runner/state.json` if it exists.

@@ -5,7 +5,7 @@
   "required": ["ecosystem", "manifest_path", "outdated"],
   "properties": {
     "ecosystem": { "enum": ["npm", "python", "go", "rust", "java", "kotlin", "csharp"] },
-    "manifest_path": { "type": "string" },
+    "manifest_path": { "type": ["string", "null"] },
     "outdated": {
       "type": "array",
       "items": {

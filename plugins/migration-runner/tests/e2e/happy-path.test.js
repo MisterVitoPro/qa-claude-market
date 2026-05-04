@@ -14,8 +14,11 @@ before(() => {
     path.join(__dirname, "../../test-fixtures/e2e-npm-happy/package.json"),
     path.join(REPO, "package.json"),
   );
-  execSync("git init -q && git config user.email t@t && git config user.name t", { cwd: REPO });
-  execSync("git add -A && git commit -q -m initial", { cwd: REPO });
+  execSync("git init -q", { cwd: REPO });
+  execSync("git config user.email t@t", { cwd: REPO });
+  execSync("git config user.name t", { cwd: REPO });
+  execSync("git add -A", { cwd: REPO });
+  execSync("git commit -q -m initial", { cwd: REPO });
 });
 
 after(() => fs.rmSync(REPO, { recursive: true, force: true }));

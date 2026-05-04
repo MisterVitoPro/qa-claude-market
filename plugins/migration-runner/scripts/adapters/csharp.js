@@ -1,7 +1,7 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
-const { execSync } = require("child_process");
+const child_process = require("child_process");
 
 function detect(cwd) {
   const entries = fs.readdirSync(cwd);
@@ -29,7 +29,7 @@ function _parseOutdated(json) {
 function listOutdated(cwd) {
   let stdout = "";
   try {
-    stdout = execSync("dotnet list package --outdated --format json", { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
+    stdout = child_process.execSync("dotnet list package --outdated --format json", { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
   } catch (e) {
     stdout = e.stdout || "";
   }
@@ -50,7 +50,7 @@ async function listAvailableVersions(name) {
 
 function applyUpgrade(cwd, name, version) {
   try {
-    execSync(`dotnet add package ${name} --version ${version}`, { cwd, stdio: ["ignore", "pipe", "pipe"] });
+    child_process.execSync(`dotnet add package ${name} --version ${version}`, { cwd, stdio: ["ignore", "pipe", "pipe"] });
     return { success: true };
   } catch (e) {
     return { success: false, stderr: String(e.stderr || e.message) };

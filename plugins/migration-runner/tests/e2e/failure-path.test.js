@@ -9,21 +9,27 @@ let REPO;
 before(() => {
   REPO = fs.mkdtempSync(path.join(os.tmpdir(), "mr-e2e-fail-"));
   fs.writeFileSync(path.join(REPO, "README.md"), "init");
-  execSync("git init -q && git config user.email t@t && git config user.name t", { cwd: REPO });
-  execSync("git add -A && git commit -q -m initial", { cwd: REPO });
+  execSync("git init -q", { cwd: REPO });
+  execSync("git config user.email t@t", { cwd: REPO });
+  execSync("git config user.name t", { cwd: REPO });
+  execSync("git add -A", { cwd: REPO });
+  execSync("git commit -q -m initial", { cwd: REPO });
 });
 after(() => fs.rmSync(REPO, { recursive: true, force: true }));
 
 test("rollback restores pre-wave SHA and removes wave changes", () => {
-  const { currentSha, resetHardTo } = require("../../scripts/git-helpers.js");
+  const { currentSha, commitAll, resetHardTo } = require("../../scripts/git-helpers.js");
   const preSha = currentSha(REPO);
 
-  // Simulate a wave that applied changes (no commit yet).
+  // Simulate a wave that applied changes and committed them.
   fs.writeFileSync(path.join(REPO, "package.json"), '{"name":"x","dependencies":{"foo":"2.0.0"}}');
   fs.writeFileSync(path.join(REPO, "package-lock.json"), '{"lockfileVersion":3}');
+  commitAll(REPO, "wave: bump foo");
 
-  // Verifier reports failure -> we revert.
+  // Verifier reports failure -> we revert back to preSha.
   resetHardTo(REPO, preSha);
+  // Also remove any untracked files left by the reset.
+  execSync("git clean -fd", { cwd: REPO });
 
   assert.equal(currentSha(REPO), preSha);
   assert.ok(!fs.existsSync(path.join(REPO, "package.json")));
@@ -60,4 +66,6 @@ test("require-clean refuses to run after a partial uncommitted change", () => {
   fs.writeFileSync(path.join(REPO, "dirty.txt"), "x");
   assert.throws(() => requireCleanTree(REPO), /dirty/i);
   fs.rmSync(path.join(REPO, "dirty.txt"));
+  // Clean any untracked files left by previous tests to avoid contamination.
+  execSync("git clean -fd", { cwd: REPO });
 });

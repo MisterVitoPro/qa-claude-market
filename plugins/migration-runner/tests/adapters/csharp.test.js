@@ -3,7 +3,6 @@ const assert = require("node:assert/strict");
 const fs = require("fs");
 const path = require("path");
 const os = require("os");
-
 const ORIG_FETCH = global.fetch;
 let CWD;
 before(() => { CWD = fs.mkdtempSync(path.join(os.tmpdir(), "csharp-adapter-")); });
@@ -42,4 +41,40 @@ test("verifyCommands: dotnet build + test", () => {
   const cmds = c.verifyCommands(CWD);
   assert.equal(cmds.build, "dotnet build");
   assert.equal(cmds.test, "dotnet test");
+});
+
+test("applyUpgrade: success -- calls dotnet add package with correct args and returns { success: true }", () => {
+  // csharp.js uses child_process.execSync (not a destructured local), so we can
+  // stub it via the shared require cache.
+  const child_process = require("child_process");
+  let capturedCmd = null;
+  const orig = child_process.execSync;
+  child_process.execSync = (cmd, _opts) => { capturedCmd = cmd; };
+
+  const c = require("../../scripts/adapters/csharp.js");
+  const result = c.applyUpgrade(CWD, "Newtonsoft.Json", "13.0.3");
+
+  child_process.execSync = orig; // restore
+
+  assert.equal(capturedCmd, "dotnet add package Newtonsoft.Json --version 13.0.3");
+  assert.deepEqual(result, { success: true });
+});
+
+test("applyUpgrade: failure -- returns { success: false, stderr: '<message>' } when execSync throws", () => {
+  const child_process = require("child_process");
+  const orig = child_process.execSync;
+  child_process.execSync = (_cmd, _opts) => {
+    const err = new Error("Command failed");
+    err.stderr = "error: project not found";
+    throw err;
+  };
+
+  const c = require("../../scripts/adapters/csharp.js");
+  const result = c.applyUpgrade(CWD, "Newtonsoft.Json", "13.0.3");
+
+  child_process.execSync = orig; // restore
+
+  assert.equal(result.success, false);
+  assert.ok(typeof result.stderr === "string" && result.stderr.length > 0,
+    "stderr should be a non-empty string");
 });
