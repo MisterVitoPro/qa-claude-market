@@ -37,6 +37,12 @@
       "description": "Consolidate scattered specs into a canonical master-spec tree with a navigable index, and append stubs for undocumented public surface found in code",
       "source": "./plugins/jupiter",
       "category": "development"
+    },
+    {
+      "name": "migration-runner",
+      "description": "Vulnerability-aware dependency upgrade orchestrator across 7 ecosystems (npm, Python, Go, Rust, Java, Kotlin, C#); detects outdated packages, queries OSV.dev for CVEs, recommends the safest-yet-most-recent version per package, then executes wave-by-wave with build/typecheck/test verification and clean git rollback on failure",
+      "source": "./plugins/migration-runner",
+      "category": "development"
     }
   ]
 }

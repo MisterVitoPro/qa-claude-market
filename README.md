@@ -72,6 +72,20 @@ claude plugin install jupiter@mistervitopro-plugin-marketplace
 
 ---
 
+### migration-runner  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fqa-claude-market%2Fmain%2Fplugins%2Fmigration-runner%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&color=blue)
+
+**Vulnerability-aware dependency upgrade orchestrator across 7 ecosystems.**
+
+Scans for outdated packages (npm, Python, Go, Rust, Java, Kotlin, C#), queries OSV.dev for CVEs, recommends the safest-yet-most-recent target version per package, then executes wave-by-wave with build/typecheck/test verification and clean git rollback on failure. The two-step flow (`detect` then `run`) lets you review the plan before any code is touched.
+
+```bash
+claude plugin install migration-runner@mistervitopro-plugin-marketplace
+/migration-runner:detect
+/migration-runner:run
+```
+
+---
+
 ## Why a marketplace?
 
 Each plugin is independently versioned and installable. Add the marketplace once; mix and match. All four work standalone — no cross-dependencies.

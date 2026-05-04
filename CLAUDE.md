@@ -12,6 +12,7 @@ Multi-plugin marketplace repository. Each plugin lives under `plugins/` with its
 | `code-atlas` | 2.0.1 | Architecture index generator with semantic graph -- writes .code-atlas/atlas.json, state.json, and graph-schema.json, loaded by session-start hook. Queryable via /code-atlas:query. Directory map, tech stack, patterns, dependencies. |
 | `plan-runner` | 0.4.1 | Run a Markdown implementation plan through a parallel agent swarm: analyze into waves, dispatch dev + verifier agents, aggregate bugs into a fix-plan, re-run on demand |
 | `jupiter` | 0.1.1 | Consolidate scattered specs into a canonical master-spec tree -- adopt command reorganizes in place; rewrite command consolidates to single file with optional cleanup; index.json flags split candidates; surface scanner appends stubs for undocumented agents/skills/CLIs/configs |
+| `migration-runner` | 0.1.0 | Vulnerability-aware dependency upgrade orchestrator across 7 ecosystems (npm, Python, Go, Rust, Java, Kotlin, C#) -- detect produces a vuln-aware plan; run executes wave-by-wave with verifier + git rollback |
 
 ### Directory Layout
 
@@ -22,6 +23,7 @@ plugins/
   code-atlas/.claude-plugin/plugin.json      # manifest (v2.0.1)
   plan-runner/.claude-plugin/plugin.json     # manifest (v0.4.1)
   jupiter/.claude-plugin/plugin.json         # manifest (v0.1.1)
+  migration-runner/.claude-plugin/plugin.json # manifest (v0.1.0)
 ```
 
 ## Adding a Plugin
@@ -71,6 +73,15 @@ plugins/                    # Root directory containing all plugins
     skills/                 # User-facing commands: adopt, rewrite
     schemas/                # JSON Schemas for agent and index contracts
     test-fixtures/          # Reference fixtures for smoke testing
+  migration-runner/         # Vuln-aware multi-ecosystem dependency upgrader (v0.1.0)
+    .claude-plugin/         # Plugin manifest and metadata
+    agents/                 # 4 agents (detector, planner, applier, verifier)
+    skills/                 # User-facing commands: detect, run
+    scripts/                # CLI tools: adapter dispatcher, OSV client, version-ranker, state, git-helpers
+    schemas/                # JSON Schemas for plan, state, agent outputs
+    test-fixtures/          # Per-ecosystem captured CLI output fixtures
+    tests/                  # node --test suite for adapters, ranker, e2e
+    hooks/                  # SessionStart hook (.migration-runner/ gitignore)
 ```
 
 ### Key Files
