@@ -35,3 +35,9 @@ test("plan-verifier supports red-gate and green-gate modes", () => {
   assert.match(f, /broken_existing/, "must flag broken pre-existing tests");
   assert.match(f, /captured_test_output|test-run output/i, "consumes orchestrator-captured test output");
 });
+
+test("plan-dev consumes tests_to_satisfy and is gated on green", () => {
+  const f = read("agents/plan-dev.md");
+  assert.match(f, /tests_to_satisfy/, "impl must be told which tests to satisfy");
+  assert.match(f, /green gate|make.{0,30}tests pass/i, "impl must aim to make the tests pass");
+});
