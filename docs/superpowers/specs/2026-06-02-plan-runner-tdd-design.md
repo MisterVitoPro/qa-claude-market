@@ -48,8 +48,10 @@ A new pre-flight step runs right after plan validation:
 - Otherwise → prompt once: `Enable TDD red-green approach for this run? (Y/n)`.
   `Y`/empty → `tdd_enabled = true`; `n` → classic pipeline.
 - Only when `tdd_enabled` do we resolve the test command + baseline. If the
-  command can't be resolved and the user can't supply one, warn and downgrade
-  `tdd_enabled = false` for the run.
+  command can't be resolved (no flag, detection fails) and the user does not
+  supply one at the prompt, **STOP** the run with a message pointing to
+  `--no-tdd` for the classic pipeline. The run never silently downgrades to
+  non-TDD.
 
 `--no-tdd` is the "never ask, never do it" escape hatch; everything else is
 opt-in per run.
@@ -166,42 +168,39 @@ Per testable task:
 The resolved test command (both forms) and the baseline failing set are also
 stored at the top level of the manifest.
 
-## Failure handling & retries
+## Failure handling
 
-A single inline retry is the only new control-flow addition; everything past it
-falls back to the **existing** bug → aggregate → fix-plan → re-run loop as the
-backstop.
+There are **no inline retries**. Every gate failure is recorded as a bug and
+handled by the **existing** bug → aggregate → fix-plan → re-run loop. This keeps
+the control flow identical to today's pipeline; gates only add new *bug sources*,
+not new retry logic.
 
 ### Red-gate failure (per task)
 
 Invalid red = the new test passes without impl, or it errors on syntax /
 collection.
 
-- One inline retry: feed the captured output back to the *same* test-author.
-  If it then produces a valid red → continue.
-- Still invalid → emit a **P1** bug and mark the paired impl node
-  **BLOCKED/skipped** (implementing against a broken test is pointless). Other
-  tasks in the wave are unaffected.
+- Emit a **P1** bug and mark the paired impl node **BLOCKED/skipped**
+  (implementing against a broken test is pointless). Other tasks in the wave are
+  unaffected. The bug flows into aggregation → fix-plan → re-run.
 
 ### Broken pre-existing test caused by a test-author
 
-→ **P0** `broken_existing` bug, same one-retry-then-skip path.
+→ **P0** `broken_existing` bug; paired impl node **BLOCKED/skipped**, same path.
 
 ### Green-gate failure (per task)
 
-Impl didn't make the red test pass.
-
-- One inline retry: feed the failing test output back to the *same* impl agent.
-- Still failing → **P0/P1** bug via the green-gate verifier. The wave still
-  commits partial progress (unchanged per-wave commit), and the bug flows into
-  aggregation → fix-plan → re-run.
+Impl didn't make the red test pass → **P0/P1** bug via the green-gate verifier.
+The wave still commits partial progress (unchanged per-wave commit), and the bug
+flows into aggregation → fix-plan → re-run.
 
 ## Edge cases
 
 - **Baseline already red:** record the pre-existing failing set at pre-flight;
   gates subtract it when attributing new failures; warn the user.
-- **No test command resolvable:** downgrade to classic for the run with a
-  warning.
+- **No test command resolvable:** prompt for one; if the user does not supply a
+  command, **STOP** the run (message points to `--no-tdd` for classic). Never a
+  silent downgrade.
 - **Re-run fix cycles:** on a fix-plan re-run, tests usually already exist. The
   analyzer detects existing test files for a task and emits an **impl-only**
   node (no test-author); the green gate still applies, so fixes are still proven
@@ -218,12 +217,12 @@ Impl didn't make the red test pass.
 ## Affected files (anticipated)
 
 - `plugins/plan-runner/skills/run/SKILL.md` — pre-flight TDD enablement, test-cmd
-  resolution + baseline, per-agent gate execution, manifest evidence, retries.
+  resolution + baseline, per-agent gate execution, manifest evidence.
 - `plugins/plan-runner/agents/plan-analyzer.md` — classification + node splitting.
 - `plugins/plan-runner/agents/plan-test-author.md` — **new** agent.
 - `plugins/plan-runner/agents/plan-verifier.md` — red/green gate modes.
-- `plugins/plan-runner/agents/plan-dev.md` — consume `tests_to_satisfy`; green
-  retry contract.
+- `plugins/plan-runner/agents/plan-dev.md` — consume `tests_to_satisfy` (impl
+  must satisfy the paired tests).
 - `plugins/plan-runner/schemas/wave-plan.schema.json` — `role`, `testable`,
   `non_testable_reason`, `tests_to_satisfy`.
 - `plugins/plan-runner/schemas/manifest.schema.json` — red/green evidence,
