@@ -17,6 +17,7 @@ You receive:
 2. A `context7_available` boolean (true if the Context7 MCP server is detected in the host session).
 3. The path to the plan file (for the `source_plan` field of your output).
 4. A `verbose` boolean. When `true`, include the optional fields `rationale` (per wave) and `complexity_signals` (per agent). When `false`, omit those fields entirely.
+5. A `tdd_enabled` boolean. When `true`, classify each task as testable or not and split testable tasks into a test-author node and an impl node (see "TDD mode" below). When `false`, behave exactly as the classic analyzer (one node per task, no `role`/`testable` fields).
 
 ## Output
 
@@ -54,6 +55,7 @@ Schema (abbreviated; full schema in `plugins/plan-runner/schemas/wave-plan.schem
 1. **Max 6 agents per wave.** If a wave would exceed 6, split into two sequential waves.
 2. **File-disjoint within a wave.** No two agents in the same wave may have overlapping `owned_files`. If two tasks would share a file, place them in different waves.
 3. **Respect dependencies.** If task B requires task A's output (imports a type, calls a function, depends on schema), A goes in an earlier wave than B.
+   In TDD mode, an impl node always depends on its paired test-author node, so the two are never in the same wave.
 4. **Maximize parallelism.** Within those constraints, pack each wave as full as possible.
 
 ## Process
@@ -91,6 +93,24 @@ When `verbose: false` (default):
 - Do NOT emit `complexity_signals` on any agent. Omit the field entirely.
 
 `uncovered_plan_sections` is always emitted regardless of verbose (it's small and used by the orchestrator for warnings).
+
+## TDD mode (only when tdd_enabled is true)
+
+For each task you identify:
+
+1. **Classify testability.** A task is `testable` if it produces behavior that a unit/integration test can exercise (functions, endpoints, parsers, CLI logic, data transforms). It is non-testable if it is pure docs, prose, configuration, or a static manifest/schema with no behavior.
+
+2. **Non-testable tasks** become a single agent with `role: "standalone"`, `testable: false`, and a one-line `non_testable_reason` (e.g. "pure JSON manifest, no behavior"). They have no test-author/impl split. This is the same as the classic single-node path, just labelled.
+
+3. **Testable tasks** become TWO nodes:
+   - a **test-author** node: `role: "test-author"`, `testable: true`, `owned_files` = the test files only. It depends only on what its interface needs (usually nothing), so it lands as early as possible.
+   - an **impl** node: `role: "impl"`, `testable: true`, `owned_files` = the implementation files, plus `tests_to_satisfy` listing the test-author's test files. The impl node depends on (a) its own test-author node and (b) the impl nodes of any task-level dependencies. It therefore always lands in a LATER wave than its test-author.
+
+4. **Pre-existing tests (re-run / fix cycles).** If the test files a testable task would need ALREADY EXIST in the repo (typical on a fix-plan re-run), do NOT emit a test-author node. Emit only the impl node (`role: "impl"`, `tests_to_satisfy` pointing at the existing test files). The green gate still applies, so the fix is still proven against the tests.
+
+5. **Constraints are unchanged.** Max 6 agents per wave, file-disjoint within a wave (test files and impl files are different paths, so no new conflicts), topological ordering by dependency.
+
+6. **agent_id numbering** still follows `wave-{wave_id}-agent-{n}`; a test-author and its impl get IDs in their respective waves.
 
 ## Validation before returning
 

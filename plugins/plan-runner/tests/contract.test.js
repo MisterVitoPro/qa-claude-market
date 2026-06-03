@@ -15,3 +15,13 @@ test("plan-test-author agent exists and only writes failing tests", () => {
   assert.match(f, /do not.{0,20}implement|never.{0,20}implement|not (write|implement).{0,40}implementation/i, "must forbid writing implementation");
   assert.match(f, /test_files/, "must return test_files");
 });
+
+test("plan-analyzer classifies testable tasks and splits them in TDD mode", () => {
+  const f = read("agents/plan-analyzer.md");
+  assert.match(f, /tdd_enabled/, "must read a tdd_enabled flag");
+  assert.match(f, /testable/i, "must classify tasks testable vs non-testable");
+  assert.match(f, /non_testable_reason/, "must record a reason for non-testable tasks");
+  assert.match(f, /test-author/i, "must emit a test-author node");
+  assert.match(f, /tests_to_satisfy/, "impl node must point at the paired tests");
+  assert.match(f, /already exist|existing test/i, "re-run: detect pre-existing tests -> impl-only");
+});
