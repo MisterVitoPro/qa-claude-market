@@ -26,6 +26,36 @@ claude plugin marketplace add MisterVitoPro/qa-swarm --plugin plan-runner
 
 The plan can be any Markdown file with task content. There is no required schema -- the analyzer reads it heuristically.
 
+## TDD red-green mode
+
+By default `/plan-runner:run` asks whether to enable a Test-Driven Development
+red-green workflow for the run:
+
+- **Testable tasks** are split into a *test-author* step (writes a failing test)
+  and an *impl* step (makes it pass). The orchestrator runs the test command at
+  two checkpoints and records proven evidence in `manifest.json` under `tdd`:
+  a `red_run` (the new test failed before implementation) and a `green_run`
+  (it passed after).
+- **Non-testable tasks** (docs, config, schemas) run as before, with static
+  verification only. The analyzer labels them and shows the reason in the wave
+  plan.
+- The **red gate** requires the new tests to fail for a genuine reason
+  (import / not-implemented / assertion) while pre-existing tests stay green;
+  a syntax/collection error is an invalid red and is flagged as a bug.
+- Gate failures are not retried inline -- they become bugs that flow through the
+  existing aggregate -> fix-plan -> re-run loop. Because every impl wave ends on
+  a green full-suite check, **each committed wave is green**.
+
+The test command is resolved as: `--test-cmd "<cmd>"` flag, else auto-detection
+from repo markers (`package.json`, `pytest`, `go.mod`, `Cargo.toml`, `*.csproj`,
+...), else a one-time prompt. If none can be resolved the run **stops** and
+points you to `--no-tdd`.
+
+**Flags:**
+- `--no-tdd` -- skip the prompt and run the classic (non-TDD) pipeline.
+- `--test-cmd "<cmd>"` -- supply the test command explicitly; use `{file}` for
+  single-file runs (e.g. `pytest {file}`).
+
 ## Output
 
 Per cycle, output lives at:

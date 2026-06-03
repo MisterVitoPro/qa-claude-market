@@ -49,7 +49,7 @@ claude plugin install code-atlas@mistervitopro-plugin-marketplace
 
 **Take a Markdown implementation plan, run it through a parallel agent swarm.**
 
-The analyzer breaks your plan into file-disjoint waves (≤6 agents per wave). Dev agents implement tasks in parallel; verifier agents check acceptance criteria per wave; the aggregator dedupes bugs and emits a `fix-plan.md` for re-runs. Per-wave git commits keep history bisectable.
+The analyzer breaks your plan into file-disjoint waves (≤6 agents per wave). Dev agents implement tasks in parallel; verifier agents check acceptance criteria per wave; the aggregator dedupes bugs and emits a `fix-plan.md` for re-runs. Per-wave git commits keep history bisectable. Optional TDD red-green mode.
 
 ```bash
 claude plugin install plan-runner@mistervitopro-plugin-marketplace

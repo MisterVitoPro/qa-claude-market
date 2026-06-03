@@ -71,3 +71,11 @@ test("SKILL runs per-agent red/green gates, routes bugs, records evidence", () =
   assert.match(f, /No inline retries|no retries|without retr/i, "explicitly no inline retries");
   assert.match(f, /tdd\.tasks|red_run|green_run/i, "writes red/green evidence to the manifest");
 });
+
+test("docs + version reflect the TDD feature", () => {
+  const pkg = JSON.parse(read(".claude-plugin/plugin.json"));
+  assert.equal(pkg.version, "0.5.0", "plugin version bumped to 0.5.0");
+  const readme = read("README.md");
+  assert.match(readme, /--no-tdd/, "README documents the --no-tdd flag");
+  assert.match(readme, /red.{0,5}green|red→green/i, "README describes the red-green flow");
+});
