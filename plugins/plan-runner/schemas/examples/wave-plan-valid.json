@@ -32,6 +32,22 @@
           "tests_to_satisfy": ["tests/adder.test.js"]
         }
       ]
+    },
+    {
+      "wave_id": 3,
+      "agents": [
+        {
+          "agent_id": "wave-3-agent-1",
+          "task_title": "update the README",
+          "task_excerpt_lines": "30-35",
+          "owned_files": ["README.md"],
+          "acceptance_criteria": ["documents the adder"],
+          "recommended_model": "haiku",
+          "role": "standalone",
+          "testable": false,
+          "non_testable_reason": "pure docs, no behavior to test"
+        }
+      ]
     }
   ],
   "uncovered_plan_sections": []
