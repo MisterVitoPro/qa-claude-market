@@ -331,20 +331,20 @@ Gates are applied **per agent**, by `role`, because a single wave may mix test-a
 **Test-author agent (role: test-author) -> RED gate:**
 1. For each file in the agent's reported `test_files`, run the single-file test command (substitute `{file}`). Capture exit code + output.
 2. Run the full suite; diff the failing-test set against `tdd.baseline_failing`.
-3. Record `red_run` = `{cmd, exit, result: exit != 0 ? "FAILED" : "PASSED", valid_red: <true if new tests fail for a genuine reason>}`. The verifier makes the final validity call from this output.
-4. This agent's `captured_test_output` (for the verifier) = the single-file run output + any new pre-existing failures from the suite diff.
+3. Record `red_run` = `{cmd, exit, result: exit != 0 ? "FAILED" : "PASSED", valid_red: null}`. Leave `valid_red` null here -- the orchestrator cannot tell a genuine failure (import / not-implemented / assertion) from an invalid one (syntax / collection error) without analysis. The red-gate verifier (Step 4b) makes that call; backfill `valid_red` in the manifest from the verifier's verdict after 4b.
+4. This agent's `captured_test_output` (for the verifier) = the per-file run output (all `test_files`) + any new pre-existing failures from the suite diff.
 
 **Impl agent (role: impl) -> GREEN gate:**
-1. Run the agent's `tests_to_satisfy` via the single-file command. Capture exit + output.
+1. For each file in the agent's `tests_to_satisfy`, run the single-file test command (substitute `{file}`). Capture exit + output per file.
 2. Run the full suite; diff against `tdd.baseline_failing` to detect newly-broken pre-existing tests.
-3. Record `green_run` = `{cmd, exit, result: exit == 0 ? "PASSED" : "FAILED"}`.
-4. `captured_test_output` = the `tests_to_satisfy` run output + any new suite failures.
+3. Record `green_run` = `{cmd, exit, result: all target files passed ? "PASSED" : "FAILED"}`.
+4. `captured_test_output` = the per-file `tests_to_satisfy` run output + any new suite failures.
 
 **Standalone agent (role: standalone or classic):** no gate; `captured_test_output` is empty.
 
 **Append evidence to the manifest `tdd.tasks` array** (one entry per testable task, keyed by `task_title`): `{task, test_files, red_run, green_run}`. The red_run is filled when the test-author wave runs; green_run when the paired impl wave runs (match by task_title / tests_to_satisfy).
 
-**Invalid red (paired impl skipped):** if the red gate shows the new tests PASSED or a syntax/collection error, do NOT dispatch the paired impl agent -- mark it BLOCKED with reason "paired test red gate invalid". The verifier still emits the P1 bug from the captured output, which flows to the next cycle.
+**Invalid red (paired impl skipped):** if the red gate shows the new tests PASSED (exit 0 -- the orchestrator detects this directly) OR the red-gate verifier judged the red invalid (syntax / collection error), do NOT dispatch the paired impl agent -- mark it BLOCKED with reason "paired test red gate invalid" and set `valid_red: false` for that task in the manifest. The verifier still emits the P1 bug from the captured output, which flows to the next cycle.
 
 ### 4b. Dispatch wave verifier (single agent, background)
 
@@ -376,9 +376,9 @@ DEV AGENT REPORTED:
 - files_written: <dev's files_written joined with newlines>
 - files_unexpectedly_modified: <dev's files_unexpectedly_modified joined with newlines>
 - concerns: <dev's concerns joined with newlines>
-role: <agent role or "standalone">
-tests_to_satisfy: <impl only: tests_to_satisfy joined with newlines, else "n/a">
-captured_test_output: |
+- role: <agent role or "standalone">
+- tests_to_satisfy: <impl only: tests_to_satisfy joined with newlines, else "n/a">
+- captured_test_output: |
   <verbatim gate output captured in 4a-bis, or "n/a" for standalone/classic>
 ---
 <end repeat>
