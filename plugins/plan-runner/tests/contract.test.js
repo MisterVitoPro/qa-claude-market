@@ -61,3 +61,13 @@ test("SKILL passes tdd flags to analyzer and shows roles in the wave plan", () =
   // display must surface role / testability
   assert.match(f, /\[test\]|\[impl\]|role|testable|non-testable/i, "wave-plan display must surface roles/testability");
 });
+
+test("SKILL runs per-agent red/green gates, routes bugs, records evidence", () => {
+  const f = read("skills/run/SKILL.md");
+  assert.match(f, /Red gate/i, "red gate step");
+  assert.match(f, /Green gate/i, "green gate step");
+  assert.match(f, /per agent|per-agent/i, "gates applied per agent within a wave");
+  assert.match(f, /invalid red[\s\S]{0,160}(BLOCKED|skip)/i, "invalid red blocks/skips the paired impl");
+  assert.match(f, /No inline retries|no retries|without retr/i, "explicitly no inline retries");
+  assert.match(f, /tdd\.tasks|red_run|green_run/i, "writes red/green evidence to the manifest");
+});
