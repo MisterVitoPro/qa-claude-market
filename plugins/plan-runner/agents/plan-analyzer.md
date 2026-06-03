@@ -41,7 +41,11 @@ Schema (abbreviated; full schema in `plugins/plan-runner/schemas/wave-plan.schem
           "owned_files": ["<exact file path>", "..."],
           "acceptance_criteria": ["<criterion 1>", "..."],
           "recommended_model": "haiku|sonnet|opus",
-          "complexity_signals": ["<verbose only -- omit when verbose=false>"]
+          "complexity_signals": ["<verbose only -- omit when verbose=false>"],
+          "role": "test-author | impl | standalone   (TDD mode only -- omit when tdd_enabled=false)",
+          "testable": true,
+          "non_testable_reason": "<TDD mode, standalone non-testable tasks only>",
+          "tests_to_satisfy": ["<TDD mode, impl role only -- the paired test files>"]
         }
       ]
     }
@@ -103,7 +107,7 @@ For each task you identify:
 2. **Non-testable tasks** become a single agent with `role: "standalone"`, `testable: false`, and a one-line `non_testable_reason` (e.g. "pure JSON manifest, no behavior"). They have no test-author/impl split. This is the same as the classic single-node path, just labelled.
 
 3. **Testable tasks** become TWO nodes:
-   - a **test-author** node: `role: "test-author"`, `testable: true`, `owned_files` = the test files only. It depends only on what its interface needs (usually nothing), so it lands as early as possible.
+   - a **test-author** node: `role: "test-author"`, `testable: true`, `owned_files` = the test files only. It depends only on what its tests must import (usually nothing, so it lands as early as possible). If the test itself must import a type or module produced by ANOTHER task, the test-author depends on that other task's impl node and is placed after it.
    - an **impl** node: `role: "impl"`, `testable: true`, `owned_files` = the implementation files, plus `tests_to_satisfy` listing the test-author's test files. The impl node depends on (a) its own test-author node and (b) the impl nodes of any task-level dependencies. It therefore always lands in a LATER wave than its test-author.
 
 4. **Pre-existing tests (re-run / fix cycles).** If the test files a testable task would need ALREADY EXIST in the repo (typical on a fix-plan re-run), do NOT emit a test-author node. Emit only the impl node (`role: "impl"`, `tests_to_satisfy` pointing at the existing test files). The green gate still applies, so the fix is still proven against the tests.
@@ -120,6 +124,7 @@ For each task you identify:
 - Wave IDs are contiguous starting at 1.
 - Every `task_excerpt_lines` matches the pattern `<START>-<END>` where START and END are 1-indexed line numbers from the prefixed plan, START <= END, and both fall within the plan's line range.
 - The output is valid JSON (no trailing commas, all strings quoted, no unescaped newlines inside strings).
+- In TDD mode (tdd_enabled true): every agent has a `role`; every `test-author` node's `owned_files` are test files only; every `impl` node carries a non-empty `tests_to_satisfy`; every `standalone` node with `testable: false` has a `non_testable_reason`; and no two agents in the same wave are the test-author and impl of the SAME task.
 
 If the plan has zero extractable tasks, return:
 

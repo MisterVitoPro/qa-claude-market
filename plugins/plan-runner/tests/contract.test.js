@@ -23,5 +23,5 @@ test("plan-analyzer classifies testable tasks and splits them in TDD mode", () =
   assert.match(f, /non_testable_reason/, "must record a reason for non-testable tasks");
   assert.match(f, /test-author/i, "must emit a test-author node");
   assert.match(f, /tests_to_satisfy/, "impl node must point at the paired tests");
-  assert.match(f, /already exist|existing test/i, "re-run: detect pre-existing tests -> impl-only");
+  assert.match(f, /already exist/i, "re-run: detect pre-existing tests -> impl-only");
 });
