@@ -72,6 +72,16 @@ test("SKILL runs per-agent red/green gates, routes bugs, records evidence", () =
   assert.match(f, /tdd\.tasks|red_run|green_run/i, "writes red/green evidence to the manifest");
 });
 
+test("SKILL Step 4a dispatches agents by role (test-author vs impl)", () => {
+  const f = read("skills/run/SKILL.md");
+  // the test-author agent must actually be dispatched, not just exist
+  assert.match(f, /plan-test-author\.md/, "Step 4 must inline/dispatch the plan-test-author agent for test-author roles");
+  // dispatch must branch on role
+  assert.match(f, /role.{0,40}(test-author|impl)/is, "dispatch must select the agent by role");
+  // impl agents must be told which tests to satisfy at dispatch time
+  assert.match(f, /TESTS TO SATISFY|forward.{0,30}tests_to_satisfy|tests_to_satisfy.{0,40}(prompt|dispatch|impl agent)/is, "impl dispatch must forward tests_to_satisfy");
+});
+
 test("docs + version reflect the TDD feature", () => {
   const pkg = JSON.parse(read(".claude-plugin/plugin.json"));
   assert.equal(pkg.version, "0.5.0", "plugin version bumped to 0.5.0");

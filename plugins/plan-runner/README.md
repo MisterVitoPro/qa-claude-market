@@ -8,7 +8,7 @@ Take a free-form Markdown implementation plan and execute it through a parallel 
 
 1. **Analyze.** A `plan-analyzer` agent reads your plan and buckets tasks into waves of file-disjoint work (max 6 agents per wave, ordered as a DAG).
 2. **Confirm.** You see the wave plan and approve before any dev work runs.
-3. **Execute per wave.** For each wave: dispatch up to 6 `plan-dev` agents in parallel, then dispatch one `plan-verifier` per dev agent in parallel, then commit the wave with verifier status in the message.
+3. **Execute per wave.** For each wave: dispatch up to 6 dev agents in parallel (TDD runs use `plan-test-author` for test-author roles and `plan-dev` for impl/standalone roles), then dispatch one `plan-verifier` for the wave, then commit the wave with verifier status in the message.
 4. **Aggregate.** A `plan-aggregator` agent collects every verifier-flagged bug, deduplicates, ranks by severity (P0-P3), and writes both a `bugs.md` audit and a `fix-plan.md` (a new plan ready for re-runs).
 5. **Re-run prompt.** You decide whether to auto-handoff to a fresh-context subagent that runs `/plan-runner:run <fix-plan.md>` for cycle 2.
 

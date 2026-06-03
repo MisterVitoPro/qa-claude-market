@@ -287,7 +287,13 @@ Record `t_wave_<W>_start = $(date +%s)`.
 
 Create one Claude Task per dev agent for live UI progress. Use TaskCreate.
 
-In a SINGLE message, dispatch all dev agents in this wave with `run_in_background: true`. For each dev agent, the prompt template:
+In a SINGLE message, dispatch all dev agents in this wave with `run_in_background: true`. **Select the agent definition by the wave-plan `role` field** (in classic / non-TDD runs there is no `role` -- treat every agent as an impl/standalone dev agent and use the plan-dev template):
+
+- `role: "test-author"` -> inline `plugins/plan-runner/agents/plan-test-author.md` and include the resolved `test_command` so it can match the test framework/style.
+- `role: "impl"` -> inline `plugins/plan-runner/agents/plan-dev.md` and include a `TESTS TO SATISFY` block listing the agent's `tests_to_satisfy`.
+- `role: "standalone"` or no role (classic) -> inline `plugins/plan-runner/agents/plan-dev.md` with no `TESTS TO SATISFY` block.
+
+Common prompt template (substitute the role-specific pieces in the marked lines):
 
 ```
 You are being deployed as a dev agent for plan-runner cycle <cycle_n>, wave <W>.
@@ -297,19 +303,21 @@ task_title: <task_title>
 plan_path: <absolute path to the source plan>
 task_excerpt_lines: <task_excerpt_lines>
 context7_available: <bool>
+<if role == "test-author": "test_command: <single-file form> (full: <full form>)">
 
 OWNED FILES (you may write only these):
 <owned_files joined with newlines>
 
 ACCEPTANCE CRITERIA:
 <acceptance_criteria joined with newlines, prefixed with "- ">
+<if role == "impl": a "TESTS TO SATISFY (make these pass; do not edit them):" block listing tests_to_satisfy, one per line>
 
-<inline the full content of plugins/plan-runner/agents/plan-dev.md here as your instructions>
+<inline the full content of the role-selected agent file (plan-test-author.md for test-author; plan-dev.md otherwise) here as your instructions>
 
 Return only the JSON status, nothing else.
 ```
 
-The dev agent reads the task prose from `plan_path` using the line range -- the orchestrator does not inline the task text. This keeps dev prompts small and lets multiple agents in a wave share one cached plan read.
+The agent reads the task prose from `plan_path` using the line range -- the orchestrator does not inline the task text. This keeps prompts small and lets multiple agents in a wave share one cached plan read.
 
 Use the `recommended_model` from the wave-plan for each agent.
 
