@@ -22,9 +22,7 @@ Tokenize `{$ARGUMENTS}` on whitespace. The first non-flag token is the plan path
 - `--no-tdd` -- if present, skip the TDD enablement prompt entirely and run the classic (non-TDD) pipeline. Set `tdd_enabled = false`.
 - `--test-cmd "<cmd>"` -- optional explicit test command. May include a `{file}` placeholder for single-file runs (e.g. `pytest {file}`). When provided, it is used verbatim and detection is skipped.
 
-Set `verbose = true | false` based on the flag. Strip flags before using the plan path.
-
-Set `tdd_requested = true` unless `--no-tdd` is present. Capture any `--test-cmd` value as `test_cmd_flag`. Strip all flags before using the plan path.
+Set `verbose = true | false` based on the flag. Capture any `--test-cmd` value as `test_cmd_flag`. If `--no-tdd` is present, set `tdd_enabled = false` now; otherwise leave `tdd_enabled` unset here -- step 1a-bis assigns it. Strip all flags before using the plan path.
 
 ## Timing
 
@@ -130,7 +128,7 @@ If false: print `Context7 MCP not detected -- dev agents will rely on training d
 If `tdd_enabled` is false, skip this step entirely.
 
 **Resolve the command** in priority order:
-1. If `test_cmd_flag` is set, use it. If it contains `{file}`, that is the single-file form and the full form is the same string with `{file}` removed/empty; otherwise treat it as the full form and derive a single-file form if the runner supports it.
+1. If `test_cmd_flag` is set, use it. If it contains `{file}`, that is the single-file form; derive the full form by removing the `{file}` token AND any now-dangling argument separator or trailing whitespace (e.g. `npm test -- {file}` -> `npm test`, `pytest {file}` -> `pytest`). Otherwise treat it as the full form and derive a single-file form if the runner supports it.
 2. Otherwise detect from repo markers (use Glob/Read, do not guess blindly):
    - `package.json` with `scripts.test` -> full: `npm test`, single-file: `npm test -- {file}`
    - `pytest.ini` / `pyproject.toml` / `setup.cfg` with pytest -> full: `pytest`, single-file: `pytest {file}`
