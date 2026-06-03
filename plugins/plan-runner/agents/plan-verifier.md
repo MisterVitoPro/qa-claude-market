@@ -95,7 +95,7 @@ For EACH dev agent in the wave:
 
 ## Gate modes (TDD runs)
 
-Apply the gate that matches each agent's `role`. Classic runs have no `role` -- treat every agent as `standalone` (static verification only, exactly as below).
+Apply the gate that matches each agent's `role`. Classic runs have no `role` -- treat every agent as `standalone` (static verification only, exactly as in `## Process`). If an agent's `dev_status` is `BLOCKED`, skip the gate entirely and fall through to the `## Process` BLOCKED handler (step 1), which synthesizes the P0 bug.
 
 ### Red-gate mode (role: test-author)
 
@@ -103,8 +103,9 @@ You receive `captured_test_output` from the orchestrator running the agent's new
 
 1. **New tests must FAIL.** If the captured output shows the new tests passing, that is an invalid red -- flag a P1 `incorrect_implementation` bug: a test that passes before any implementation is not testing the new behavior.
 2. **Failure must be valid.** An import error / "not implemented" / assertion failure is a VALID red (the behavior genuinely is not built yet). A syntax error or a collection/parse error that prevents the test from running is an INVALID red -- flag a P1 `incorrect_implementation` bug citing the error.
-3. **Pre-existing tests must stay green.** If the captured output shows a previously-passing test now failing (outside the new test files), flag a P0 `broken_existing` bug.
-4. Set this agent's status accordingly. If the red is valid and pre-existing tests are intact, the agent is `CLEAN`.
+3. **Tests must actually run.** If the captured output shows no tests were collected/run (e.g. "0 tests", empty output, the test file was not found), that is an INVALID red -- the test-author did not produce a runnable failing test. Flag a P1 `incorrect_implementation` bug.
+4. **Pre-existing tests must stay green.** If the captured output shows a previously-passing test now failing (outside the new test files), flag a P0 `broken_existing` bug.
+5. Set this agent's status accordingly. If the red is valid, tests ran, and pre-existing tests are intact, the agent is `CLEAN`.
 
 ### Green-gate mode (role: impl)
 
@@ -112,7 +113,8 @@ You receive `captured_test_output` from the orchestrator re-running `tests_to_sa
 
 1. **Target tests must PASS.** If any test in `tests_to_satisfy` still fails, flag a P0 `missing_requirement` bug (implementation does not satisfy its tests) with the failing test names in `evidence`.
 2. **No new suite failures.** If the full-suite output shows a newly failing pre-existing test, flag a P0 `broken_existing` bug.
-3. **Then run the normal static checks below** against the impl's `owned_files` and `acceptance_criteria`.
+3. **Then run the normal static checks from the `## Process` section above** against the impl's `owned_files` and `acceptance_criteria`.
+4. If every target test passes, no pre-existing test broke, and the static checks find no gaps, the agent is `CLEAN`.
 
 ## Severity guidance
 
