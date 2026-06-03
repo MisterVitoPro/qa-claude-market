@@ -41,3 +41,14 @@ test("plan-dev consumes tests_to_satisfy and is gated on green", () => {
   assert.match(f, /tests_to_satisfy/, "impl must be told which tests to satisfy");
   assert.match(f, /green gate|make.{0,30}tests pass/i, "impl must aim to make the tests pass");
 });
+
+test("SKILL pre-flight handles --no-tdd, prompts, resolves test cmd, stops if none", () => {
+  const f = read("skills/run/SKILL.md");
+  assert.match(f, /--no-tdd/, "must document the --no-tdd flag");
+  assert.match(f, /Enable TDD/i, "must prompt to enable TDD");
+  assert.match(f, /--test-cmd/, "must support a --test-cmd flag");
+  assert.match(f, /package\.json|pytest|go\.mod|Cargo\.toml|csproj/i, "must list detection markers");
+  assert.match(f, /baseline/i, "must capture a green baseline");
+  assert.match(f, /\{file\}/, "must store a single-file invocation pattern");
+  assert.match(f, /STOP[\s\S]{0,200}--no-tdd/, "must STOP (not downgrade) when no test cmd is resolved");
+});

@@ -19,8 +19,12 @@ Follow this pipeline exactly. Do not skip steps.
 
 Tokenize `{$ARGUMENTS}` on whitespace. The first non-flag token is the plan path. Flags:
 - `--verbose` -- if present, the analyzer emits per-wave `rationale` and per-agent `complexity_signals`. If absent, those fields are omitted (default; smaller analyzer output).
+- `--no-tdd` -- if present, skip the TDD enablement prompt entirely and run the classic (non-TDD) pipeline. Set `tdd_enabled = false`.
+- `--test-cmd "<cmd>"` -- optional explicit test command. May include a `{file}` placeholder for single-file runs (e.g. `pytest {file}`). When provided, it is used verbatim and detection is skipped.
 
 Set `verbose = true | false` based on the flag. Strip flags before using the plan path.
+
+Set `tdd_requested = true` unless `--no-tdd` is present. Capture any `--test-cmd` value as `test_cmd_flag`. Strip all flags before using the plan path.
 
 ## Timing
 
@@ -50,6 +54,21 @@ Error: plan file is empty: <path>
 ```
 
 Then STOP.
+
+### 1a-bis. TDD enablement
+
+- If `--no-tdd` was passed: set `tdd_enabled = false` and print `TDD disabled (--no-tdd). Running classic pipeline.` Skip the rest of this step.
+- Otherwise prompt:
+
+```
+Enable TDD red-green approach for this run?
+Testable tasks get a failing test written first (red), then implementation makes it pass (green).
+[Y] = TDD on   [n] = classic pipeline
+
+(Y/n)
+```
+
+If `Y` or empty: set `tdd_enabled = true`. If `n`: set `tdd_enabled = false`.
 
 ### 1b. Compute cycle directory
 
@@ -106,6 +125,38 @@ Check whether the tools `mcp__context7__resolve-library-id` and `mcp__context7__
 If true: print `Context7 MCP detected -- dev agents will use it for current framework docs.`
 If false: print `Context7 MCP not detected -- dev agents will rely on training data only.`
 
+### 1d-bis. Resolve test command + green baseline (only if tdd_enabled)
+
+If `tdd_enabled` is false, skip this step entirely.
+
+**Resolve the command** in priority order:
+1. If `test_cmd_flag` is set, use it. If it contains `{file}`, that is the single-file form and the full form is the same string with `{file}` removed/empty; otherwise treat it as the full form and derive a single-file form if the runner supports it.
+2. Otherwise detect from repo markers (use Glob/Read, do not guess blindly):
+   - `package.json` with `scripts.test` -> full: `npm test`, single-file: `npm test -- {file}`
+   - `pytest.ini` / `pyproject.toml` / `setup.cfg` with pytest -> full: `pytest`, single-file: `pytest {file}`
+   - `go.mod` -> full: `go test ./...`, single-file: `go test ./{dir}`
+   - `Cargo.toml` -> full: `cargo test`, single-file: `cargo test {mod}`
+   - `*.csproj` / `*.sln` -> full: `dotnet test`, single-file: `dotnet test --filter {file}`
+3. If detection is ambiguous or finds nothing, prompt the user once:
+
+```
+No test command detected. Enter the test command (use {file} for single-file runs),
+or press Enter to STOP (re-run with --no-tdd for the classic pipeline):
+```
+
+   If the user supplies a command, use it. **If the user enters nothing, STOP** with:
+
+```
+No test command available -- cannot run TDD gates.
+Re-run with --no-tdd to use the classic pipeline.
+```
+
+   Do NOT silently downgrade to classic.
+
+**Capture the green baseline.** Run the full test command via Bash. Record the set of currently-failing test identifiers as `baseline_failing` (empty if the suite is green). If the suite is already red, print a warning that the baseline is not clean and that the listed failures will be subtracted when attributing new failures.
+
+Store the resolved command (both forms) and `baseline_failing` for the manifest `tdd` block.
+
 ### 1e. Initialize manifest
 
 Write a starter `manifest.json` to `$cycle_dir/manifest.json`:
@@ -119,9 +170,17 @@ Write a starter `manifest.json` to `$cycle_dir/manifest.json`:
   "context7_available": <bool>,
   "waves": [],
   "total_bugs": 0,
-  "next_cycle_plan": null
+  "next_cycle_plan": null,
+  "tdd": {
+    "enabled": <tdd_enabled>,
+    "test_command": {"full": "<resolved full or null>", "single_file": "<resolved single-file or null>"},
+    "baseline_failing": [<baseline ids>],
+    "tasks": []
+  }
 }
 ```
+
+(When `tdd_enabled` is false, write `"tdd": {"enabled": false}` and omit the other keys.)
 
 Record `t_preflight_done = $(date +%s)`.
 
