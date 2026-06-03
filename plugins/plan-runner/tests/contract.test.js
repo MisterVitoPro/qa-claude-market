@@ -25,3 +25,13 @@ test("plan-analyzer classifies testable tasks and splits them in TDD mode", () =
   assert.match(f, /tests_to_satisfy/, "impl node must point at the paired tests");
   assert.match(f, /already exist/i, "re-run: detect pre-existing tests -> impl-only");
 });
+
+test("plan-verifier supports red-gate and green-gate modes", () => {
+  const f = read("agents/plan-verifier.md");
+  assert.match(f, /red-gate/i, "must define red-gate behavior");
+  assert.match(f, /green-gate/i, "must define green-gate behavior");
+  assert.match(f, /valid_red|valid red/i, "must judge whether red is valid");
+  assert.match(f, /syntax|collection/i, "syntax/collection error = invalid red");
+  assert.match(f, /broken_existing/, "must flag broken pre-existing tests");
+  assert.match(f, /captured_test_output|test-run output/i, "consumes orchestrator-captured test output");
+});
