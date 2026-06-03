@@ -52,3 +52,12 @@ test("SKILL pre-flight handles --no-tdd, prompts, resolves test cmd, stops if no
   assert.match(f, /\{file\}/, "must store a single-file invocation pattern");
   assert.match(f, /STOP[\s\S]{0,200}--no-tdd/, "must STOP (not downgrade) when no test cmd is resolved");
 });
+
+test("SKILL passes tdd flags to analyzer and shows roles in the wave plan", () => {
+  const f = read("skills/run/SKILL.md");
+  // analyzer dispatch block must forward the tdd flag + test command
+  assert.match(f, /TDD enabled:\s*<tdd_enabled>|tdd_enabled:\s*<tdd_enabled>/, "analyzer prompt forwards tdd_enabled");
+  assert.match(f, /Test command:\s*<.*single.*>|test_command/i, "analyzer prompt forwards the test command");
+  // display must surface role / testability
+  assert.match(f, /\[test\]|\[impl\]|role|testable|non-testable/i, "wave-plan display must surface roles/testability");
+});

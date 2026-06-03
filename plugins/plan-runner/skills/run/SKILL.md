@@ -205,6 +205,8 @@ You are being deployed as the plan-analyzer for plan-runner cycle <cycle_n>.
 Source plan path: <plan path>
 Context7 available: <bool>
 Verbose: <verbose>
+TDD enabled: <tdd_enabled>
+Test command: <resolved single-file form, or "n/a"> (full: <resolved full form, or "n/a">)
 
 PLAN CONTENTS (1-indexed line-number prefixes):
 <<<
@@ -248,17 +250,21 @@ Print the wave plan in human-readable form:
 Wave Plan (<W> waves, <total_agents> dev agents total)
 ========================================================
 Wave 1 (<N> agents, parallel):
-  agent-1: <task_title>     -> <owned_files joined with comma>
-  agent-2: <task_title>     -> <owned_files joined with comma>
+  agent-1 [test]        : <task_title>   -> <owned_files joined with comma>
+  agent-2 [impl]        : <task_title>   -> <owned_files joined with comma>
+  agent-3 [standalone]  : <task_title>   -> <owned_files joined with comma>
   ...
-Wave 2 (<N> agents, parallel):
-  ...
+
+Non-testable tasks (will run without a test gate):
+  - <task_title>: <non_testable_reason>     (one line per standalone task with a reason)
 
 Uncovered plan sections: <sections or "none">
 Estimated total agents: <total_dev + <W> verifiers + 2 (analyzer + aggregator)>
 ```
 
 If `uncovered_plan_sections` is non-empty, print a warning that those sections will not be executed and the user can re-run with a revised plan after this cycle completes.
+
+The bracketed tag is the agent `role` (`test`, `impl`, or `standalone`). In classic (non-TDD) runs, agents have no role and the tag is omitted. The "Non-testable tasks" block lists standalone agents that carry a `non_testable_reason`, so the user can challenge a mis-classification before execution.
 
 Proceed automatically without waiting for user input.
 
