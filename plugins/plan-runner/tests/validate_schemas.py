@@ -16,6 +16,7 @@ EXAMPLES_DIR = SCHEMAS_DIR / "examples"
 CASES = [
     ("wave-plan.schema.json", "wave-plan-valid.json", "wave-plan-invalid.json"),
     ("dev-return.schema.json", "dev-return-valid.json", "dev-return-invalid.json"),
+    ("manifest.schema.json", "manifest-valid.json", "manifest-invalid.json"),
 ]
 
 
