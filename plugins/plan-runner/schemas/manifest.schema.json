@@ -37,6 +37,49 @@
       }
     },
     "total_bugs": {"type": "integer"},
-    "next_cycle_plan": {"type": ["string", "null"]}
+    "next_cycle_plan": {"type": ["string", "null"]},
+    "tdd": {
+      "type": "object",
+      "required": ["enabled"],
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "test_command": {
+          "type": "object",
+          "properties": {
+            "full": {"type": "string"},
+            "single_file": {"type": "string", "description": "Single-file invocation with a {file} placeholder, e.g. 'pytest {file}'."}
+          }
+        },
+        "baseline_failing": {"type": "array", "items": {"type": "string"}, "description": "Pre-existing failing tests at pre-flight; subtracted when attributing new failures."},
+        "tasks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["task", "test_files"],
+            "properties": {
+              "task": {"type": "string"},
+              "test_files": {"type": "array", "items": {"type": "string"}},
+              "red_run": {
+                "type": "object",
+                "properties": {
+                  "cmd": {"type": "string"},
+                  "exit": {"type": "integer"},
+                  "result": {"type": "string"},
+                  "valid_red": {"type": "boolean"}
+                }
+              },
+              "green_run": {
+                "type": "object",
+                "properties": {
+                  "cmd": {"type": "string"},
+                  "exit": {"type": "integer"},
+                  "result": {"type": "string"}
+                }
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }

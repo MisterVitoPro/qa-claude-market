@@ -1,7 +1,7 @@
 {
   "name": "plan-runner",
-  "description": "Take a Markdown implementation plan, run it through a parallel agent swarm with per-wave verification, and generate a bug-fix plan for re-runs",
-  "version": "0.4.1",
+  "description": "Take a Markdown implementation plan, run it through a parallel agent swarm with per-wave verification, and generate a bug-fix plan for re-runs; optional TDD red-green mode with per-task red/green gate evidence",
+  "version": "0.5.0",
   "license": "MIT",
   "keywords": [
     "agent-orchestration",

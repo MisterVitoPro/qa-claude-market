@@ -18,6 +18,8 @@
       }
     },
     "summary": {"type": "string"},
-    "concerns": {"type": "array", "items": {"type": "string"}}
+    "concerns": {"type": "array", "items": {"type": "string"}},
+    "test_files": {"type": "array", "items": {"type": "string"}, "description": "test-author role: test files written, for orchestrator-scoped gate runs."},
+    "test_ids": {"type": "array", "items": {"type": "string"}, "description": "test-author role: individual test names/IDs added."}
   }
 }

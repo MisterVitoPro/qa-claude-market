@@ -6,7 +6,7 @@ description: >
   agents, dispatch dev + verifier agents per wave, commit per wave, aggregate bugs at
   the end, and prompt to re-run with the generated fix-plan. Use when the user has a
   Markdown plan they want executed with built-in verification and bug-driven re-planning.
-argument-hint: "<path-to-plan.md> [--verbose]"
+argument-hint: "<path-to-plan.md> [--verbose] [--no-tdd] [--test-cmd \"<cmd>\"]"
 ---
 
 You are orchestrating a plan-runner pipeline cycle. The user's arguments are:
@@ -19,8 +19,10 @@ Follow this pipeline exactly. Do not skip steps.
 
 Tokenize `{$ARGUMENTS}` on whitespace. The first non-flag token is the plan path. Flags:
 - `--verbose` -- if present, the analyzer emits per-wave `rationale` and per-agent `complexity_signals`. If absent, those fields are omitted (default; smaller analyzer output).
+- `--no-tdd` -- if present, skip the TDD enablement prompt entirely and run the classic (non-TDD) pipeline. Set `tdd_enabled = false`.
+- `--test-cmd "<cmd>"` -- optional explicit test command. May include a `{file}` placeholder for single-file runs (e.g. `pytest {file}`). When provided, it is used verbatim and detection is skipped.
 
-Set `verbose = true | false` based on the flag. Strip flags before using the plan path.
+Set `verbose = true | false` based on the flag. Capture any `--test-cmd` value as `test_cmd_flag`. If `--no-tdd` is present, set `tdd_enabled = false` now; otherwise leave `tdd_enabled` unset here -- step 1a-bis assigns it. Strip all flags before using the plan path.
 
 ## Timing
 
@@ -50,6 +52,21 @@ Error: plan file is empty: <path>
 ```
 
 Then STOP.
+
+### 1a-bis. TDD enablement
+
+- If `--no-tdd` was passed: set `tdd_enabled = false` and print `TDD disabled (--no-tdd). Running classic pipeline.` Skip the rest of this step.
+- Otherwise prompt:
+
+```
+Enable TDD red-green approach for this run?
+Testable tasks get a failing test written first (red), then implementation makes it pass (green).
+[Y] = TDD on   [n] = classic pipeline
+
+(Y/n)
+```
+
+If `Y` or empty: set `tdd_enabled = true`. If `n`: set `tdd_enabled = false`.
 
 ### 1b. Compute cycle directory
 
@@ -106,6 +123,38 @@ Check whether the tools `mcp__context7__resolve-library-id` and `mcp__context7__
 If true: print `Context7 MCP detected -- dev agents will use it for current framework docs.`
 If false: print `Context7 MCP not detected -- dev agents will rely on training data only.`
 
+### 1d-bis. Resolve test command + green baseline (only if tdd_enabled)
+
+If `tdd_enabled` is false, skip this step entirely.
+
+**Resolve the command** in priority order:
+1. If `test_cmd_flag` is set, use it. If it contains `{file}`, that is the single-file form; derive the full form by removing the `{file}` token AND any now-dangling argument separator or trailing whitespace (e.g. `npm test -- {file}` -> `npm test`, `pytest {file}` -> `pytest`). Otherwise treat it as the full form and derive a single-file form if the runner supports it.
+2. Otherwise detect from repo markers (use Glob/Read, do not guess blindly):
+   - `package.json` with `scripts.test` -> full: `npm test`, single-file: `npm test -- {file}`
+   - `pytest.ini` / `pyproject.toml` / `setup.cfg` with pytest -> full: `pytest`, single-file: `pytest {file}`
+   - `go.mod` -> full: `go test ./...`, single-file: `go test ./{dir}`
+   - `Cargo.toml` -> full: `cargo test`, single-file: `cargo test {mod}`
+   - `*.csproj` / `*.sln` -> full: `dotnet test`, single-file: `dotnet test --filter {file}`
+3. If detection is ambiguous or finds nothing, prompt the user once:
+
+```
+No test command detected. Enter the test command (use {file} for single-file runs),
+or press Enter to STOP (re-run with --no-tdd for the classic pipeline):
+```
+
+   If the user supplies a command, use it. **If the user enters nothing, STOP** with:
+
+```
+No test command available -- cannot run TDD gates.
+Re-run with --no-tdd to use the classic pipeline.
+```
+
+   Do NOT silently downgrade to classic.
+
+**Capture the green baseline.** Run the full test command via Bash. Record the set of currently-failing test identifiers as `baseline_failing` (empty if the suite is green). If the suite is already red, print a warning that the baseline is not clean and that the listed failures will be subtracted when attributing new failures.
+
+Store the resolved command (both forms) and `baseline_failing` for the manifest `tdd` block.
+
 ### 1e. Initialize manifest
 
 Write a starter `manifest.json` to `$cycle_dir/manifest.json`:
@@ -119,9 +168,17 @@ Write a starter `manifest.json` to `$cycle_dir/manifest.json`:
   "context7_available": <bool>,
   "waves": [],
   "total_bugs": 0,
-  "next_cycle_plan": null
+  "next_cycle_plan": null,
+  "tdd": {
+    "enabled": <tdd_enabled>,
+    "test_command": {"full": "<resolved full or null>", "single_file": "<resolved single-file or null>"},
+    "baseline_failing": [<baseline ids>],
+    "tasks": []
+  }
 }
 ```
+
+(When `tdd_enabled` is false, write `"tdd": {"enabled": false}` and omit the other keys.)
 
 Record `t_preflight_done = $(date +%s)`.
 
@@ -148,6 +205,8 @@ You are being deployed as the plan-analyzer for plan-runner cycle <cycle_n>.
 Source plan path: <plan path>
 Context7 available: <bool>
 Verbose: <verbose>
+TDD enabled: <tdd_enabled>
+Test command: <resolved single-file form, or "n/a"> (full: <resolved full form, or "n/a">)
 
 PLAN CONTENTS (1-indexed line-number prefixes):
 <<<
@@ -191,17 +250,21 @@ Print the wave plan in human-readable form:
 Wave Plan (<W> waves, <total_agents> dev agents total)
 ========================================================
 Wave 1 (<N> agents, parallel):
-  agent-1: <task_title>     -> <owned_files joined with comma>
-  agent-2: <task_title>     -> <owned_files joined with comma>
+  agent-1 [test]        : <task_title>   -> <owned_files joined with comma>
+  agent-2 [impl]        : <task_title>   -> <owned_files joined with comma>
+  agent-3 [standalone]  : <task_title>   -> <owned_files joined with comma>
   ...
-Wave 2 (<N> agents, parallel):
-  ...
+
+Non-testable tasks (will run without a test gate):
+  - <task_title>: <non_testable_reason>     (one line per standalone task with a reason)
 
 Uncovered plan sections: <sections or "none">
 Estimated total agents: <total_dev + <W> verifiers + 2 (analyzer + aggregator)>
 ```
 
 If `uncovered_plan_sections` is non-empty, print a warning that those sections will not be executed and the user can re-run with a revised plan after this cycle completes.
+
+The bracketed tag is the agent `role` (`test`, `impl`, or `standalone`). In classic (non-TDD) runs, agents have no role and the tag is omitted. The "Non-testable tasks" block lists standalone agents that carry a `non_testable_reason`, so the user can challenge a mis-classification before execution.
 
 Proceed automatically without waiting for user input.
 
@@ -224,7 +287,13 @@ Record `t_wave_<W>_start = $(date +%s)`.
 
 Create one Claude Task per dev agent for live UI progress. Use TaskCreate.
 
-In a SINGLE message, dispatch all dev agents in this wave with `run_in_background: true`. For each dev agent, the prompt template:
+In a SINGLE message, dispatch all dev agents in this wave with `run_in_background: true`. **Select the agent definition by the wave-plan `role` field** (in classic / non-TDD runs there is no `role` -- treat every agent as an impl/standalone dev agent and use the plan-dev template):
+
+- `role: "test-author"` -> inline `plugins/plan-runner/agents/plan-test-author.md` and include the resolved `test_command` so it can match the test framework/style.
+- `role: "impl"` -> inline `plugins/plan-runner/agents/plan-dev.md` and include a `TESTS TO SATISFY` block listing the agent's `tests_to_satisfy`.
+- `role: "standalone"` or no role (classic) -> inline `plugins/plan-runner/agents/plan-dev.md` with no `TESTS TO SATISFY` block.
+
+Common prompt template (substitute the role-specific pieces in the marked lines):
 
 ```
 You are being deployed as a dev agent for plan-runner cycle <cycle_n>, wave <W>.
@@ -234,19 +303,21 @@ task_title: <task_title>
 plan_path: <absolute path to the source plan>
 task_excerpt_lines: <task_excerpt_lines>
 context7_available: <bool>
+<if role == "test-author": "test_command: <single-file form> (full: <full form>)">
 
 OWNED FILES (you may write only these):
 <owned_files joined with newlines>
 
 ACCEPTANCE CRITERIA:
 <acceptance_criteria joined with newlines, prefixed with "- ">
+<if role == "impl": a "TESTS TO SATISFY (make these pass; do not edit them):" block listing tests_to_satisfy, one per line>
 
-<inline the full content of plugins/plan-runner/agents/plan-dev.md here as your instructions>
+<inline the full content of the role-selected agent file (plan-test-author.md for test-author; plan-dev.md otherwise) here as your instructions>
 
 Return only the JSON status, nothing else.
 ```
 
-The dev agent reads the task prose from `plan_path` using the line range -- the orchestrator does not inline the task text. This keeps dev prompts small and lets multiple agents in a wave share one cached plan read.
+The agent reads the task prose from `plan_path` using the line range -- the orchestrator does not inline the task text. This keeps prompts small and lets multiple agents in a wave share one cached plan read.
 
 Use the `recommended_model` from the wave-plan for each agent.
 
@@ -258,6 +329,30 @@ For each dev agent return:
 3. Record the dev_status in a wave-state map.
 
 Wait for ALL dev agents in this wave to complete before proceeding.
+
+### 4a-bis. Run gates (only if tdd_enabled)
+
+If `tdd_enabled` is false, skip this step (classic pipeline).
+
+Gates are applied **per agent**, by `role`, because a single wave may mix test-author, impl, and standalone agents. For each agent in the wave, run the matching gate via Bash and capture verbatim output. There are **No inline retries** -- every gate failure is recorded as captured output for the verifier and surfaces as a bug routed through the normal aggregate -> fix-plan -> re-run loop.
+
+**Test-author agent (role: test-author) -> RED gate:**
+1. For each file in the agent's reported `test_files`, run the single-file test command (substitute `{file}`). Capture exit code + output.
+2. Run the full suite; diff the failing-test set against `tdd.baseline_failing`.
+3. Record `red_run` = `{cmd, exit, result: exit != 0 ? "FAILED" : "PASSED", valid_red: null}`. Leave `valid_red` null here -- the orchestrator cannot tell a genuine failure (import / not-implemented / assertion) from an invalid one (syntax / collection error) without analysis. The red-gate verifier (Step 4b) makes that call; backfill `valid_red` in the manifest from the verifier's verdict after 4b.
+4. This agent's `captured_test_output` (for the verifier) = the per-file run output (all `test_files`) + any new pre-existing failures from the suite diff.
+
+**Impl agent (role: impl) -> GREEN gate:**
+1. For each file in the agent's `tests_to_satisfy`, run the single-file test command (substitute `{file}`). Capture exit + output per file.
+2. Run the full suite; diff against `tdd.baseline_failing` to detect newly-broken pre-existing tests.
+3. Record `green_run` = `{cmd, exit, result: all target files passed ? "PASSED" : "FAILED"}`.
+4. `captured_test_output` = the per-file `tests_to_satisfy` run output + any new suite failures.
+
+**Standalone agent (role: standalone or classic):** no gate; `captured_test_output` is empty.
+
+**Append evidence to the manifest `tdd.tasks` array** (one entry per testable task, keyed by `task_title`): `{task, test_files, red_run, green_run}`. The red_run is filled when the test-author wave runs; green_run when the paired impl wave runs (match by task_title / tests_to_satisfy).
+
+**Invalid red (paired impl skipped):** if the red gate shows the new tests PASSED (exit 0 -- the orchestrator detects this directly) OR the red-gate verifier judged the red invalid (syntax / collection error), do NOT dispatch the paired impl agent -- mark it BLOCKED with reason "paired test red gate invalid" and set `valid_red: false` for that task in the manifest. The verifier still emits the P1 bug from the captured output, which flows to the next cycle.
 
 ### 4b. Dispatch wave verifier (single agent, background)
 
@@ -289,6 +384,10 @@ DEV AGENT REPORTED:
 - files_written: <dev's files_written joined with newlines>
 - files_unexpectedly_modified: <dev's files_unexpectedly_modified joined with newlines>
 - concerns: <dev's concerns joined with newlines>
+- role: <agent role or "standalone">
+- tests_to_satisfy: <impl only: tests_to_satisfy joined with newlines, else "n/a">
+- captured_test_output: |
+  <verbatim gate output captured in 4a-bis, or "n/a" for standalone/classic>
 ---
 <end repeat>
 

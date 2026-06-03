@@ -1,0 +1,23 @@
+{
+  "cycle": 1,
+  "input_plan": "docs/foo/plan.md",
+  "started_at": "2026-06-02T00:00:00Z",
+  "completed_at": null,
+  "context7_available": false,
+  "waves": [],
+  "total_bugs": 0,
+  "next_cycle_plan": null,
+  "tdd": {
+    "enabled": true,
+    "test_command": {"full": "npm test", "single_file": "npm test -- {file}"},
+    "baseline_failing": [],
+    "tasks": [
+      {
+        "task": "implement adder",
+        "test_files": ["tests/adder.test.js"],
+        "red_run": {"cmd": "npm test -- tests/adder.test.js", "exit": 1, "result": "FAILED", "valid_red": true},
+        "green_run": {"cmd": "npm test -- tests/adder.test.js", "exit": 0, "result": "PASSED"}
+      }
+    ]
+  }
+}

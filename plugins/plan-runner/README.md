@@ -8,7 +8,7 @@ Take a free-form Markdown implementation plan and execute it through a parallel 
 
 1. **Analyze.** A `plan-analyzer` agent reads your plan and buckets tasks into waves of file-disjoint work (max 6 agents per wave, ordered as a DAG).
 2. **Confirm.** You see the wave plan and approve before any dev work runs.
-3. **Execute per wave.** For each wave: dispatch up to 6 `plan-dev` agents in parallel, then dispatch one `plan-verifier` per dev agent in parallel, then commit the wave with verifier status in the message.
+3. **Execute per wave.** For each wave: dispatch up to 6 dev agents in parallel (TDD runs use `plan-test-author` for test-author roles and `plan-dev` for impl/standalone roles), then dispatch one `plan-verifier` for the wave, then commit the wave with verifier status in the message.
 4. **Aggregate.** A `plan-aggregator` agent collects every verifier-flagged bug, deduplicates, ranks by severity (P0-P3), and writes both a `bugs.md` audit and a `fix-plan.md` (a new plan ready for re-runs).
 5. **Re-run prompt.** You decide whether to auto-handoff to a fresh-context subagent that runs `/plan-runner:run <fix-plan.md>` for cycle 2.
 
@@ -25,6 +25,37 @@ claude plugin marketplace add MisterVitoPro/qa-swarm --plugin plan-runner
 ```
 
 The plan can be any Markdown file with task content. There is no required schema -- the analyzer reads it heuristically.
+
+## TDD red-green mode
+
+By default `/plan-runner:run` asks whether to enable a Test-Driven Development
+red-green workflow for the run:
+
+- **Testable tasks** are split into a *test-author* step (writes a failing test)
+  and an *impl* step (makes it pass). The orchestrator runs the test command at
+  two checkpoints and records proven evidence in `manifest.json` under `tdd`:
+  a `red_run` (the new test failed before implementation) and a `green_run`
+  (it passed after).
+- **Non-testable tasks** (docs, config, schemas) run as before, with static
+  verification only. The analyzer labels them and shows the reason in the wave
+  plan.
+- The **red gate** requires the new tests to fail for a genuine reason
+  (import / not-implemented / assertion) while pre-existing tests stay green;
+  a syntax/collection error is an invalid red and is flagged as a bug.
+- Gate failures are not retried inline -- the impl agent aims for a green
+  full-suite, but a wave whose gate fails is **still committed** (marked
+  `BUGS_FOUND`); the failures become bugs that flow through the existing
+  aggregate -> fix-plan -> re-run loop and are resolved on the next cycle.
+
+The test command is resolved as: `--test-cmd "<cmd>"` flag, else auto-detection
+from repo markers (`package.json`, `pytest`, `go.mod`, `Cargo.toml`, `*.csproj`,
+...), else a one-time prompt. If none can be resolved the run **stops** and
+points you to `--no-tdd`.
+
+**Flags:**
+- `--no-tdd` -- skip the prompt and run the classic (non-TDD) pipeline.
+- `--test-cmd "<cmd>"` -- supply the test command explicitly; use `{file}` for
+  single-file runs (e.g. `pytest {file}`).
 
 ## Output
 
