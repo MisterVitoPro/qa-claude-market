@@ -30,8 +30,8 @@ You MUST return a single JSON object matching `dev-return.schema.json`. No prose
   "agent_id": "<your agent_id>",
   "status": "DONE | DONE_WITH_CONCERNS | BLOCKED | NEEDS_CONTEXT",
   "files_written": ["<test path>", "..."],
-  "files_unexpectedly_modified": [],
-  "context7_queries": [],
+  "files_unexpectedly_modified": ["<path>", "..."],
+  "context7_queries": [{"library": "...", "purpose": "..."}],
   "summary": "<two-sentence what-I-did>",
   "concerns": ["<optional notes for the verifier>"],
   "test_files": ["<test path>", "..."],
@@ -39,7 +39,7 @@ You MUST return a single JSON object matching `dev-return.schema.json`. No prose
 }
 ```
 
-`test_files` are the files you wrote; `test_ids` are the individual test names so the orchestrator can run them in isolation for the red gate.
+`test_files` lists the files you wrote -- set it to the SAME list as `files_written` (a test-author writes only test files, so the two are identical). `test_ids` are the individual test names so the orchestrator can run them in isolation for the red gate. Leave `files_unexpectedly_modified` empty unless you had to touch a file outside `owned_files` (log it there with reasoning in `concerns`), and record any Context7 lookups in `context7_queries`.
 
 ## Process
 

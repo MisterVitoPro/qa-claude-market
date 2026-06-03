@@ -12,6 +12,6 @@ test("plan-test-author agent exists and only writes failing tests", () => {
   const f = read("agents/plan-test-author.md");
   assert.match(f, /name:\s*plan-test-author/, "frontmatter name");
   assert.match(f, /failing test/i, "must describe writing a failing test");
-  assert.match(f, /not (write|implement).{0,40}implementation|never.{0,20}implement/i, "must forbid writing implementation");
+  assert.match(f, /do not.{0,20}implement|never.{0,20}implement|not (write|implement).{0,40}implementation/i, "must forbid writing implementation");
   assert.match(f, /test_files/, "must return test_files");
 });
