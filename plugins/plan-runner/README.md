@@ -42,9 +42,10 @@ red-green workflow for the run:
 - The **red gate** requires the new tests to fail for a genuine reason
   (import / not-implemented / assertion) while pre-existing tests stay green;
   a syntax/collection error is an invalid red and is flagged as a bug.
-- Gate failures are not retried inline -- they become bugs that flow through the
-  existing aggregate -> fix-plan -> re-run loop. Because every impl wave ends on
-  a green full-suite check, **each committed wave is green**.
+- Gate failures are not retried inline -- the impl agent aims for a green
+  full-suite, but a wave whose gate fails is **still committed** (marked
+  `BUGS_FOUND`); the failures become bugs that flow through the existing
+  aggregate -> fix-plan -> re-run loop and are resolved on the next cycle.
 
 The test command is resolved as: `--test-cmd "<cmd>"` flag, else auto-detection
 from repo markers (`package.json`, `pytest`, `go.mod`, `Cargo.toml`, `*.csproj`,

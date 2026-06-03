@@ -1,6 +1,6 @@
 # Claude Code Plugin Marketplace
 
-Four production-grade plugins for [Claude Code](https://docs.claude.com/en/docs/claude-code/overview): multi-agent code review, queryable architecture maps, parallel plan execution, and spec consolidation.
+Five production-grade plugins for [Claude Code](https://docs.claude.com/en/docs/claude-code/overview): multi-agent code review, queryable architecture maps, parallel plan execution, spec consolidation, and vulnerability-aware dependency upgrades.
 
 ```bash
 # One-time: add the marketplace

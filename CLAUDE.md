@@ -63,10 +63,11 @@ plugins/                    # Root directory containing all plugins
     hooks/                  # SessionStart hook for auto-staleness detection
   plan-runner/                # Plan-driven parallel agent orchestrator (v0.5.0)
     .claude-plugin/
-    agents/                   # 4 agents (analyzer, dev, verifier, aggregator)
+    agents/                   # 5 agents (analyzer, test-author, dev, verifier, aggregator)
     skills/                   # User-facing command: run
-    schemas/                  # JSON Schemas for agent contracts
+    schemas/                  # JSON Schemas for agent contracts (+ examples/ for tests)
     test-fixtures/            # Reference plans for smoke testing
+    tests/                    # node --test contract suite + python jsonschema validator
   jupiter/                  # Spec consolidation + codebase surface scanner (v0.1.1)
     .claude-plugin/         # Plugin manifest and metadata
     agents/                 # 2 pipeline agents (spec-cataloger, surface-scanner)
