@@ -37,7 +37,7 @@ During each update strategy, `graph-schema.json` is regenerated to reflect the c
 
 3. Check `_header.schema_version`. If it is not `1`:
    ```
-   Schema version {N} is not supported by plugin v1.2.0.
+   state.json schema version {N} is not supported by this plugin version.
    Running full re-scan...
    ```
    Invoke the full `/code-atlas:map` pipeline (Steps 1-5 from the map skill) and STOP.
@@ -111,7 +111,7 @@ Evaluate these rows in order; first match wins.
      - Recompute edges: incoming and outgoing edges touching the changed module
      - Update the affected nodes in the graph schema
    - Preserve nodes and edges not affected by the changes
-7. Update both files' `_header.generated_at` and `_header.baseline_commit`.
+7. Update all three artifacts' `_header.generated_at` and `_header.baseline_commit` (graph-schema.json keeps `schema_version: 2`).
 8. Update `state.json.last_run`:
    - `strategy`: "micro"
    - `agents_used`: 0
@@ -198,7 +198,13 @@ Artifacts Updated:
 Agents:      {N}
 Time:        {Xm Ys}
 
-All three artifacts (.atlas.json, state.json, graph-schema.json) are now current.
+All three artifacts (atlas.json, state.json, graph-schema.json) are now current.
 The session-start hook will load atlas.json next session.
 To query the semantic dependency graph: /code-atlas:query
 ```
+
+After writing artifacts (any strategy), validate the graph: run
+`node "${CLAUDE_PLUGIN_ROOT}/scripts/query.js" --validate` via Bash. If it
+reports errors, fix the graph (most commonly an edge whose endpoint is no
+longer a node key after deletions), rewrite, and re-validate. If `node` is
+unavailable, skip with a one-line note.

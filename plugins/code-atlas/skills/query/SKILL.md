@@ -9,8 +9,6 @@ description: >
   Use for impact analysis, architecture exploration, and risk identification.
   Triggers on: query code atlas, find dependencies, who imports, blast radius,
   impact analysis, find critical modules, query graph.
-model: claude-sonnet-4-5
-color: cyan
 argument-hint: "<optional: paste your JSON query here, or leave blank to describe what you want in plain English>"
 ---
 
@@ -92,7 +90,16 @@ Optional: "max_depth": <1-5> (default: 2) for traversal operations.
 
 ## Step 3: EXECUTE QUERY
 
-Execute the validated query against the loaded graph. Apply the logic below for each operation.
+**Prefer the deterministic script runtime.** `scripts/query.js` (in this plugin) implements all four operations with exact BFS semantics, schema validation, and the response envelope — no manual traversal needed.
+
+1. Write the JSON query to `.code-atlas/last-query.json` using the Write tool (this avoids shell-quoting problems with inline JSON on Windows).
+2. Run via Bash:
+   ```
+   node "${CLAUDE_PLUGIN_ROOT}/scripts/query.js" --query-file .code-atlas/last-query.json
+   ```
+3. The script prints the JSON result envelope followed by a plain-text breakdown. Relay both to the user (Step 4's format is already produced by the script). Exit code 0 = success; 1 = structured failure (the JSON explains why); 2 = graph missing/unreadable.
+
+**Fall back to in-model execution ONLY if** `node` is not on PATH or the script file does not exist. In that case, execute the operation manually against the loaded graph using the logic below, then format the result yourself per Step 4.
 
 ### `dependencies_of`
 
@@ -147,6 +154,8 @@ Execute the validated query against the loaded graph. Apply the logic below for 
 ---
 
 ## Step 4: FORMAT AND RETURN RESULT
+
+(When the script runtime executed the query, it already produced this format — just relay its output. This section specifies the format for the in-model fallback.)
 
 Return the result as a JSON block followed by a plain-text explanation.
 
@@ -231,6 +240,7 @@ Tip: Run /code-atlas:map to regenerate the graph if the codebase has changed sig
 | `middleware` | Request/response pipeline layer |
 | `model` | Data structure or domain entity |
 | `public_api` | Exported interface layer |
+| `route_definition` | HTTP/API route declarations |
 | `internal` | Internal implementation detail |
 
 ### `criticality`

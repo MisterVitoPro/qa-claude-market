@@ -34,7 +34,7 @@ claude plugin install qa-swarm@mistervitopro-plugin-marketplace
 
 **Stops Claude from re-exploring your repo every session.**
 
-Three agents scan your codebase in parallel and produce a curated architecture index (directory map, key files, tech stack, patterns, dependencies, build commands) plus a queryable semantic graph. A `SessionStart` hook injects the index as context at session start so Claude navigates straight to the right files instead of grepping. Incremental updates re-scan only what changed.
+Three analyst agents scan your codebase in parallel and a graph synthesizer annotates the key modules, producing a curated architecture index (directory map, key files, tech stack, patterns, dependencies, build commands) plus a semantic dependency graph. Graph queries (dependencies, dependents, blast radius, risk filters) run deterministically through a bundled Node script. A `SessionStart` hook injects the index as context at session start so Claude navigates straight to the right files instead of grepping. Incremental updates re-scan only what changed.
 
 ```bash
 claude plugin install code-atlas@mistervitopro-plugin-marketplace
@@ -42,6 +42,8 @@ claude plugin install code-atlas@mistervitopro-plugin-marketplace
 /code-atlas:update                # incremental refresh
 /code-atlas:query "what calls AuthService.login?"
 ```
+
+→ [Plugin docs](plugins/code-atlas/README.md)
 
 ---
 
