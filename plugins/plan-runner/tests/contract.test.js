@@ -74,18 +74,48 @@ test("SKILL runs per-agent red/green gates, routes bugs, records evidence", () =
 
 test("SKILL Step 4a dispatches agents by role (test-author vs impl)", () => {
   const f = read("skills/run/SKILL.md");
-  // the test-author agent must actually be dispatched, not just exist
-  assert.match(f, /plan-test-author\.md/, "Step 4 must inline/dispatch the plan-test-author agent for test-author roles");
+  // the test-author agent must be dispatched by registered subagent type (not inlined)
+  assert.match(f, /plan-runner:plan-test-author/, "Step 4 must dispatch the plan-test-author agent by subagent type for test-author roles");
   // dispatch must branch on role
   assert.match(f, /role.{0,40}(test-author|impl)/is, "dispatch must select the agent by role");
   // impl agents must be told which tests to satisfy at dispatch time
   assert.match(f, /TESTS TO SATISFY|forward.{0,30}tests_to_satisfy|tests_to_satisfy.{0,40}(prompt|dispatch|impl agent)/is, "impl dispatch must forward tests_to_satisfy");
 });
 
+test("SKILL dispatches pipeline agents by registered subagent type (no inlining)", () => {
+  const f = read("skills/run/SKILL.md");
+  // all five pipeline agents are referenced by type, keeping prompts token-lean
+  for (const t of [
+    "plan-runner:plan-analyzer",
+    "plan-runner:plan-dev",
+    "plan-runner:plan-test-author",
+    "plan-runner:plan-verifier",
+    "plan-runner:plan-aggregator",
+  ]) {
+    assert.match(f, new RegExp(t), `must dispatch ${t} by subagent type`);
+  }
+  // the old inline-the-full-content pattern must be gone
+  assert.doesNotMatch(f, /inline the full content of .*agents\/.*\.md/i, "must not inline agent .md bodies into prompts");
+});
+
+test("SKILL selects an execution backend (Agent Teams vs subagent fallback)", () => {
+  const f = read("skills/run/SKILL.md");
+  assert.match(f, /CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS/, "must read the agent-teams env var");
+  assert.match(f, /backend\s*=\s*"teams"/, "must select the teams backend");
+  assert.match(f, /backend\s*=\s*"subagent"/, "must fall back to the subagent backend");
+  assert.match(f, /per-wave barrier|wave barrier/i, "both backends must keep the per-wave barrier");
+});
+
 test("docs + version reflect the TDD feature", () => {
   const pkg = JSON.parse(read(".claude-plugin/plugin.json"));
-  assert.equal(pkg.version, "0.5.0", "plugin version bumped to 0.5.0");
+  assert.equal(pkg.version, "1.0.0", "plugin version bumped to 1.0.0");
   const readme = read("README.md");
   assert.match(readme, /--no-tdd/, "README documents the --no-tdd flag");
   assert.match(readme, /red.{0,5}green|red→green/i, "README describes the red-green flow");
+});
+
+test("docs cover the Agent Teams backend", () => {
+  const readme = read("README.md");
+  assert.match(readme, /CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS/, "README documents the agent-teams env var");
+  assert.match(readme, /2\.1\.178/, "README notes the Claude Code version requirement");
 });

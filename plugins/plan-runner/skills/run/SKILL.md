@@ -123,6 +123,25 @@ Check whether the tools `mcp__context7__resolve-library-id` and `mcp__context7__
 If true: print `Context7 MCP detected -- dev agents will use it for current framework docs.`
 If false: print `Context7 MCP not detected -- dev agents will rely on training data only.`
 
+### 1d-ter. Select execution backend
+
+plan-runner can run wave execution two ways. Pick the backend now:
+
+1. Read the env var with Bash: `printenv CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS`.
+2. If the value is exactly `1` AND this Claude Code session exposes Agent Teams tooling (team task list + teammate spawning, Claude Code v2.1.178+), set `backend = "teams"`. Otherwise set `backend = "subagent"`.
+3. Print one of:
+
+```
+Agent Teams enabled -- using team backend (lean orchestration, lower token usage).
+```
+```
+Agent Teams not enabled -- using subagent backend. Set CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 (Claude Code v2.1.178+) for lower token usage.
+```
+
+If the env var is set to `1` but team tooling is not available (older build), do NOT error -- fall back to `backend = "subagent"` and print the second message with a note that the build is too old.
+
+Store `backend` for the manifest and for Step 4 / Step 6 branching.
+
 ### 1d-bis. Resolve test command + green baseline (only if tdd_enabled)
 
 If `tdd_enabled` is false, skip this step entirely.
@@ -166,6 +185,7 @@ Write a starter `manifest.json` to `$cycle_dir/manifest.json`:
   "started_at": "<ISO 8601 from `date -Iseconds`>",
   "completed_at": null,
   "context7_available": <bool>,
+  "backend": "<backend>",
   "waves": [],
   "total_bugs": 0,
   "next_cycle_plan": null,
@@ -197,7 +217,7 @@ awk '{printf "%4d\t%s\n", NR, $0}' "<plan path>"
 
 Capture the result as `PLAN_WITH_LINES`.
 
-Dispatch ONE plan-analyzer agent with the prefixed plan inlined:
+Dispatch ONE analyzer via the **registered subagent type `plan-runner:plan-analyzer`**. Do NOT inline the agent file -- the definition body loads automatically as the agent's system prompt. Pass ONLY the per-invocation parameters:
 
 ```
 You are being deployed as the plan-analyzer for plan-runner cycle <cycle_n>.
@@ -212,8 +232,6 @@ PLAN CONTENTS (1-indexed line-number prefixes):
 <<<
 <PLAN_WITH_LINES inlined here>
 >>>
-
-<inline the full content of plugins/plan-runner/agents/plan-analyzer.md here as your instructions>
 
 Return only the JSON wave plan, nothing else.
 ```
@@ -274,6 +292,8 @@ Record `t_confirmed = $(date +%s)`.
 
 ## Step 4: WAVE EXECUTION
 
+Wave execution honors the `backend` chosen in Step 1d-ter. Both backends keep the same per-wave barrier (dispatch -> wait for all -> TDD gates -> verify -> commit -> next wave); they differ only in how dev agents are dispatched and how their results are collected (4a). Gates (4a-bis), verification (4b), bug JSON (4c), dashboard (4d), commit (4e), and manifest (4f) are identical for both.
+
 For each wave in `wave_plan.waves` (sequentially):
 
 Print:
@@ -283,17 +303,15 @@ Print:
 
 Record `t_wave_<W>_start = $(date +%s)`.
 
-### 4a. Dispatch dev agents (parallel, background)
+### 4a. Dispatch dev agents (parallel)
 
-Create one Claude Task per dev agent for live UI progress. Use TaskCreate.
+**Select the registered subagent type by the wave-plan `role` field** (in classic / non-TDD runs there is no `role` -- treat every agent as an impl/standalone dev agent and use `plan-runner:plan-dev`). Do NOT inline agent `.md` bodies -- referencing the type loads the definition as the agent's system prompt automatically and keeps each prompt small:
 
-In a SINGLE message, dispatch all dev agents in this wave with `run_in_background: true`. **Select the agent definition by the wave-plan `role` field** (in classic / non-TDD runs there is no `role` -- treat every agent as an impl/standalone dev agent and use the plan-dev template):
+- `role: "test-author"` -> subagent type `plan-runner:plan-test-author`; include the resolved `test_command` so it can match the test framework/style.
+- `role: "impl"` -> subagent type `plan-runner:plan-dev`; include a `TESTS TO SATISFY` block listing the agent's `tests_to_satisfy`.
+- `role: "standalone"` or no role (classic) -> subagent type `plan-runner:plan-dev` with no `TESTS TO SATISFY` block.
 
-- `role: "test-author"` -> inline `plugins/plan-runner/agents/plan-test-author.md` and include the resolved `test_command` so it can match the test framework/style.
-- `role: "impl"` -> inline `plugins/plan-runner/agents/plan-dev.md` and include a `TESTS TO SATISFY` block listing the agent's `tests_to_satisfy`.
-- `role: "standalone"` or no role (classic) -> inline `plugins/plan-runner/agents/plan-dev.md` with no `TESTS TO SATISFY` block.
-
-Common prompt template (substitute the role-specific pieces in the marked lines):
+Common per-invocation prompt template (parameters only -- the agent body comes from its registered definition):
 
 ```
 You are being deployed as a dev agent for plan-runner cycle <cycle_n>, wave <W>.
@@ -312,23 +330,26 @@ ACCEPTANCE CRITERIA:
 <acceptance_criteria joined with newlines, prefixed with "- ">
 <if role == "impl": a "TESTS TO SATISFY (make these pass; do not edit them):" block listing tests_to_satisfy, one per line>
 
-<inline the full content of the role-selected agent file (plan-test-author.md for test-author; plan-dev.md otherwise) here as your instructions>
-
 Return only the JSON status, nothing else.
 ```
 
-The agent reads the task prose from `plan_path` using the line range -- the orchestrator does not inline the task text. This keeps prompts small and lets multiple agents in a wave share one cached plan read.
+The agent reads the task prose from `plan_path` using the line range -- the orchestrator does not inline the task text. This keeps prompts small and lets multiple agents in a wave share one cached plan read. Use the `recommended_model` from the wave-plan for each agent.
 
-Use the `recommended_model` from the wave-plan for each agent.
+Dispatch depends on `backend`:
 
-As each background agent completes, the orchestrator receives a notification. Collect all dev agent return JSONs.
+**Backend `subagent` (default):** Create one Claude Task per dev agent for live UI progress (TaskCreate). In a SINGLE message, dispatch all dev agents in this wave with `run_in_background: true`, each using its role-selected `subagent_type` and the per-invocation prompt above. As each background agent completes, the orchestrator receives a notification; collect all dev agent return JSONs.
 
-For each dev agent return:
+**Backend `teams`:** The session is the team lead.
+1. Create one task on the shared team task list per wave-plan agent, embedding the per-invocation prompt parameters (agent_id, task_title, plan_path, task_excerpt_lines, owned files, acceptance criteria, role-specific blocks) in the task detail. Give the wave's tasks no unmet dependencies so they are all immediately claimable (cross-wave ordering is enforced by the lead opening one wave at a time, not by global DAG edges).
+2. Spawn one teammate per task (honor the <=6-per-wave cap), each referencing the role-selected `subagent_type` and the role's `recommended_model`. Teammates self-claim the wave's tasks.
+3. Read teammate progress from the task list / mailbox -- do NOT pull full JSON returns into the lead context. Each teammate records its final JSON status as its task result / final message.
+
+For each dev agent return (both backends):
 1. Parse the JSON. If parse fails, treat as `{"agent_id": "<id>", "status": "BLOCKED", "files_written": [], "files_unexpectedly_modified": [], "context7_queries": [], "summary": "agent returned non-JSON output", "concerns": ["unparseable response"]}` and continue.
 2. Update the corresponding Task to `completed`.
 3. Record the dev_status in a wave-state map.
 
-Wait for ALL dev agents in this wave to complete before proceeding.
+**Wave barrier (both backends):** Wait for ALL dev agents/teammates in this wave to complete before proceeding. On the `teams` backend, if a task is stuck past a bounded wait (the known task-status-lag issue), read the owned-file state directly, treat any unreported teammate as `BLOCKED`, print a warning, and proceed to gates -- the gap then flows through the normal verify -> aggregate -> fix-plan loop rather than hanging the pipeline.
 
 ### 4a-bis. Run gates (only if tdd_enabled)
 
@@ -361,7 +382,7 @@ Print:
 [Wave <W>] All dev agents complete. Dispatching wave verifier...
 ```
 
-Dispatch ONE verifier for the entire wave. Include all dev agents' data in the prompt:
+Dispatch ONE verifier for the entire wave via the **registered subagent type `plan-runner:plan-verifier`** (do NOT inline the agent file). On the `teams` backend this may be a teammate or a plain subagent; either way reference the type rather than inlining. Include all dev agents' data in the per-invocation prompt:
 
 ```
 You are being deployed as the wave verifier for plan-runner cycle <cycle_n>, wave <W>.
@@ -390,8 +411,6 @@ DEV AGENT REPORTED:
   <verbatim gate output captured in 4a-bis, or "n/a" for standalone/classic>
 ---
 <end repeat>
-
-<inline the full content of plugins/plan-runner/agents/plan-verifier.md here as your instructions>
 
 Return only the JSON bug report, nothing else.
 ```
@@ -503,7 +522,7 @@ If total bugs > 0:
 [Phase 3/4] Aggregating <N> bugs across <W> waves...
 ```
 
-Dispatch ONE plan-aggregator agent (foreground, model: sonnet):
+Dispatch ONE aggregator via the **registered subagent type `plan-runner:plan-aggregator`** (foreground, model: sonnet; do NOT inline the agent file). Pass only the per-invocation parameters:
 
 ```
 You are being deployed as the plan-aggregator for plan-runner cycle <cycle_n>.
@@ -513,8 +532,6 @@ input_plan: <absolute path to the original plan>
 
 Read all bug JSONs under <cycle_dir>/bugs/*.json.
 Read the wave plan at <cycle_dir>/wave-plan.json for task context.
-
-<inline the full content of plugins/plan-runner/agents/plan-aggregator.md here as your instructions>
 
 Write bugs.md and fix-plan.md to <cycle_dir> as instructed. Return the status JSON.
 ```
@@ -566,7 +583,9 @@ Run plan-runner again with the generated fix-plan to address these bugs?
 
 If `n`: print `Stopping fix-plan re-run. Proceeding to PR step.` Proceed to Step 8.
 
-If `Y` (or empty default): dispatch a `general-purpose` Agent with this self-contained prompt:
+If `Y` (or empty default), the re-run mechanism depends on `backend`:
+
+**Backend `subagent`:** dispatch a `general-purpose` Agent with this self-contained prompt:
 
 ```
 You are executing the plan-runner:run skill in a fresh session.
@@ -580,9 +599,9 @@ The fix-plan file already exists on disk. Read it fresh. Follow the skill exactl
 When the skill completes, return a concise summary: cycle number, waves run, total bugs found, whether the user accepted another re-run, and the path to the cycle's bugs.md. Do not re-describe work the user already saw -- just the outcome.
 ```
 
-Use absolute paths so the subagent's path resolution does not depend on shared working-directory state.
+Use absolute paths so the subagent's path resolution does not depend on shared working-directory state. When the subagent returns, print its summary verbatim and STOP.
 
-When the subagent returns, print its summary verbatim and STOP.
+**Backend `teams`:** do NOT hand off to a fresh subagent -- a teammate cannot spawn its own team (no nested teams), and the lead is fixed for the session. Instead re-run **in place in the lead session**: re-enter this pipeline from Step 1 with the plan path set to the absolute `fix-plan.md` path (this starts a new cycle under the same date root). Carry the existing `backend = "teams"` forward. When that cycle completes, STOP.
 
 ## Step 7: FINAL SUMMARY (clean run only)
 
