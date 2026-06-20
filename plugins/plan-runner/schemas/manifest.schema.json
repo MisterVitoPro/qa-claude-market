@@ -10,6 +10,7 @@
     "started_at": {"type": "string", "format": "date-time"},
     "completed_at": {"type": ["string", "null"], "format": "date-time"},
     "context7_available": {"type": "boolean"},
+    "backend": {"type": "string", "enum": ["teams", "subagent"], "description": "Wave-execution backend selected at pre-flight: 'teams' when CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 and team tooling is present, else 'subagent'. Optional for back-compat with pre-1.0.0 manifests."},
     "waves": {
       "type": "array",
       "items": {

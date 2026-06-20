@@ -26,6 +26,36 @@ claude plugin marketplace add MisterVitoPro/qa-swarm --plugin plan-runner
 
 The plan can be any Markdown file with task content. There is no required schema -- the analyzer reads it heuristically.
 
+## Token-efficient mode (Agent Teams, experimental)
+
+plan-runner dispatches every pipeline agent (analyzer, dev, test-author,
+verifier, aggregator) by its **registered subagent type** rather than pasting the
+agent definition into each prompt. This alone removes the dominant token cost and
+applies to every run.
+
+On top of that, plan-runner auto-detects Claude Code's experimental **Agent
+Teams** orchestration and uses it when available:
+
+- **Enable it** by setting the environment variable
+  `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` (e.g. in `~/.claude/settings.json`
+  under `"env"`). Requires **Claude Code v2.1.178 or later**.
+- **What changes.** The session becomes the team lead and spawns teammates that
+  self-claim each wave's tasks from a shared task list and report via the team
+  mailbox, so the lead's context stays lean instead of accumulating every agent's
+  full JSON return.
+- **Same safety contract.** The per-wave barrier is unchanged: dispatch a wave ->
+  wait for all -> run TDD gates -> verify -> commit -> next wave. File-disjoint
+  waves (already produced by the analyzer) satisfy the Agent Teams "each teammate
+  owns different files" requirement.
+- **Fallback.** If the variable is not set (or the build is older than 2.1.178),
+  plan-runner transparently uses the original subagent backend. The pre-flight
+  output prints which backend is active, and `manifest.json` records it under
+  `"backend"`.
+- **Display note.** Split-pane teammate views need tmux or iTerm2; the default
+  in-process view works everywhere (including Windows Terminal). The re-run loop
+  on the teams backend continues in the same lead session, since teammates cannot
+  spawn nested teams.
+
 ## TDD red-green mode
 
 By default `/plan-runner:run` asks whether to enable a Test-Driven Development
