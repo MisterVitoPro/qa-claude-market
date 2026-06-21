@@ -87,6 +87,16 @@ points you to `--no-tdd`.
 - `--test-cmd "<cmd>"` -- supply the test command explicitly; use `{file}` for
   single-file runs (e.g. `pytest {file}`).
 
+## Pull request
+
+At the end of a run, plan-runner pushes the branch and opens (or updates) a pull
+request via the internal `plan-runner:pr` skill. The PR uses a conventional title
+(`feat:`/`fix:`), a structured body (Summary, Changes with a whole-branch diff
+summary, Bug counts by severity, and plan-runner stats), and a smart default: it
+opens as a **draft** when unresolved bugs remain and ready-for-review otherwise. If a
+PR already exists for the branch it is updated in place. When `gh` is not installed,
+the title and body are printed for manual creation.
+
 ## Output
 
 Per cycle, output lives at:
