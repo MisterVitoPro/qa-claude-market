@@ -617,67 +617,25 @@ Update manifest `completed_at` and write to disk. Proceed to Step 8.
 
 ## Step 8: OPEN PR
 
-Determine the current branch:
+Delegate push + PR creation to the dedicated PR skill. Compute the absolute path to
+the cycle directory (the `$cycle_dir` from Step 1b resolved to an absolute path):
 
 ```bash
-git branch --show-current
+realpath "$cycle_dir"
 ```
 
-Push the branch to origin:
-
-```bash
-git push -u origin <branch>
-```
-
-Build the PR title and body from pipeline state:
-
-- **Title:** `plan-runner: <plan file basename> (cycle <cycle_n>)`
-- **Body:**
+Capture as `cycle_dir_abs`. Then invoke the Skill tool:
 
 ```
-## Summary
-<bulleted list of task_title values from the wave plan, one per line>
-
-## plan-runner stats
-- Cycles: <cycle_n>
-- Waves: <W>
-- Dev agents: <total dev agents dispatched>
-- Bugs found: <total_bugs>
-
-Generated with plan-runner
+Invoke the Skill tool with:
+  skill: "plan-runner:pr"
+  args: "<cycle_dir_abs>"
 ```
 
-Check whether `gh` is available:
-
-```bash
-gh --version
-```
-
-**If `gh` is available**, create the PR:
-
-```bash
-gh pr create --title "<title>" --body "$(cat <<'EOF'
-<body>
-EOF
-)"
-```
-
-Print the PR URL returned by `gh pr create`. STOP.
-
-**If `gh` is not available**, print:
-
-```
-Branch pushed to origin/<branch>.
-
-Open a PR with the following details:
-
-Title: <title>
-
-Body:
-<body>
-```
-
-STOP.
+The `plan-runner:pr` skill reads `manifest.json`, `wave-plan.json`, and the bug JSONs
+from that directory, pushes the current branch, and creates or updates the pull
+request (conventional title, rich body, draft when bugs remain). When it returns,
+print its confirmation line verbatim and STOP.
 
 ## Phase Timing Summary (always print before STOP unless STOP was an early-exit error)
 
