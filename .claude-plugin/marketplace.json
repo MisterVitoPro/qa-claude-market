@@ -28,7 +28,7 @@
     },
     {
       "name": "plan-runner",
-      "description": "Take a Markdown implementation plan, run it through a parallel agent swarm with per-wave verification, and generate a bug-fix plan for re-runs; optional TDD red-green mode with per-task red/green gate evidence; auto-detects Claude Code Agent Teams for token-lean orchestration with a subagent fallback",
+      "description": "Take a Markdown implementation plan, run it through a parallel agent swarm with per-wave verification, and generate a bug-fix plan for re-runs; TDD red-green mode on by default (--no-tdd to disable) with per-task red/green gate evidence; auto-detects Claude Code Agent Teams for token-lean orchestration with a subagent fallback",
       "source": "./plugins/plan-runner",
       "category": "development"
     },
