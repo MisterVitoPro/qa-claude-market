@@ -19,10 +19,10 @@ Follow this pipeline exactly. Do not skip steps.
 
 Tokenize `{$ARGUMENTS}` on whitespace. The first non-flag token is the plan path. Flags:
 - `--verbose` -- if present, the analyzer emits per-wave `rationale` and per-agent `complexity_signals`. If absent, those fields are omitted (default; smaller analyzer output).
-- `--no-tdd` -- if present, skip the TDD enablement prompt entirely and run the classic (non-TDD) pipeline. Set `tdd_enabled = false`.
+- `--no-tdd` -- if present, disable TDD and run the classic (non-TDD) pipeline. Set `tdd_enabled = false`. TDD is ON by default; this flag is the only way to turn it off.
 - `--test-cmd "<cmd>"` -- optional explicit test command. May include a `{file}` placeholder for single-file runs (e.g. `pytest {file}`). When provided, it is used verbatim and detection is skipped.
 
-Set `verbose = true | false` based on the flag. Capture any `--test-cmd` value as `test_cmd_flag`. If `--no-tdd` is present, set `tdd_enabled = false` now; otherwise leave `tdd_enabled` unset here -- step 1a-bis assigns it. Strip all flags before using the plan path.
+Set `verbose = true | false` based on the flag. Capture any `--test-cmd` value as `test_cmd_flag`. Set `tdd_enabled = false` if `--no-tdd` is present, otherwise `tdd_enabled = true` (TDD is auto-enabled by default -- never prompt for it). Strip all flags before using the plan path.
 
 ## Timing
 
@@ -55,18 +55,10 @@ Then STOP.
 
 ### 1a-bis. TDD enablement
 
-- If `--no-tdd` was passed: set `tdd_enabled = false` and print `TDD disabled (--no-tdd). Running classic pipeline.` Skip the rest of this step.
-- Otherwise prompt:
+TDD is auto-enabled. Do NOT prompt the user.
 
-```
-Enable TDD red-green approach for this run?
-Testable tasks get a failing test written first (red), then implementation makes it pass (green).
-[Y] = TDD on   [n] = classic pipeline
-
-(Y/n)
-```
-
-If `Y` or empty: set `tdd_enabled = true`. If `n`: set `tdd_enabled = false`.
+- If `--no-tdd` was passed: `tdd_enabled` is already `false`; print `TDD disabled (--no-tdd). Running classic pipeline.`
+- Otherwise: `tdd_enabled` is already `true`; print `TDD red-green enabled (default). Testable tasks get a failing test first (red), then implementation makes it pass (green). Use --no-tdd to run the classic pipeline.`
 
 ### 1b. Compute cycle directory
 
@@ -625,67 +617,25 @@ Update manifest `completed_at` and write to disk. Proceed to Step 8.
 
 ## Step 8: OPEN PR
 
-Determine the current branch:
+Delegate push + PR creation to the dedicated PR skill. Compute the absolute path to
+the cycle directory (the `$cycle_dir` from Step 1b resolved to an absolute path):
 
 ```bash
-git branch --show-current
+realpath "$cycle_dir"
 ```
 
-Push the branch to origin:
-
-```bash
-git push -u origin <branch>
-```
-
-Build the PR title and body from pipeline state:
-
-- **Title:** `plan-runner: <plan file basename> (cycle <cycle_n>)`
-- **Body:**
+Capture as `cycle_dir_abs`. Then invoke the Skill tool:
 
 ```
-## Summary
-<bulleted list of task_title values from the wave plan, one per line>
-
-## plan-runner stats
-- Cycles: <cycle_n>
-- Waves: <W>
-- Dev agents: <total dev agents dispatched>
-- Bugs found: <total_bugs>
-
-Generated with plan-runner
+Invoke the Skill tool with:
+  skill: "plan-runner:pr"
+  args: "<cycle_dir_abs>"
 ```
 
-Check whether `gh` is available:
-
-```bash
-gh --version
-```
-
-**If `gh` is available**, create the PR:
-
-```bash
-gh pr create --title "<title>" --body "$(cat <<'EOF'
-<body>
-EOF
-)"
-```
-
-Print the PR URL returned by `gh pr create`. STOP.
-
-**If `gh` is not available**, print:
-
-```
-Branch pushed to origin/<branch>.
-
-Open a PR with the following details:
-
-Title: <title>
-
-Body:
-<body>
-```
-
-STOP.
+The `plan-runner:pr` skill reads `manifest.json`, `wave-plan.json`, and the bug JSONs
+from that directory, pushes the current branch, and creates or updates the pull
+request (conventional title, rich body, draft when bugs remain). When it returns,
+print its confirmation line verbatim and STOP.
 
 ## Phase Timing Summary (always print before STOP unless STOP was an early-exit error)
 

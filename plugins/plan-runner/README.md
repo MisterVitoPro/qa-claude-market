@@ -58,8 +58,8 @@ Teams** orchestration and uses it when available:
 
 ## TDD red-green mode
 
-By default `/plan-runner:run` asks whether to enable a Test-Driven Development
-red-green workflow for the run:
+`/plan-runner:run` enables a Test-Driven Development red-green workflow by
+default (no prompt); pass `--no-tdd` to run the classic pipeline instead:
 
 - **Testable tasks** are split into a *test-author* step (writes a failing test)
   and an *impl* step (makes it pass). The orchestrator runs the test command at
@@ -83,9 +83,19 @@ from repo markers (`package.json`, `pytest`, `go.mod`, `Cargo.toml`, `*.csproj`,
 points you to `--no-tdd`.
 
 **Flags:**
-- `--no-tdd` -- skip the prompt and run the classic (non-TDD) pipeline.
+- `--no-tdd` -- disable TDD and run the classic (non-TDD) pipeline (TDD is on by default).
 - `--test-cmd "<cmd>"` -- supply the test command explicitly; use `{file}` for
   single-file runs (e.g. `pytest {file}`).
+
+## Pull request
+
+At the end of a run, plan-runner pushes the branch and opens (or updates) a pull
+request via the internal `plan-runner:pr` skill. The PR uses a conventional title
+(`feat:`/`fix:`), a structured body (Summary, Changes with a whole-branch diff
+summary, Bug counts by severity, and plan-runner stats), and a smart default: it
+opens as a **draft** when unresolved bugs remain and ready-for-review otherwise. If a
+PR already exists for the branch it is updated in place. When `gh` is not installed,
+the title and body are printed for manual creation.
 
 ## Output
 
