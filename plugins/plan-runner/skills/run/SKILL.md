@@ -73,7 +73,23 @@ TDD is auto-enabled. Do NOT prompt the user.
 mkdir -p "$cycle_dir/bugs"
 ```
 
+### 1b-bis. Detect git availability
+
+Run `git rev-parse --is-inside-work-tree 2>/dev/null`. If the command succeeds and prints `true`, set `git_available = true`. Otherwise -- git is not installed, or the working directory is not a git repository -- set `git_available = false`.
+
+If `git_available` is false, print:
+
+```
+Git not detected (no git binary or not a git repository). plan-runner will run
+without any git operations: no clean-tree check, no per-wave commits, and no PR
+step. Generated artifacts remain in the cycle directory.
+```
+
+Store `git_available` for the manifest and for the conditional git steps below (1c, 4e, 7-bis, and 8). When `git_available` is false, every step that runs `git` is skipped as noted in that step.
+
 ### 1c. Pre-flight clean tree check
+
+If `git_available` is false, skip this step entirely (no working tree to check).
 
 Run `git status --porcelain`. If output is non-empty:
 
@@ -177,10 +193,12 @@ Write a starter `manifest.json` to `$cycle_dir/manifest.json`:
   "started_at": "<ISO 8601 from `date -Iseconds`>",
   "completed_at": null,
   "context7_available": <bool>,
+  "git_available": <bool>,
   "backend": "<backend>",
   "waves": [],
   "total_bugs": 0,
   "next_cycle_plan": null,
+  "code_atlas_sync": null,
   "tdd": {
     "enabled": <tdd_enabled>,
     "test_command": {"full": "<resolved full or null>", "single_file": "<resolved single-file or null>"},
@@ -409,7 +427,13 @@ Return only the JSON bug report, nothing else.
 
 Use `model: sonnet`.
 
-Wait for the verifier to complete.
+**Wait for the verifier to complete (backend-aware).** The verdict must come from the verifier's own report -- never from the orchestrator's own reading of the code:
+
+**Backend `subagent` (default):** dispatch the verifier as a background task and wait for its completion notification. Collect its return JSON.
+
+**Backend `teams`:** the verifier runs as a teammate (or a plain subagent referencing the type). Because the team task status lags, do NOT treat "no status update yet" as "no verdict." Instead **deterministically poll the verifier's task result / mailbox** with a generous bounded wait, re-reading the task result until the verifier's bug-report JSON (its final message) is actually retrieved. Read the verdict *from the task result*, not by inferring it.
+
+**No-self-verify rule (both backends, hard requirement):** The orchestrator MUST NOT perform the verification itself, MUST NOT substitute its own judgment for the verifier's report, and MUST NOT advance to 4c / 4e / Step 5 / Step 8 until the verifier's report is in hand. If the bounded wait genuinely expires without a report, do NOT self-verify to "rescue" the wave: mark the wave `verifier_status = UNVERIFIABLE` (use the 4c synthetic-bug fallback) so the gap flows through the normal verify -> aggregate -> fix-plan -> re-run loop. A late or missing verdict becomes a tracked bug, never a silently-closed wave.
 
 ### 4c. Write bug JSON
 
@@ -438,6 +462,10 @@ Wave verifier: <verifier_status>   Total bugs: <bugs array length>
 ```
 
 ### 4e. Commit the wave
+
+If `git_available` is false, skip this step: set `commit_sha = null` and `skipped_reason = "git not available"` in the manifest entry, print `Wave <W>: git not available -- skipping commit.`, and continue to the next wave. Do NOT run any `git` command.
+
+Otherwise (git is available):
 
 Compute verifier-status summary for the commit message:
 - If all verifiers returned CLEAN: `"verified clean"`
@@ -499,6 +527,20 @@ Record `t_wave_<W>_end = $(date +%s)`.
 Move to the next wave. After the last wave completes, proceed to Step 5.
 
 ## Step 5: AGGREGATE
+
+### 5.0. Verifier-coverage gate (runs before counting, on every path)
+
+Before counting bugs, assert that **every** wave `1..W` produced a verdict. For each wave, check that `$cycle_dir/bugs/wave-<W>.json` exists and parses with a non-null `verifier_status`.
+
+If any wave's bug JSON is missing or has a null `verifier_status`, the verifier for that wave never landed -- the wave must not be treated as clean. For each such wave, synthesize and write:
+
+```json
+{"wave_id": <W>, "verifier_status": "UNVERIFIABLE", "agent_statuses": {}, "bugs": [{"bug_id": "wave-<W>-bug-1", "severity": "P2", "category": "incorrect_implementation", "title": "Wave <W> verifier verdict missing -- wave closed without verification", "file": "n/a", "line": null, "evidence": "No bugs/wave-<W>.json with a verifier_status was found at aggregation time.", "expected": "Every wave is gated by its verifier before the cycle closes", "suggested_fix": "Re-run this cycle's wave <W> so the verifier produces a verdict"}]}
+```
+
+Print a warning naming each backfilled wave. This gate makes it structurally impossible to reach the PR step (Step 8, downstream of Step 5 on both the clean and buggy paths) while a verifier verdict is still outstanding.
+
+### 5.1. Count and aggregate
 
 Count total bugs across all bug JSONs. If total bugs == 0:
 
@@ -573,7 +615,7 @@ Run plan-runner again with the generated fix-plan to address these bugs?
 (Y/n)
 ```
 
-If `n`: print `Stopping fix-plan re-run. Proceeding to PR step.` Proceed to Step 8.
+If `n`: print `Stopping fix-plan re-run. Proceeding to code-atlas sync + PR step.` Proceed to Step 7-bis.
 
 If `Y` (or empty default), the re-run mechanism depends on `backend`:
 
@@ -613,9 +655,75 @@ Duration: <total elapsed in Xm Ys>
 Manifest: <path to manifest.json>
 ```
 
-Update manifest `completed_at` and write to disk. Proceed to Step 8.
+Update manifest `completed_at` and write to disk. Proceed to Step 7-bis.
+
+## Step 7-bis: SYNC CODE ATLAS
+
+This step keeps a code-atlas architecture index in sync with what this cycle just
+implemented. All wave changes are already committed to disk (Step 4e), so the atlas
+update picks them up automatically. It runs on the terminal cycle only -- the Step 6
+"Y" re-run handoff never reaches this step, so intermediate fix cycles do not re-index.
+
+`code-atlas:update` writes only to `.code-atlas/` (gitignored by the map skill), so
+this step produces nothing committable and never changes the PR diff. It is purely a
+freshness step run before the PR is opened.
+
+### 7-bis.a. Git guard
+
+If `git_available` is false, skip this step entirely. Set `code_atlas_sync = {"ran": false, "reason": "git not available"}` in the manifest and print:
+
+```
+code-atlas sync skipped (git not available).
+```
+
+Do NOT run any command. Proceed to Step 8.
+
+### 7-bis.b. Detect code-atlas
+
+Check whether `.code-atlas/state.json` exists (use Glob, or `test -f .code-atlas/state.json` via Bash). This file exists only when code-atlas is installed AND has already been initialized with `/code-atlas:map`.
+
+If it does NOT exist, skip: set `code_atlas_sync = {"ran": false, "reason": "code-atlas not detected"}` in the manifest and print:
+
+```
+code-atlas not detected (.code-atlas/state.json absent) -- skipping architecture index sync.
+```
+
+Then proceed to Step 8. Do NOT auto-run `/code-atlas:map` (a full map is expensive and the user never opted in).
+
+### 7-bis.c. Run the incremental update
+
+If `.code-atlas/state.json` exists, print:
+
+```
+code-atlas detected -- syncing architecture index with this cycle's changes...
+```
+
+Invoke the Skill tool with:
+
+```
+  skill: "code-atlas:update"
+  args: ""
+```
+
+Pass NO arguments. The update auto-selects its depth (micro / targeted / full) from the
+size of the committed change set -- a small plan stays cheap; a large one re-scans as
+needed. When the skill returns, print its final confirmation line verbatim, then set
+`code_atlas_sync = {"ran": true, "reason": "synced"}` in the manifest and write it to disk.
+
+Proceed to Step 8.
 
 ## Step 8: OPEN PR
+
+If `git_available` is false, skip this step entirely. Print:
+
+```
+Git not available -- skipping the PR step. Review the generated artifacts in the
+cycle directory: <cycle_dir>.
+```
+
+Then proceed to the Phase Timing Summary and STOP. Do NOT invoke the `plan-runner:pr` skill.
+
+Otherwise (git is available):
 
 Delegate push + PR creation to the dedicated PR skill. Compute the absolute path to
 the cycle directory (the `$cycle_dir` from Step 1b resolved to an absolute path):
@@ -646,6 +754,7 @@ Phase Timing:
   User confirm     (excluded from total)
   Wave execution   <Xm Ys>   (<W> waves)
   Aggregation      <Xm Ys>   (skipped if 0 bugs)
+  Sync code atlas  <Xm Ys>   (skipped if git absent or code-atlas not present)
   Open PR          <Xm Ys>
   --------------------------------
   Total            <Xm Ys>

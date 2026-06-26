@@ -47,6 +47,12 @@ Teams** orchestration and uses it when available:
   wait for all -> run TDD gates -> verify -> commit -> next wave. File-disjoint
   waves (already produced by the analyzer) satisfy the Agent Teams "each teammate
   owns different files" requirement.
+- **Verifier-gated waves.** Because the team task status lags, the lead waits on
+  the verifier's actual task result (not a status poll) before closing a wave, and
+  never substitutes its own reading of the code for the verifier's verdict. If a
+  verdict never lands the wave is marked `UNVERIFIABLE` and routed through the
+  fix-plan loop. A coverage gate before aggregation backfills any missing verdict,
+  so a PR can never open while a wave's verifier is still outstanding.
 - **Fallback.** If the variable is not set (or the build is older than 2.1.178),
   plan-runner transparently uses the original subagent backend. The pre-flight
   output prints which backend is active, and `manifest.json` records it under
@@ -87,6 +93,19 @@ points you to `--no-tdd`.
 - `--test-cmd "<cmd>"` -- supply the test command explicitly; use `{file}` for
   single-file runs (e.g. `pytest {file}`).
 
+## Code Atlas sync
+
+Right before opening the PR, plan-runner keeps a [code-atlas](../code-atlas)
+architecture index in sync with what the cycle just built. If `.code-atlas/state.json`
+is present (code-atlas is installed and has been mapped), it invokes `/code-atlas:update`
+with no arguments -- the update diffs file hashes against the committed wave changes and
+refreshes only what changed, auto-selecting its depth (micro / targeted / full). If
+`.code-atlas/` is absent it is skipped silently; plan-runner never auto-runs a full
+`/code-atlas:map`. The step is also skipped in no-git mode (the update relies on git).
+`code-atlas:update` writes only to `.code-atlas/` (gitignored), so it adds nothing to the
+PR diff -- it runs only on the terminal cycle that opens the PR, not on intermediate
+fix-plan re-runs. The outcome is recorded in `manifest.json` under `code_atlas_sync`.
+
 ## Pull request
 
 At the end of a run, plan-runner pushes the branch and opens (or updates) a pull
@@ -96,6 +115,15 @@ summary, Bug counts by severity, and plan-runner stats), and a smart default: it
 opens as a **draft** when unresolved bugs remain and ready-for-review otherwise. If a
 PR already exists for the branch it is updated in place. When `gh` is not installed,
 the title and body are printed for manual creation.
+
+## No-git mode
+
+git is **optional**. At pre-flight, plan-runner runs `git rev-parse
+--is-inside-work-tree`; if git is not installed or the working directory is not a git
+repository, it sets `git_available = false` (recorded in `manifest.json`) and skips
+every git operation: no clean-tree check, no per-wave commits, and no PR step. The
+pipeline still analyzes, dispatches dev + verifier agents, runs TDD gates, and
+aggregates bugs -- all generated artifacts remain in the cycle directory for review.
 
 ## Output
 
@@ -113,7 +141,9 @@ docs/plan-runner/{DATE}/cycle-{N}/
 
 ## Requirements
 
-- Clean working tree (you can override, but commits are per-wave)
+- Optional: git -- when present, plan-runner commits per wave and opens a PR; when
+  absent (no git binary or not a repo), all git operations are skipped (see No-git mode)
+- Clean working tree recommended when git is present (you can override, but commits are per-wave)
 - Optional: Context7 MCP server for current framework docs (auto-detected; skipped if absent)
 
 ## Auto-Setup
