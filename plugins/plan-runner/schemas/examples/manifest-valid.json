@@ -4,6 +4,7 @@
   "started_at": "2026-06-02T00:00:00Z",
   "completed_at": null,
   "context7_available": false,
+  "git_available": true,
   "backend": "teams",
   "waves": [],
   "total_bugs": 0,

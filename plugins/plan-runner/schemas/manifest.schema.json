@@ -10,6 +10,7 @@
     "started_at": {"type": "string", "format": "date-time"},
     "completed_at": {"type": ["string", "null"], "format": "date-time"},
     "context7_available": {"type": "boolean"},
+    "git_available": {"type": "boolean", "description": "Whether git was available at pre-flight (git binary present AND inside a work tree). When false, all git operations are skipped: clean-tree check, per-wave commits, and the PR step. Optional for back-compat with manifests written before 1.3.0."},
     "backend": {"type": "string", "enum": ["teams", "subagent"], "description": "Wave-execution backend selected at pre-flight: 'teams' when CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 and team tooling is present, else 'subagent'. Optional for back-compat with pre-1.0.0 manifests."},
     "waves": {
       "type": "array",
@@ -39,6 +40,15 @@
     },
     "total_bugs": {"type": "integer"},
     "next_cycle_plan": {"type": ["string", "null"]},
+    "code_atlas_sync": {
+      "type": ["object", "null"],
+      "description": "Outcome of the pre-PR code-atlas index sync (Step 7-bis). null until the step runs. ran=true when /code-atlas:update was invoked; ran=false with a reason when skipped (git not available, or code-atlas not detected). Optional for back-compat with manifests written before 1.4.0.",
+      "properties": {
+        "ran": {"type": "boolean"},
+        "reason": {"type": "string"}
+      },
+      "required": ["ran", "reason"]
+    },
     "tdd": {
       "type": "object",
       "required": ["enabled"],
