@@ -45,7 +45,7 @@ test("plan-dev consumes tests_to_satisfy and is gated on green", () => {
 test("SKILL pre-flight handles --no-tdd, prompts, resolves test cmd, stops if none", () => {
   const f = read("skills/run/SKILL.md");
   assert.match(f, /--no-tdd/, "must document the --no-tdd flag");
-  assert.match(f, /Enable TDD/i, "must prompt to enable TDD");
+  assert.match(f, /auto-enabled|on by default|enabled.{0,20}default/i, "TDD is auto-enabled by default (no prompt)");
   assert.match(f, /--test-cmd/, "must support a --test-cmd flag");
   assert.match(f, /package\.json|pytest|go\.mod|Cargo\.toml|csproj/i, "must list detection markers");
   assert.match(f, /baseline/i, "must capture a green baseline");
@@ -98,6 +98,28 @@ test("SKILL dispatches pipeline agents by registered subagent type (no inlining)
   assert.doesNotMatch(f, /inline the full content of .*agents\/.*\.md/i, "must not inline agent .md bodies into prompts");
 });
 
+test("SKILL gates each wave on the verifier and forbids the orchestrator self-verifying", () => {
+  const f = read("skills/run/SKILL.md");
+  // teams-aware verifier completion: poll the actual task result, not a status guess
+  assert.match(f, /poll the verifier's task result|task result \/ mailbox[\s\S]{0,200}verifier/i, "teams backend must poll the verifier's task result");
+  // explicit no-self-verify rule
+  assert.match(f, /No-self-verify|MUST NOT perform the verification itself|MUST NOT substitute its own judgment/i, "must forbid the orchestrator from self-verifying");
+  // missing verdict routes to UNVERIFIABLE, not a silently-closed wave
+  assert.match(f, /UNVERIFIABLE[\s\S]{0,160}(aggregate|fix-plan|re-run)/i, "missing verdict must route through the fix-plan loop");
+});
+
+test("SKILL has a verifier-coverage gate before aggregation", () => {
+  const f = read("skills/run/SKILL.md");
+  assert.match(f, /Verifier-coverage gate/i, "must define a verifier-coverage gate");
+  // gate lives at the top of Step 5, before the bug count, so both the clean and buggy paths hit it
+  assert.ok(
+    f.indexOf("Verifier-coverage gate") < f.indexOf("Count total bugs across all bug JSONs"),
+    "the coverage gate must run before counting bugs"
+  );
+  assert.match(f, /every.{0,10}wave[\s\S]{0,120}wave-<W>\.json/i, "must assert every wave produced a bug JSON");
+  assert.match(f, /structurally impossible to reach the PR|PR.{0,40}(outstanding|while a verifier)/i, "gate must block opening a PR while a verdict is outstanding");
+});
+
 test("SKILL selects an execution backend (Agent Teams vs subagent fallback)", () => {
   const f = read("skills/run/SKILL.md");
   assert.match(f, /CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS/, "must read the agent-teams env var");
@@ -108,10 +130,61 @@ test("SKILL selects an execution backend (Agent Teams vs subagent fallback)", ()
 
 test("docs + version reflect the TDD feature", () => {
   const pkg = JSON.parse(read(".claude-plugin/plugin.json"));
-  assert.equal(pkg.version, "1.0.0", "plugin version bumped to 1.0.0");
+  assert.equal(pkg.version, "1.4.1", "plugin version is current");
   const readme = read("README.md");
   assert.match(readme, /--no-tdd/, "README documents the --no-tdd flag");
   assert.match(readme, /red.{0,5}green|red→green/i, "README describes the red-green flow");
+});
+
+test("git is optional: run skill gates all git ops on availability", () => {
+  const f = read("skills/run/SKILL.md");
+  assert.match(f, /git rev-parse --is-inside-work-tree/, "must detect git via rev-parse --is-inside-work-tree");
+  assert.match(f, /git_available/, "must set a git_available flag");
+  // clean-tree check, per-wave commit, and PR step must each be gated
+  // (allow backticks around `git_available` in the prose)
+  assert.match(f, /git_available.{0,3}is false[\s\S]{0,80}skip this step/i, "clean-tree check skipped when git absent");
+  assert.match(f, /git_available.{0,3}is false[\s\S]{0,120}(skipping commit|git not available)/i, "per-wave commit skipped when git absent");
+  assert.match(f, /git_available.{0,3}is false[\s\S]{0,400}plan-runner:pr/i, "PR step skipped when git absent");
+});
+
+test("git is optional: pr skill guards on git availability", () => {
+  const f = read("skills/pr/SKILL.md");
+  assert.match(f, /git rev-parse --is-inside-work-tree/, "pr skill must pre-check git");
+  assert.match(f, /git not available[\s\S]{0,120}(Skipping|STOP)/i, "pr skill must STOP gracefully when git is absent");
+});
+
+test("manifest schema documents git_available", () => {
+  const schema = JSON.parse(read("schemas/manifest.schema.json"));
+  assert.ok(schema.properties.git_available, "manifest schema must define git_available");
+  assert.equal(schema.properties.git_available.type, "boolean", "git_available is a boolean");
+});
+
+test("run skill syncs code-atlas before the PR step", () => {
+  const f = read("skills/run/SKILL.md");
+  // a dedicated step exists and precedes OPEN PR
+  assert.match(f, /Step 7-bis: SYNC CODE ATLAS/, "must define the code-atlas sync step");
+  assert.ok(
+    f.indexOf("Step 7-bis: SYNC CODE ATLAS") < f.indexOf("Step 8: OPEN PR"),
+    "the sync step must come before the OPEN PR step"
+  );
+  // detection is gated on the code-atlas state file and invokes the incremental update
+  assert.match(f, /\.code-atlas\/state\.json/, "must detect code-atlas via state.json");
+  assert.match(f, /code-atlas:update/, "must invoke the code-atlas:update skill");
+  // gated on git availability like the other git-dependent steps
+  assert.match(f, /git_available.{0,3}is false[\s\S]{0,160}code-atlas sync skipped/i, "sync skipped when git absent");
+  // both PR-bound paths route through the sync step
+  assert.match(f, /Proceed to Step 7-bis/, "clean-run + stop-rerun paths route through the sync step");
+});
+
+test("manifest schema documents code_atlas_sync", () => {
+  const schema = JSON.parse(read("schemas/manifest.schema.json"));
+  assert.ok(schema.properties.code_atlas_sync, "manifest schema must define code_atlas_sync");
+  assert.ok(schema.properties.code_atlas_sync.properties.ran, "code_atlas_sync has a ran flag");
+});
+
+test("README documents the code-atlas sync", () => {
+  const readme = read("README.md");
+  assert.match(readme, /code-atlas:update|Code Atlas sync/i, "README documents the code-atlas sync");
 });
 
 test("docs cover the Agent Teams backend", () => {

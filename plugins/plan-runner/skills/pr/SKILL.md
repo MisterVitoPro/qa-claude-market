@@ -17,6 +17,21 @@ The single argument is the absolute path to the completed cycle directory:
 Set `cycle_dir = {$ARGUMENTS}` (strip surrounding whitespace/quotes). Follow these
 steps in order. Do not skip steps.
 
+## Step 0: Git pre-check
+
+This skill is entirely git-dependent (branch resolution, push, PR). Run
+`git rev-parse --is-inside-work-tree 2>/dev/null`. If it does NOT succeed and print
+`true` -- git is not installed, or the working directory is not a git repository --
+print and STOP:
+
+```
+plan-runner:pr: git not available (no git binary or not a git repository) --
+cannot push a branch or open a PR. Skipping the PR step.
+```
+
+(When invoked by `/plan-runner:run`, this case is already handled upstream and the PR
+step is skipped, so this guard only matters for a direct invocation.)
+
 ## Step 1: Load cycle state
 
 Read `$cycle_dir/manifest.json`. If it is missing or not valid JSON:
