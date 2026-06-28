@@ -28,6 +28,34 @@ Set `verbose = true | false` based on the flag. Capture any `--test-cmd` value a
 
 Track elapsed time for each phase. At the start of each step run `date +%s` and store the timestamp. Compute durations at the end and write to `manifest.json`.
 
+## Token accounting
+
+plan-runner tallies the tokens consumed by every subagent it dispatches (analyzer, dev agents, wave verifiers, aggregator) so `manifest.json` carries a per-agent breakdown and a grand total for the whole cycle. This is the foundation for tallying the full run's token cost.
+
+There is no tool that returns a subagent's token count directly. The only source is the usage figure the harness surfaces when a subagent finishes, so capture is **best-effort**:
+
+- When a subagent completes, read the token usage reported in its completion result (the Task/Agent result's usage summary, e.g. input/output token counts). Record it as `{"input": <n>, "output": <n>, "total": <input + output>}`.
+- If only a single combined total is surfaced, record `{"input": null, "output": null, "total": <n>}`.
+- If the harness surfaces no usage figure for that subagent, record `tokens: null` and count the agent as unreported.
+
+On the `teams` backend a teammate's usage may not be visible to the lead; record `null` for those. **Never fabricate a token count** -- a `null` with an honest coverage number is the correct outcome when the figure is unavailable.
+
+Maintain a running `token_usage` tally in memory across the whole cycle and write it to the manifest at finalization (Step 5 / Step 7):
+
+```json
+{
+  "by_agent": [
+    {"agent": "analyzer", "phase": "analyze", "input": <n|null>, "output": <n|null>, "total": <n|null>}
+  ],
+  "total_tokens": <sum of every non-null per-agent total>,
+  "agents_reported": <count of subagents that surfaced a usage figure>,
+  "agents_total": <count of subagents dispatched this cycle>,
+  "complete": <agents_reported == agents_total>
+}
+```
+
+Append one `by_agent` entry per dispatched subagent: the analyzer (Step 2), every dev agent (Step 4a), every wave verifier (Step 4b), and the aggregator (Step 5). `agent` is the subagent label (`analyzer`, `wave-<W>-agent-<n>`, `wave-<W>-verifier`, `aggregator`); `phase` is one of `analyze | wave | verify | aggregate`.
+
 ## Step 1: PRE-FLIGHT
 
 Record the pipeline start time: `t_start = $(date +%s)`.
@@ -197,6 +225,7 @@ Write a starter `manifest.json` to `$cycle_dir/manifest.json`:
   "backend": "<backend>",
   "waves": [],
   "total_bugs": 0,
+  "token_usage": null,
   "next_cycle_plan": null,
   "code_atlas_sync": null,
   "tdd": {
@@ -267,6 +296,8 @@ No tasks to execute. STOP.
 Then STOP.
 
 Write the wave plan to `$cycle_dir/wave-plan.json`.
+
+Capture the analyzer's token usage (see **Token accounting**) and append it to `token_usage.by_agent` as `{"agent": "analyzer", "phase": "analyze", ...}`.
 
 Record `t_analyze_done = $(date +%s)`.
 
@@ -358,6 +389,7 @@ For each dev agent return (both backends):
 1. Parse the JSON. If parse fails, treat as `{"agent_id": "<id>", "status": "BLOCKED", "files_written": [], "files_unexpectedly_modified": [], "context7_queries": [], "summary": "agent returned non-JSON output", "concerns": ["unparseable response"]}` and continue.
 2. Update the corresponding Task to `completed`.
 3. Record the dev_status in a wave-state map.
+4. Capture the agent's token usage (see **Token accounting**) and store it in the wave-state map keyed by `agent_id`. Append it to `token_usage.by_agent` as `{"agent": "<agent_id>", "phase": "wave", ...}` (use `tokens: null` if the harness surfaced no figure -- common for teammates on the `teams` backend).
 
 **Wave barrier (both backends):** Wait for ALL dev agents/teammates in this wave to complete before proceeding. On the `teams` backend, if a task is stuck past a bounded wait (the known task-status-lag issue), read the owned-file state directly, treat any unreported teammate as `BLOCKED`, print a warning, and proceed to gates -- the gap then flows through the normal verify -> aggregate -> fix-plan loop rather than hanging the pipeline.
 
@@ -444,6 +476,8 @@ Parse the verifier's return. If parse fails, synthesize:
 
 Write the JSON to `$cycle_dir/bugs/wave-<W>.json`.
 
+Capture the verifier's token usage (see **Token accounting**), store it as the wave's `verifier_tokens`, and append it to `token_usage.by_agent` as `{"agent": "wave-<W>-verifier", "phase": "verify", ...}`.
+
 ### 4d. Render wave dashboard
 
 Print a wave summary table. The "Verify" and "Bugs" columns reflect the single wave verifier result (the verifier_status and total bugs across all agents):
@@ -458,8 +492,11 @@ Wave <W>/<total_W> complete (<duration>s)
    3   | <task_title>               | BLOCKED      | <agent_statuses[agent_id] or N/A>
 -------|----------------------------|--------------|-----------------
 Wave verifier: <verifier_status>   Total bugs: <bugs array length>
+Wave tokens: <wave_token_total or "n/a"> (<reported>/<dispatched> agents reported)
 ============================================================
 ```
+
+`wave_token_total` is the sum of every non-null per-agent and verifier `total` in this wave; print `n/a` when nothing was reported. `<reported>/<dispatched>` is how many of this wave's subagents (dev agents + verifier) surfaced a usage figure.
 
 ### 4e. Commit the wave
 
@@ -511,10 +548,12 @@ Append a wave entry to `$cycle_dir/manifest.json`:
   "wave_id": <W>,
   "duration_seconds": <wave duration>,
   "agents": [
-    {"agent_id": "<id>", "dev_status": "<status>"}
+    {"agent_id": "<id>", "dev_status": "<status>", "tokens": {"input": <n|null>, "output": <n|null>, "total": <n|null>}}
   ],
   "wave_verifier_status": "<verifier_status>",
   "wave_bug_count": <total bugs in wave>,
+  "verifier_tokens": {"input": <n|null>, "output": <n|null>, "total": <n|null>},
+  "wave_token_total": <sum of non-null totals in this wave, or null>,
   "commit_sha": "<sha or null>",
   "skipped_reason": "<reason or null>"
 }
@@ -548,7 +587,9 @@ Count total bugs across all bug JSONs. If total bugs == 0:
 [Phase 3/4] All waves complete. Zero bugs flagged -- skipping aggregation.
 ```
 
-Update manifest: `total_bugs: 0`, `completed_at: <ISO timestamp>`. Skip to Step 7 (final summary).
+Finalize the token tally: compute `total_tokens`, `agents_reported`, `agents_total`, and `complete` from `token_usage.by_agent` (see **Token accounting**). No aggregator runs on this path, so it contributes no entry.
+
+Update manifest: `total_bugs: 0`, `token_usage: <finalized tally>`, `completed_at: <ISO timestamp>`. Skip to Step 7 (final summary).
 
 If total bugs > 0:
 
@@ -570,7 +611,7 @@ Read the wave plan at <cycle_dir>/wave-plan.json for task context.
 Write bugs.md and fix-plan.md to <cycle_dir> as instructed. Return the status JSON.
 ```
 
-The aggregator writes the two files itself. When it returns, parse its status JSON.
+The aggregator writes the two files itself. When it returns, parse its status JSON. Capture the aggregator's token usage (see **Token accounting**) and append it to `token_usage.by_agent` as `{"agent": "aggregator", "phase": "aggregate", ...}`.
 
 If the aggregator crashes or returns non-JSON:
 ```
@@ -579,8 +620,11 @@ You can run aggregation manually by re-invoking the agent.
 ```
 Skip to Step 7 with `total_bugs = <count>`, `next_cycle_plan = null`.
 
+Finalize the token tally: compute `total_tokens`, `agents_reported`, `agents_total`, and `complete` from `token_usage.by_agent` (see **Token accounting**).
+
 Update manifest:
 - `total_bugs: <from aggregator status>`
+- `token_usage: <finalized tally>`
 - `next_cycle_plan: <fix-plan path from aggregator>`
 - `completed_at: <ISO timestamp>`
 
@@ -593,6 +637,8 @@ Print the bug summary:
 ======================
 P0: <N>   P1: <N>   P2: <N>   P3: <N>
 Total: <N> bugs across <W> waves
+
+Tokens:        <total_tokens> across <agents_reported>/<agents_total> subagents<if not complete: " (partial -- some subagents did not report usage)">
 
 Bug report:    <bugs.md path>
 Fix plan:      <fix-plan.md path>
@@ -651,6 +697,7 @@ Dev agents: <total dev agents>
 Wave verifiers: <W> (1 per wave)
 Commits: <count of waves with non-null commit_sha>
 Duration: <total elapsed in Xm Ys>
+Tokens: <total_tokens> across <agents_reported>/<agents_total> subagents<if not complete: " (partial -- some subagents did not report usage)">
 
 Manifest: <path to manifest.json>
 ```

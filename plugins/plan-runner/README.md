@@ -62,6 +62,24 @@ Teams** orchestration and uses it when available:
   on the teams backend continues in the same lead session, since teammates cannot
   spawn nested teams.
 
+## Token accounting
+
+plan-runner tallies the tokens consumed by every subagent it dispatches -- the
+analyzer, every dev agent, each wave verifier, and the aggregator -- so you can
+see what a cycle cost. The tally is written to `manifest.json` under
+`token_usage` (a per-agent `by_agent` breakdown plus a `total_tokens` grand
+total) and surfaced in the wave dashboards, the final summary, and the PR stats.
+
+Capture is **best-effort**: there is no tool that returns a subagent's token
+count, so plan-runner records the usage figure the harness surfaces when each
+subagent finishes. When a figure is unavailable -- most commonly for teammates on
+the Agent Teams backend, whose usage is not always visible to the lead -- that
+agent's entry is `null` and the run is honest about it via the
+`agents_reported` / `agents_total` coverage counters and a `complete` flag. A
+token count is never fabricated. Each cycle's manifest records its own tally; to
+tally a full multi-cycle run, sum `token_usage.total_tokens` across every cycle's
+`manifest.json` under the cycle root.
+
 ## TDD red-green mode
 
 `/plan-runner:run` enables a Test-Driven Development red-green workflow by

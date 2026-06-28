@@ -29,16 +29,44 @@
                 "agent_id": {"type": "string"},
                 "dev_status": {"type": "string"},
                 "verifier_status": {"type": "string"},
-                "bug_count": {"type": "integer"}
+                "bug_count": {"type": "integer"},
+                "tokens": {"$ref": "#/$defs/tokenCount"}
               }
             }
           },
+          "verifier_tokens": {"$ref": "#/$defs/tokenCount"},
+          "wave_token_total": {"type": ["integer", "null"], "description": "Sum of every non-null per-agent and verifier total in this wave; null when nothing was reported."},
           "commit_sha": {"type": ["string", "null"]},
           "skipped_reason": {"type": ["string", "null"]}
         }
       }
     },
     "total_bugs": {"type": "integer"},
+    "token_usage": {
+      "type": ["object", "null"],
+      "description": "Best-effort tally of tokens consumed by every dispatched subagent (analyzer, dev agents, wave verifiers, aggregator). Captured from the usage figures the harness surfaces when each subagent completes; entries are null where no figure was surfaced (e.g. teammates on the teams backend). null until the run finalizes the tally. Optional for back-compat with manifests written before 1.5.0.",
+      "properties": {
+        "by_agent": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["agent", "phase"],
+            "properties": {
+              "agent": {"type": "string", "description": "Subagent label, e.g. 'analyzer', 'wave-2-agent-3', 'wave-2-verifier', 'aggregator'."},
+              "phase": {"type": "string", "enum": ["analyze", "wave", "verify", "aggregate"]},
+              "input": {"type": ["integer", "null"]},
+              "output": {"type": ["integer", "null"]},
+              "total": {"type": ["integer", "null"]}
+            }
+          }
+        },
+        "total_tokens": {"type": "integer", "description": "Sum of every non-null per-agent total."},
+        "agents_reported": {"type": "integer", "description": "Count of dispatched subagents that surfaced a usage figure."},
+        "agents_total": {"type": "integer", "description": "Count of dispatched subagents in the run."},
+        "complete": {"type": "boolean", "description": "true only when agents_reported == agents_total (every subagent's usage was captured)."}
+      },
+      "required": ["total_tokens", "agents_reported", "agents_total", "complete"]
+    },
     "next_cycle_plan": {"type": ["string", "null"]},
     "code_atlas_sync": {
       "type": ["object", "null"],
@@ -90,6 +118,17 @@
             }
           }
         }
+      }
+    }
+  },
+  "$defs": {
+    "tokenCount": {
+      "type": ["object", "null"],
+      "description": "Best-effort token usage for one subagent, captured from the harness completion summary. null when no figure was surfaced; individual fields may be null when only a single total is reported.",
+      "properties": {
+        "input": {"type": ["integer", "null"]},
+        "output": {"type": ["integer", "null"]},
+        "total": {"type": ["integer", "null"]}
       }
     }
   }
