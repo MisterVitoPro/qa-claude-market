@@ -130,7 +130,7 @@ test("SKILL selects an execution backend (Agent Teams vs subagent fallback)", ()
 
 test("docs + version reflect the TDD feature", () => {
   const pkg = JSON.parse(read(".claude-plugin/plugin.json"));
-  assert.equal(pkg.version, "1.4.1", "plugin version is current");
+  assert.equal(pkg.version, "1.5.0", "plugin version is current");
   const readme = read("README.md");
   assert.match(readme, /--no-tdd/, "README documents the --no-tdd flag");
   assert.match(readme, /red.{0,5}green|red→green/i, "README describes the red-green flow");
@@ -185,6 +185,48 @@ test("manifest schema documents code_atlas_sync", () => {
 test("README documents the code-atlas sync", () => {
   const readme = read("README.md");
   assert.match(readme, /code-atlas:update|Code Atlas sync/i, "README documents the code-atlas sync");
+});
+
+test("manifest schema documents token_usage", () => {
+  const schema = JSON.parse(read("schemas/manifest.schema.json"));
+  assert.ok(schema.properties.token_usage, "manifest schema must define token_usage");
+  const tu = schema.properties.token_usage;
+  for (const key of ["total_tokens", "agents_reported", "agents_total", "complete"]) {
+    assert.ok(tu.required.includes(key), `token_usage requires ${key}`);
+  }
+  // per-agent token shape is reusable via $defs and attached to wave agents
+  assert.ok(schema.$defs && schema.$defs.tokenCount, "schema defines a reusable tokenCount shape");
+  const agentProps = schema.properties.waves.items.properties.agents.items.properties;
+  assert.ok(agentProps.tokens, "wave agent entries carry per-agent tokens");
+});
+
+test("run skill captures and tallies subagent tokens", () => {
+  const f = read("skills/run/SKILL.md");
+  assert.match(f, /## Token accounting/, "run skill documents token accounting");
+  // best-effort, never fabricated
+  assert.match(f, /best-effort/i, "token capture is described as best-effort");
+  assert.match(f, /[Nn]ever fabricate/, "skill forbids fabricating token counts");
+  // captured for each subagent class
+  assert.match(f, /analyzer["']?,\s*"phase":\s*"analyze"/, "analyzer tokens are captured");
+  assert.match(f, /"phase":\s*"wave"/, "dev-agent tokens are captured");
+  assert.match(f, /verifier["']?,\s*"phase":\s*"verify"/, "verifier tokens are captured");
+  assert.match(f, /aggregator["']?,\s*"phase":\s*"aggregate"/, "aggregator tokens are captured");
+  // tally fields are finalized and surfaced
+  assert.match(f, /total_tokens/, "skill tallies a grand total");
+  assert.match(f, /agents_reported/, "skill tracks reporting coverage");
+});
+
+test("pr skill surfaces token totals in stats", () => {
+  const f = read("skills/pr/SKILL.md");
+  assert.match(f, /token_usage/, "pr skill reads token_usage from the manifest");
+  assert.match(f, /Tokens:.{0,80}subagents/, "pr stats include a Tokens line");
+});
+
+test("README documents token accounting", () => {
+  const readme = read("README.md");
+  assert.match(readme, /## Token accounting/, "README has a token accounting section");
+  assert.match(readme, /token_usage/, "README references the manifest token_usage field");
+  assert.match(readme, /best-effort/i, "README is honest that capture is best-effort");
 });
 
 test("docs cover the Agent Teams backend", () => {

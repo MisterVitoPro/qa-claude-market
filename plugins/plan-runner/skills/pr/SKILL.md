@@ -42,9 +42,9 @@ Error: cannot read manifest at <cycle_dir>/manifest.json -- cannot build a PR.
 
 Then STOP.
 
-From the manifest capture: `cycle`, `backend`, `total_bugs`, `input_plan`, and the
+From the manifest capture: `cycle`, `backend`, `total_bugs`, `input_plan`, the
 `waves` array (length = wave count; sum of each wave's `agents` length = dev agent
-count).
+count), and `token_usage` (may be absent on pre-1.5.0 manifests, or null).
 
 Read `$cycle_dir/wave-plan.json` for the per-agent `task_title` values (used for the
 Summary section). If it is missing, fall back to an empty task list.
@@ -131,9 +131,13 @@ P0: <n>   P1: <n>   P2: <n>   P3: <n>   (total: <total_bugs>)
 - Waves: <wave count>
 - Dev agents: <dev agent count>
 - Backend: <backend>
+- Tokens: <token_usage.total_tokens> across <agents_reported>/<agents_total> subagents<if token_usage present but not complete: " (partial)">
 
 Generated with plan-runner
 ```
+
+Omit the `Tokens:` line entirely when `token_usage` is absent or null (pre-1.5.0
+manifests, or a run where no figure was captured).
 
 ## Step 6: Decide draft state
 
