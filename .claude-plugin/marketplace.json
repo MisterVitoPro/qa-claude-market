@@ -28,7 +28,12 @@
     {
       "name": "code-atlas",
       "description": "Scan a codebase and generate an architecture index loaded at session start — directory map, key files, tech stack, patterns, build commands — plus a semantic dependency graph queryable deterministically via /code-atlas:query (impact analysis, blast radius, risk filters)",
-      "source": "./plugins/code-atlas",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/MisterVitoPro/code-atlas.git",
+        "ref": "v2.1.0",
+        "sha": "5336df572e139c45444f687d6c9b59a3df7878e2"
+      },
       "category": "development"
     },
     {
