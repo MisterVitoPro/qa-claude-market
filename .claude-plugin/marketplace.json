@@ -1,14 +1,7 @@
 {
   "name": "mistervitopro-plugin-marketplace",
   "metadata": {
-    "description": "A collection of Claude Code plugins by MisterVitoPro",
-    "repository": "https://github.com/MisterVitoPro/qa-claude-market",
-    "tags": [
-      "marketplace",
-      "plugins",
-      "claude-code",
-      "multi-plugin"
-    ]
+    "description": "A collection of Claude Code plugins by MisterVitoPro"
   },
   "owner": {
     "name": "MisterVitoPro"
@@ -28,7 +21,12 @@
     {
       "name": "code-atlas",
       "description": "Scan a codebase and generate an architecture index loaded at session start — directory map, key files, tech stack, patterns, build commands — plus a semantic dependency graph queryable deterministically via /code-atlas:query (impact analysis, blast radius, risk filters)",
-      "source": "./plugins/code-atlas",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/MisterVitoPro/code-atlas.git",
+        "ref": "v2.1.0",
+        "sha": "418294744a24a3125e5d1a22409ce0553c0ef552"
+      },
       "category": "development"
     },
     {

@@ -30,7 +30,7 @@ claude plugin install qa-swarm@mistervitopro-plugin-marketplace
 
 ---
 
-### code-atlas  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fqa-claude-market%2Fmain%2Fplugins%2Fcode-atlas%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&color=blue)
+### code-atlas  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fcode-atlas%2Fmain%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&color=blue)
 
 **Stops Claude from re-exploring your repo every session.**
 
@@ -43,7 +43,7 @@ claude plugin install code-atlas@mistervitopro-plugin-marketplace
 /code-atlas:query "what calls AuthService.login?"
 ```
 
-→ [Plugin docs](plugins/code-atlas/README.md)
+→ [Plugin docs](https://github.com/MisterVitoPro/code-atlas)
 
 ---
 
@@ -124,7 +124,7 @@ claude --debug                      # shows plugin load errors
 
 1. Create `plugins/<name>/` with `.claude-plugin/plugin.json`, `agents/`, `skills/`, and a `README.md`.
 2. Register in [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json).
-3. Tag releases as `<plugin-name>/v<version>` (e.g. `code-atlas/v2.1.0`) and push the tag — Claude Code uses tags as the version cache key. Plugins sourced from their own repo (e.g. `qa-swarm`) instead tag plain `v<version>` in that repo, then bump `ref`/`sha` on the plugin's `source` entry in this repo's `marketplace.json`.
+3. Tag releases as `<plugin-name>/v<version>` (e.g. `plan-runner/v1.5.0`) and push the tag — Claude Code uses tags as the version cache key. Plugins sourced from their own repo (e.g. `qa-swarm`, `code-atlas`) instead tag plain `v<version>` in that repo, then bump `ref`/`sha` on the plugin's `source` entry in this repo's `marketplace.json`.
 
 See [CLAUDE.md](CLAUDE.md) for repo conventions.
 

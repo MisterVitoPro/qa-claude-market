@@ -4,7 +4,6 @@
   "mode": "module",
   "root": "docs/master-spec/",
   "consolidated_files": [
-    "docs/master-spec/CONSOLIDATED-code-atlas.md",
     "docs/master-spec/CONSOLIDATED-jupiter.md",
     "docs/master-spec/CONSOLIDATED-llm-wiki.md",
     "docs/master-spec/CONSOLIDATED-migration-runner.md",
@@ -12,56 +11,6 @@
     "docs/master-spec/CONSOLIDATED-shared.md"
   ],
   "buckets": {
-    "code-atlas": {
-      "summary": "code-atlas / architecture / code-indexing",
-      "source_file": "docs/master-spec/CONSOLIDATED-code-atlas.md",
-      "sections": [
-        {
-          "anchor": "#readme",
-          "original_path": "plugins/code-atlas/README.md",
-          "heading": "## README",
-          "line": 7,
-          "loc": 90,
-          "topics": [
-            "architecture",
-            "code-indexing",
-            "dependency-graph",
-            "code-atlas",
-            "semantic-analysis",
-            "repository-scanning"
-          ]
-        },
-        {
-          "anchor": "#query-language-reference",
-          "original_path": "plugins/code-atlas/docs/query-language-reference.md",
-          "heading": "## query-language-reference",
-          "line": 101,
-          "loc": 151,
-          "topics": [
-            "query-language",
-            "code-atlas",
-            "dependencies",
-            "graph-querying",
-            "syntax-reference"
-          ]
-        },
-        {
-          "anchor": "#schema-reference",
-          "original_path": "plugins/code-atlas/docs/schema-reference.md",
-          "heading": "## schema-reference",
-          "line": 256,
-          "loc": 223,
-          "topics": [
-            "schema",
-            "code-atlas",
-            "artifact-specification",
-            "json-schema",
-            "metadata"
-          ]
-        }
-      ],
-      "gaps_count": 10
-    },
     "jupiter": {
       "summary": "specs / consolidation / master-spec",
       "source_file": "docs/master-spec/CONSOLIDATED-jupiter.md",
@@ -352,7 +301,7 @@
       "gaps_count": 3
     }
   },
-  "total_loc": 7174,
+  "total_loc": 6678,
   "scan_summary": {
     "public_surface_found": 36,
     "configs_found": 26,
