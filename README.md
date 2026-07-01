@@ -14,7 +14,7 @@ claude plugin install qa-swarm@mistervitopro-plugin-marketplace
 
 ## Plugins
 
-### qa-swarm  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fqa-claude-market%2Fmain%2Fplugins%2Fqa-swarm%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&color=blue)
+### qa-swarm  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fqa-swarm%2Fmain%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&color=blue)
 
 **A swarm of specialist agents reviews your code, then fixes the bugs test-first.**
 
@@ -26,7 +26,7 @@ claude plugin install qa-swarm@mistervitopro-plugin-marketplace
 /qa-swarm:implement
 ```
 
-→ [Plugin docs](plugins/qa-swarm/README.md)
+→ [Plugin docs](https://github.com/MisterVitoPro/qa-swarm)
 
 ---
 
@@ -107,7 +107,7 @@ claude --debug                      # shows plugin load errors
 
 1. Create `plugins/<name>/` with `.claude-plugin/plugin.json`, `agents/`, `skills/`, and a `README.md`.
 2. Register in [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json).
-3. Tag releases as `<plugin-name>/v<version>` (e.g. `qa-swarm/v1.4.1`) and push the tag — Claude Code uses tags as the version cache key.
+3. Tag releases as `<plugin-name>/v<version>` (e.g. `code-atlas/v2.1.0`) and push the tag — Claude Code uses tags as the version cache key. Plugins sourced from their own repo (e.g. `qa-swarm`) instead tag plain `v<version>` in that repo, then bump `ref`/`sha` on the plugin's `source` entry in this repo's `marketplace.json`.
 
 See [CLAUDE.md](CLAUDE.md) for repo conventions.
 
