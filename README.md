@@ -105,10 +105,6 @@ claude plugin install llm-wiki@mistervitopro-plugin-marketplace
 
 ---
 
-## Why a marketplace?
-
-Each plugin is independently versioned and installable. Add the marketplace once; mix and match. All six work standalone — no cross-dependencies.
-
 ## Troubleshooting
 
 If `/plugin` shows errors after installing:
