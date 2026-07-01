@@ -17,7 +17,12 @@
     {
       "name": "qa-swarm",
       "description": "AI-powered code quality analyzer: specialized agents find security, performance, architecture, and correctness issues, then fix them via TDD",
-      "source": "./plugins/qa-swarm",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/MisterVitoPro/qa-swarm.git",
+        "ref": "v1.4.1",
+        "sha": "47dc40c871da40d8d405ffc49a14910d11397f4d"
+      },
       "category": "development"
     },
     {
