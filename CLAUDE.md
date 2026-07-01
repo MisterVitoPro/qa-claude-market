@@ -13,16 +13,15 @@ Multi-plugin marketplace repository. Most plugins live under `plugins/` with the
 | `plan-runner` | 1.5.0 | Run a Markdown implementation plan through a parallel agent swarm: analyze into waves, dispatch dev + verifier agents, aggregate bugs into a fix-plan, re-run on demand. TDD red-green mode on by default (--no-tdd to disable). Auto-detects Claude Code Agent Teams (CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS) for token-lean orchestration; subagent fallback otherwise. Tallies best-effort per-subagent token usage into manifest.json token_usage (grand total + honest coverage counters), surfaced in dashboards, the final summary, and the PR stats. On the teams backend each wave is verifier-gated: the lead waits on the verifier's actual task result (never self-verifies) and a coverage gate before aggregation backfills any missing verdict, so a PR cannot open while a verifier is still outstanding. git is optional -- all git operations (clean-tree check, per-wave commits, PR) are skipped when git is absent. Before the PR, syncs a code-atlas index (runs /code-atlas:update when .code-atlas/ is present). Final step opens/updates a proper PR via the plan-runner:pr skill. |
 | `jupiter` | 0.1.1 | Consolidate scattered specs into a canonical master-spec tree -- adopt command reorganizes in place; rewrite command consolidates to single file with optional cleanup; index.json flags split candidates; surface scanner appends stubs for undocumented agents/skills/CLIs/configs. Sourced externally from [github.com/MisterVitoPro/jupiter](https://github.com/MisterVitoPro/jupiter). |
 | `migration-runner` | 0.1.0 | Vulnerability-aware dependency upgrade orchestrator across 7 ecosystems (npm, Python, Go, Rust, Java, Kotlin, C#) -- detect produces a vuln-aware plan; run executes wave-by-wave with verifier + git rollback |
-| `llm-wiki` | 0.1.0 | Generate a navigable multi-page Markdown wiki under .llm-wiki/, engineered for on-demand retrieval as Claude's context while staying human-readable. Two-pass outline-then-fill across a swarm (wiki-planner, wiki-diagram-author, wiki-overview-writer, wiki-module-writer, wiki-index-synthesizer); consumes a code-atlas index as ground truth when present, else self-scans. Pure static Markdown (no embeddings), Mermaid diagrams from the dependency graph, per-page source provenance, git-blob hash-diff staleness detection (only stale pages regenerate). Pages + index are committed; state.json cache is gitignored. SessionStart hook loads index.md. Bundled dependency-free deterministic validator (scripts/validate.js: frontmatter, cross-link resolution, Mermaid structural lint, index honesty) gates both skills, with a node --test suite. |
+| `llm-wiki` | 0.1.0 | Generate a navigable multi-page Markdown wiki under .llm-wiki/, engineered for on-demand retrieval as Claude's context while staying human-readable. Two-pass outline-then-fill across a swarm (wiki-planner, wiki-diagram-author, wiki-overview-writer, wiki-module-writer, wiki-index-synthesizer); consumes a code-atlas index as ground truth when present, else self-scans. Pure static Markdown (no embeddings), Mermaid diagrams from the dependency graph, per-page source provenance, git-blob hash-diff staleness detection (only stale pages regenerate). Pages + index are committed; state.json cache is gitignored. SessionStart hook loads index.md. Bundled dependency-free deterministic validator (scripts/validate.js: frontmatter, cross-link resolution, Mermaid structural lint, index honesty) gates both skills, with a node --test suite. Sourced externally from [github.com/MisterVitoPro/llm-wiki](https://github.com/MisterVitoPro/llm-wiki). |
 
 ### Directory Layout
 
 ```
-.claude-plugin/marketplace.json              # central registry -- qa-swarm, code-atlas, and jupiter sourced externally (github.com/MisterVitoPro/qa-swarm, github.com/MisterVitoPro/code-atlas, github.com/MisterVitoPro/jupiter)
+.claude-plugin/marketplace.json              # central registry -- qa-swarm, code-atlas, jupiter, and llm-wiki sourced externally (github.com/MisterVitoPro/qa-swarm, github.com/MisterVitoPro/code-atlas, github.com/MisterVitoPro/jupiter, github.com/MisterVitoPro/llm-wiki)
 plugins/
   plan-runner/.claude-plugin/plugin.json     # manifest (v1.5.0)
   migration-runner/.claude-plugin/plugin.json # manifest (v0.1.0)
-  llm-wiki/.claude-plugin/plugin.json         # manifest (v0.1.0)
 ```
 
 ## Adding a Plugin
@@ -49,7 +48,7 @@ Bump `plugins/<name>/.claude-plugin/plugin.json` before pushing. Tag as `<plugin
 ### Directory Map
 ```
 .claude-plugin/             # Marketplace registry -- lists all plugins with source paths
-plugins/                    # Root directory containing local plugins (qa-swarm, code-atlas, and jupiter live externally -- github.com/MisterVitoPro/qa-swarm, github.com/MisterVitoPro/code-atlas, github.com/MisterVitoPro/jupiter)
+plugins/                    # Root directory containing local plugins (qa-swarm, code-atlas, jupiter, and llm-wiki live externally -- github.com/MisterVitoPro/qa-swarm, github.com/MisterVitoPro/code-atlas, github.com/MisterVitoPro/jupiter, github.com/MisterVitoPro/llm-wiki)
   plan-runner/                # Plan-driven parallel agent orchestrator (v1.5.0)
     .claude-plugin/
     agents/                   # 5 agents (analyzer, test-author, dev, verifier, aggregator)
@@ -66,14 +65,6 @@ plugins/                    # Root directory containing local plugins (qa-swarm,
     test-fixtures/          # Per-ecosystem captured CLI output fixtures
     tests/                  # node --test suite for adapters, ranker, e2e
     hooks/                  # SessionStart hook (.migration-runner/ gitignore)
-  llm-wiki/                 # Generated codebase wiki -- prose layer atop code-atlas (v0.1.0)
-    .claude-plugin/         # Plugin manifest and metadata
-    agents/                 # 6 agents (wiki-planner, wiki-diagram-author, wiki-overview-writer, wiki-module-writer, wiki-index-synthesizer, wiki-reviewer [opt-in --review])
-    skills/                 # User-facing commands: generate (full build), update (incremental)
-    scripts/                # session-start.js (hook) + validate.js (gate) + finalize.js (state.json/llms.txt) + coverage.js (undocumented-module report) + normalize-citations.js (expand abbreviated path:line citations)
-    docs/                   # schema-reference.md (shapes, validation, finalize, citations) + improvement-backlog.md (self-improvement loop)
-    tests/                  # node --test suites for validator, finalizer, coverage, and citation normalizer
-    hooks/                  # SessionStart hook registration
 ```
 
 ### Key Files

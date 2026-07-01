@@ -55,7 +55,12 @@
     {
       "name": "llm-wiki",
       "description": "Generate a navigable, version-controlled multi-page Markdown wiki from a codebase, engineered for on-demand retrieval as Claude's context while staying human-readable. Two-pass outline-then-fill generation across a parallel agent swarm of planner, diagram author, page writers, and index synthesizer; consumes a code-atlas index as ground truth when present, else self-scans. Pure static Markdown (no embeddings), Mermaid diagrams derived from the dependency graph, per-page source provenance, and git-blob hash-diff staleness detection that regenerates only stale pages. A SessionStart hook loads the wiki index at session start",
-      "source": "./plugins/llm-wiki",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/MisterVitoPro/llm-wiki.git",
+        "ref": "v0.1.0",
+        "sha": "ff3c176ae8ba9efaeafadcfddd464d2761302e5b"
+      },
       "category": "development"
     }
   ]
