@@ -38,7 +38,12 @@
     {
       "name": "jupiter",
       "description": "Consolidate scattered specs into a canonical master-spec tree with a navigable index, and append stubs for undocumented public surface found in code",
-      "source": "./plugins/jupiter",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/MisterVitoPro/jupiter.git",
+        "ref": "v0.1.1",
+        "sha": "95d515c6490a9a780cbbfc753f88b4f0d9ce51ec"
+      },
       "category": "development"
     },
     {
