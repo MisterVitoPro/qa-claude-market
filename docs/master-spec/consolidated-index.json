@@ -7,7 +7,6 @@
     "docs/master-spec/CONSOLIDATED-code-atlas.md",
     "docs/master-spec/CONSOLIDATED-jupiter.md",
     "docs/master-spec/CONSOLIDATED-plan-runner.md",
-    "docs/master-spec/CONSOLIDATED-qa-swarm.md",
     "docs/master-spec/CONSOLIDATED-shared.md"
   ],
   "buckets": {
@@ -121,74 +120,6 @@
       ],
       "gaps_count": 14
     },
-    "qa-swarm": {
-      "summary": "agents / tdd / orchestration",
-      "source_file": "docs/master-spec/CONSOLIDATED-qa-swarm.md",
-      "sections": [
-        {
-          "anchor": "#2026-04-02-qa-swarm-plugin-design",
-          "original_path": "plugins/qa-swarm/docs/superpowers/specs/2026-04-02-qa-swarm-plugin-design.md",
-          "heading": "## 2026-04-02-qa-swarm-plugin-design",
-          "line": 7,
-          "loc": 518,
-          "topics": [
-            "qa",
-            "agents",
-            "orchestration",
-            "security",
-            "priority",
-            "tdd",
-            "multi-agent"
-          ]
-        },
-        {
-          "anchor": "#master-spec",
-          "original_path": "plugins/qa-swarm/docs/MASTER-SPEC.md",
-          "heading": "## MASTER-SPEC",
-          "line": 525,
-          "loc": 694,
-          "topics": [
-            "qa",
-            "agents",
-            "tdd",
-            "priority",
-            "aggregation",
-            "security",
-            "orchestration"
-          ]
-        },
-        {
-          "anchor": "#readme",
-          "original_path": "plugins/qa-swarm/README.md",
-          "heading": "## README",
-          "line": 1219,
-          "loc": 260,
-          "topics": [
-            "qa",
-            "agents",
-            "security",
-            "tdd",
-            "parallel",
-            "installation"
-          ]
-        },
-        {
-          "anchor": "#2026-04-02-qa-swarm-plugin",
-          "original_path": "plugins/qa-swarm/docs/superpowers/plans/2026-04-02-qa-swarm-plugin.md",
-          "heading": "## 2026-04-02-qa-swarm-plugin",
-          "line": 1479,
-          "loc": 2711,
-          "topics": [
-            "implementation-plan",
-            "agents",
-            "tdd",
-            "orchestration",
-            "plugin-scaffold"
-          ]
-        }
-      ],
-      "gaps_count": 22
-    },
     "shared": {
       "summary": "code-atlas / installation / marketplace",
       "source_file": "docs/master-spec/CONSOLIDATED-shared.md",
@@ -212,7 +143,7 @@
       "gaps_count": 3
     }
   },
-  "total_loc": 9498,
+  "total_loc": 5315,
   "scan_summary": {
     "public_surface_found": 60,
     "configs_found": 20,
