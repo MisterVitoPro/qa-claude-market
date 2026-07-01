@@ -16,5 +16,8 @@
     "progressive-disclosure",
     "developer-tools"
   ],
-  "repository": "https://github.com/MisterVitoPro/qa-claude-market"
+  "repository": "https://github.com/MisterVitoPro/qa-claude-market",
+  "author": {
+    "name": "MisterVitoPro"
+  }
 }

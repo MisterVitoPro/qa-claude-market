@@ -1,14 +1,7 @@
 {
   "name": "mistervitopro-plugin-marketplace",
   "metadata": {
-    "description": "A collection of Claude Code plugins by MisterVitoPro",
-    "repository": "https://github.com/MisterVitoPro/qa-claude-market",
-    "tags": [
-      "marketplace",
-      "plugins",
-      "claude-code",
-      "multi-plugin"
-    ]
+    "description": "A collection of Claude Code plugins by MisterVitoPro"
   },
   "owner": {
     "name": "MisterVitoPro"

@@ -12,5 +12,8 @@
     "tdd",
     "developer-tools"
   ],
-  "repository": "https://github.com/MisterVitoPro/qa-swarm"
+  "repository": "https://github.com/MisterVitoPro/qa-swarm",
+  "author": {
+    "name": "MisterVitoPro"
+  }
 }
