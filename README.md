@@ -90,7 +90,7 @@ claude plugin install migration-runner@mistervitopro-plugin-marketplace
 
 ---
 
-### llm-wiki  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fqa-claude-market%2Fmain%2Fplugins%2Fllm-wiki%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&color=blue)
+### llm-wiki  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fllm-wiki%2Fmain%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&color=blue)
 
 **Turns your codebase into a navigable wiki -- written for both new engineers and Claude's per-task context.**
 
@@ -103,7 +103,7 @@ claude plugin install llm-wiki@mistervitopro-plugin-marketplace
 /llm-wiki:update                  # incrementally refresh stale pages
 ```
 
-→ [Plugin docs](plugins/llm-wiki/README.md)
+→ [Plugin docs](https://github.com/MisterVitoPro/llm-wiki)
 
 ---
 
