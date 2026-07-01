@@ -1,0 +1,18 @@
+{
+  "description": "llm-wiki SessionStart hook: loads .llm-wiki/index.md into session context as a read-only navigation primer.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/session-start.js\"",
+            "timeout": 10,
+            "statusMessage": "Loading llm-wiki index..."
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -2,28 +2,29 @@
 
 ## Overview
 
-Multi-plugin marketplace repository. Each plugin lives under `plugins/` with its own `.claude-plugin/plugin.json`, agents, skills, and docs. See Architecture section for tech stack, directory map, key files, and conventions.
+Multi-plugin marketplace repository. Most plugins live under `plugins/` with their own `.claude-plugin/plugin.json`, agents, skills, and docs; some plugins (e.g. `qa-swarm`) are sourced from their own dedicated repo instead (see `.claude-plugin/marketplace.json`). See Architecture section for tech stack, directory map, key files, and conventions.
 
 ### Current Plugins
 
 | Plugin | Version | Description |
 |--------|---------|-------------|
-| `qa-swarm` | 1.4.1 | AI-powered code quality analyzer: 6 Sonnet core agents + optional Haiku, 3-agent parallel TDD, fresh-context subagent handoff, Context7 MCP baseline across all agents |
+| `qa-swarm` | 1.4.1 | AI-powered code quality analyzer: 6 Sonnet core agents + optional Haiku, 3-agent parallel TDD, fresh-context subagent handoff, Context7 MCP baseline across all agents. Sourced externally from [github.com/MisterVitoPro/qa-swarm](https://github.com/MisterVitoPro/qa-swarm). |
 | `code-atlas` | 2.1.0 | Architecture index generator with semantic graph -- writes .code-atlas/atlas.json, state.json, and graph-schema.json, loaded by session-start hook. Deterministic graph queries + validation via bundled scripts/query.js (/code-atlas:query). Directory map, tech stack, patterns, dependencies. |
 | `plan-runner` | 1.5.0 | Run a Markdown implementation plan through a parallel agent swarm: analyze into waves, dispatch dev + verifier agents, aggregate bugs into a fix-plan, re-run on demand. TDD red-green mode on by default (--no-tdd to disable). Auto-detects Claude Code Agent Teams (CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS) for token-lean orchestration; subagent fallback otherwise. Tallies best-effort per-subagent token usage into manifest.json token_usage (grand total + honest coverage counters), surfaced in dashboards, the final summary, and the PR stats. On the teams backend each wave is verifier-gated: the lead waits on the verifier's actual task result (never self-verifies) and a coverage gate before aggregation backfills any missing verdict, so a PR cannot open while a verifier is still outstanding. git is optional -- all git operations (clean-tree check, per-wave commits, PR) are skipped when git is absent. Before the PR, syncs a code-atlas index (runs /code-atlas:update when .code-atlas/ is present). Final step opens/updates a proper PR via the plan-runner:pr skill. |
 | `jupiter` | 0.1.1 | Consolidate scattered specs into a canonical master-spec tree -- adopt command reorganizes in place; rewrite command consolidates to single file with optional cleanup; index.json flags split candidates; surface scanner appends stubs for undocumented agents/skills/CLIs/configs |
 | `migration-runner` | 0.1.0 | Vulnerability-aware dependency upgrade orchestrator across 7 ecosystems (npm, Python, Go, Rust, Java, Kotlin, C#) -- detect produces a vuln-aware plan; run executes wave-by-wave with verifier + git rollback |
+| `llm-wiki` | 0.1.0 | Generate a navigable multi-page Markdown wiki under .llm-wiki/, engineered for on-demand retrieval as Claude's context while staying human-readable. Two-pass outline-then-fill across a swarm (wiki-planner, wiki-diagram-author, wiki-overview-writer, wiki-module-writer, wiki-index-synthesizer); consumes a code-atlas index as ground truth when present, else self-scans. Pure static Markdown (no embeddings), Mermaid diagrams from the dependency graph, per-page source provenance, git-blob hash-diff staleness detection (only stale pages regenerate). Pages + index are committed; state.json cache is gitignored. SessionStart hook loads index.md. Bundled dependency-free deterministic validator (scripts/validate.js: frontmatter, cross-link resolution, Mermaid structural lint, index honesty) gates both skills, with a node --test suite. |
 
 ### Directory Layout
 
 ```
-.claude-plugin/marketplace.json              # central registry
+.claude-plugin/marketplace.json              # central registry -- qa-swarm sourced externally (github.com/MisterVitoPro/qa-swarm)
 plugins/
-  qa-swarm/.claude-plugin/plugin.json        # manifest (v1.4.1)
   code-atlas/.claude-plugin/plugin.json      # manifest (v2.1.0)
   plan-runner/.claude-plugin/plugin.json     # manifest (v1.5.0)
   jupiter/.claude-plugin/plugin.json         # manifest (v0.1.1)
   migration-runner/.claude-plugin/plugin.json # manifest (v0.1.0)
+  llm-wiki/.claude-plugin/plugin.json         # manifest (v0.1.0)
 ```
 
 ## Adding a Plugin
@@ -34,7 +35,7 @@ plugins/
 
 ## Versioning
 
-Bump `plugins/<name>/.claude-plugin/plugin.json` before pushing. Tag as `<plugin-name>/v<version>` and push with `git push origin --tags`.
+Bump `plugins/<name>/.claude-plugin/plugin.json` before pushing. Tag as `<plugin-name>/v<version>` and push with `git push origin --tags`. Plugins sourced from their own repo (e.g. `qa-swarm`) are versioned and tagged plain `v<version>` in that repo instead; after tagging there, bump `ref`/`sha` on the plugin's `source` entry in `.claude-plugin/marketplace.json` here.
 
 <!-- code-atlas:start -->
 <!-- generated: 2026-04-09 | commit: d9feed2 | plugin: code-atlas v1.0.0 -->
@@ -50,12 +51,7 @@ Bump `plugins/<name>/.claude-plugin/plugin.json` before pushing. Tag as `<plugin
 ### Directory Map
 ```
 .claude-plugin/             # Marketplace registry -- lists all plugins with source paths
-plugins/                    # Root directory containing all plugins
-  qa-swarm/                 # AI-powered code quality analyzer (v1.4.1)
-    .claude-plugin/         # Plugin manifest and metadata
-    agents/                 # 16 QA agent definitions (security, perf, correctness, architecture, data flow, async, etc.)
-    skills/                 # User-facing commands: attack (analyze), implement (fix)
-    docs/                   # Master spec, design plans, implementation plans
+plugins/                    # Root directory containing local plugins (qa-swarm lives externally -- github.com/MisterVitoPro/qa-swarm)
   code-atlas/               # Architecture index generator with semantic graph (v2.1.0)
     .claude-plugin/         # Plugin manifest and metadata
     agents/                 # 4 analysis agents (structure, patterns, dependencies, graph synthesizer)
@@ -87,6 +83,14 @@ plugins/                    # Root directory containing all plugins
     test-fixtures/          # Per-ecosystem captured CLI output fixtures
     tests/                  # node --test suite for adapters, ranker, e2e
     hooks/                  # SessionStart hook (.migration-runner/ gitignore)
+  llm-wiki/                 # Generated codebase wiki -- prose layer atop code-atlas (v0.1.0)
+    .claude-plugin/         # Plugin manifest and metadata
+    agents/                 # 6 agents (wiki-planner, wiki-diagram-author, wiki-overview-writer, wiki-module-writer, wiki-index-synthesizer, wiki-reviewer [opt-in --review])
+    skills/                 # User-facing commands: generate (full build), update (incremental)
+    scripts/                # session-start.js (hook) + validate.js (gate) + finalize.js (state.json/llms.txt) + coverage.js (undocumented-module report) + normalize-citations.js (expand abbreviated path:line citations)
+    docs/                   # schema-reference.md (shapes, validation, finalize, citations) + improvement-backlog.md (self-improvement loop)
+    tests/                  # node --test suites for validator, finalizer, coverage, and citation normalizer
+    hooks/                  # SessionStart hook registration
 ```
 
 ### Key Files
@@ -95,7 +99,7 @@ plugins/                    # Root directory containing all plugins
 | `.claude-plugin/marketplace.json` | Plugin registry |
 | `plugins/*/skills/*.md` | Skill entry points |
 | `plugins/*/agents/*.md` | Agent definitions |
-| `plugins/qa-swarm/docs/MASTER-SPEC.md` | QA Swarm spec |
+| [`docs/MASTER-SPEC.md`](https://github.com/MisterVitoPro/qa-swarm/blob/main/docs/MASTER-SPEC.md) (external qa-swarm repo) | QA Swarm spec |
 
 ### Patterns & Conventions
 - Agents: Markdown + YAML frontmatter (`name`, `description`, `model`, `color`)

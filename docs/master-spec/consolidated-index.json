@@ -1,24 +1,69 @@
 {
-  "generated_at": "2026-04-20T05:05:23Z",
-  "jupiter_version": "0.1.0",
+  "generated_at": "2026-07-01T15:59:16Z",
+  "jupiter_version": "0.1.1",
   "mode": "module",
   "root": "docs/master-spec/",
   "consolidated_files": [
     "docs/master-spec/CONSOLIDATED-code-atlas.md",
     "docs/master-spec/CONSOLIDATED-jupiter.md",
+    "docs/master-spec/CONSOLIDATED-llm-wiki.md",
+    "docs/master-spec/CONSOLIDATED-migration-runner.md",
     "docs/master-spec/CONSOLIDATED-plan-runner.md",
-    "docs/master-spec/CONSOLIDATED-qa-swarm.md",
     "docs/master-spec/CONSOLIDATED-shared.md"
   ],
   "buckets": {
     "code-atlas": {
-      "summary": "surface-only bucket; 31 undocumented entries",
+      "summary": "code-atlas / architecture / code-indexing",
       "source_file": "docs/master-spec/CONSOLIDATED-code-atlas.md",
-      "sections": [],
-      "gaps_count": 31
+      "sections": [
+        {
+          "anchor": "#readme",
+          "original_path": "plugins/code-atlas/README.md",
+          "heading": "## README",
+          "line": 7,
+          "loc": 90,
+          "topics": [
+            "architecture",
+            "code-indexing",
+            "dependency-graph",
+            "code-atlas",
+            "semantic-analysis",
+            "repository-scanning"
+          ]
+        },
+        {
+          "anchor": "#query-language-reference",
+          "original_path": "plugins/code-atlas/docs/query-language-reference.md",
+          "heading": "## query-language-reference",
+          "line": 101,
+          "loc": 151,
+          "topics": [
+            "query-language",
+            "code-atlas",
+            "dependencies",
+            "graph-querying",
+            "syntax-reference"
+          ]
+        },
+        {
+          "anchor": "#schema-reference",
+          "original_path": "plugins/code-atlas/docs/schema-reference.md",
+          "heading": "## schema-reference",
+          "line": 256,
+          "loc": 223,
+          "topics": [
+            "schema",
+            "code-atlas",
+            "artifact-specification",
+            "json-schema",
+            "metadata"
+          ]
+        }
+      ],
+      "gaps_count": 10
     },
     "jupiter": {
-      "summary": "adopt / jupiter / surface-scanner",
+      "summary": "specs / consolidation / master-spec",
       "source_file": "docs/master-spec/CONSOLIDATED-jupiter.md",
       "sections": [
         {
@@ -26,51 +71,119 @@
           "original_path": "plugins/jupiter/README.md",
           "heading": "## README",
           "line": 7,
-          "loc": 60,
+          "loc": 56,
           "topics": [
-            "jupiter",
-            "adopt",
-            "rewrite",
-            "surface-scanner",
-            "index",
-            "spec-consolidation"
-          ]
-        },
-        {
-          "anchor": "#2026-04-19-jupiter-plugin-design",
-          "original_path": "plugins/jupiter/docs/superpowers/specs/2026-04-19-jupiter-plugin-design.md",
-          "heading": "## 2026-04-19-jupiter-plugin-design",
-          "line": 67,
-          "loc": 411,
-          "topics": [
-            "jupiter",
-            "spec-consolidation",
-            "surface-scanner",
-            "adopt",
-            "index",
-            "incremental"
-          ]
-        },
-        {
-          "anchor": "#2026-04-19-jupiter-plugin",
-          "original_path": "plugins/jupiter/docs/superpowers/plans/2026-04-19-jupiter-plugin.md",
-          "heading": "## 2026-04-19-jupiter-plugin",
-          "line": 478,
-          "loc": 2491,
-          "topics": [
-            "implementation-plan",
-            "jupiter",
-            "schemas",
-            "adopt",
-            "rewrite",
-            "surface-scanner"
+            "specs",
+            "consolidation",
+            "master-spec",
+            "documentation",
+            "spec-management"
           ]
         }
       ],
       "gaps_count": 10
     },
+    "llm-wiki": {
+      "summary": "llm-wiki / schema / documentation-structure",
+      "source_file": "docs/master-spec/CONSOLIDATED-llm-wiki.md",
+      "sections": [
+        {
+          "anchor": "#schema-reference",
+          "original_path": "plugins/llm-wiki/docs/schema-reference.md",
+          "heading": "## schema-reference",
+          "line": 7,
+          "loc": 253,
+          "topics": [
+            "schema",
+            "llm-wiki",
+            "documentation-structure",
+            "frontmatter",
+            "json-schema"
+          ]
+        },
+        {
+          "anchor": "#improvement-backlog",
+          "original_path": "plugins/llm-wiki/docs/improvement-backlog.md",
+          "heading": "## improvement-backlog",
+          "line": 264,
+          "loc": 107,
+          "topics": [
+            "llm-wiki",
+            "improvement",
+            "backlog",
+            "roadmap",
+            "self-improvement"
+          ]
+        },
+        {
+          "anchor": "#readme",
+          "original_path": "plugins/llm-wiki/README.md",
+          "heading": "## README",
+          "line": 375,
+          "loc": 86,
+          "topics": [
+            "wiki",
+            "documentation",
+            "code-documentation",
+            "codebase-wiki",
+            "markdown"
+          ]
+        }
+      ],
+      "gaps_count": 11
+    },
+    "migration-runner": {
+      "summary": "migration-runner / ecosystem-support / design",
+      "source_file": "docs/master-spec/CONSOLIDATED-migration-runner.md",
+      "sections": [
+        {
+          "anchor": "#2026-05-03-migration-runner-design",
+          "original_path": "plugins/migration-runner/docs/2026-05-03-migration-runner-design.md",
+          "heading": "## 2026-05-03-migration-runner-design",
+          "line": 7,
+          "loc": 381,
+          "topics": [
+            "design",
+            "migration-runner",
+            "ecosystem-support",
+            "version-selection",
+            "vulnerability-aware"
+          ]
+        },
+        {
+          "anchor": "#2026-05-03-migration-runner-implementation-plan",
+          "original_path": "plugins/migration-runner/docs/2026-05-03-migration-runner-implementation-plan.md",
+          "heading": "## 2026-05-03-migration-runner-implementation-plan",
+          "line": 392,
+          "loc": 3456,
+          "topics": [
+            "implementation",
+            "plan",
+            "migration-runner",
+            "tasks",
+            "development"
+          ]
+        },
+        {
+          "anchor": "#readme",
+          "original_path": "plugins/migration-runner/README.md",
+          "heading": "## README",
+          "line": 3852,
+          "loc": 89,
+          "topics": [
+            "dependencies",
+            "vulnerability",
+            "migration",
+            "version-upgrade",
+            "security",
+            "ecosystem-support"
+          ]
+        }
+      ],
+      "gaps_count": 14
+    },
     "plan-runner": {
-      "summary": "agents / plan-runner / verification",
+      "summary": "plan-runner / parallel-execution / implementation",
       "source_file": "docs/master-spec/CONSOLIDATED-plan-runner.md",
       "sections": [
         {
@@ -78,144 +191,171 @@
           "original_path": "plugins/plan-runner/README.md",
           "heading": "## README",
           "line": 7,
-          "loc": 62,
+          "loc": 177,
           "topics": [
             "plan-runner",
-            "agents",
-            "waves",
+            "parallel-execution",
+            "implementation",
+            "testing",
             "verification",
-            "installation"
-          ]
-        },
-        {
-          "anchor": "#2026-04-15-plan-runner-design",
-          "original_path": "plugins/plan-runner/docs/superpowers/specs/2026-04-15-plan-runner-design.md",
-          "heading": "## 2026-04-15-plan-runner-design",
-          "line": 69,
-          "loc": 419,
-          "topics": [
-            "plan-runner",
-            "agents",
-            "parallel",
-            "waves",
-            "verification",
-            "bug-aggregation",
-            "orchestration"
-          ]
-        },
-        {
-          "anchor": "#2026-04-15-plan-runner",
-          "original_path": "plugins/plan-runner/docs/superpowers/plans/2026-04-15-plan-runner.md",
-          "heading": "## 2026-04-15-plan-runner",
-          "line": 488,
-          "loc": 1640,
-          "topics": [
-            "implementation-plan",
-            "plan-runner",
-            "agents",
-            "waves",
-            "verification",
-            "schemas"
+            "agent-orchestration"
           ]
         }
       ],
       "gaps_count": 14
     },
-    "qa-swarm": {
-      "summary": "agents / tdd / orchestration",
-      "source_file": "docs/master-spec/CONSOLIDATED-qa-swarm.md",
-      "sections": [
-        {
-          "anchor": "#2026-04-02-qa-swarm-plugin-design",
-          "original_path": "plugins/qa-swarm/docs/superpowers/specs/2026-04-02-qa-swarm-plugin-design.md",
-          "heading": "## 2026-04-02-qa-swarm-plugin-design",
-          "line": 7,
-          "loc": 518,
-          "topics": [
-            "qa",
-            "agents",
-            "orchestration",
-            "security",
-            "priority",
-            "tdd",
-            "multi-agent"
-          ]
-        },
-        {
-          "anchor": "#master-spec",
-          "original_path": "plugins/qa-swarm/docs/MASTER-SPEC.md",
-          "heading": "## MASTER-SPEC",
-          "line": 525,
-          "loc": 694,
-          "topics": [
-            "qa",
-            "agents",
-            "tdd",
-            "priority",
-            "aggregation",
-            "security",
-            "orchestration"
-          ]
-        },
-        {
-          "anchor": "#readme",
-          "original_path": "plugins/qa-swarm/README.md",
-          "heading": "## README",
-          "line": 1219,
-          "loc": 260,
-          "topics": [
-            "qa",
-            "agents",
-            "security",
-            "tdd",
-            "parallel",
-            "installation"
-          ]
-        },
-        {
-          "anchor": "#2026-04-02-qa-swarm-plugin",
-          "original_path": "plugins/qa-swarm/docs/superpowers/plans/2026-04-02-qa-swarm-plugin.md",
-          "heading": "## 2026-04-02-qa-swarm-plugin",
-          "line": 1479,
-          "loc": 2711,
-          "topics": [
-            "implementation-plan",
-            "agents",
-            "tdd",
-            "orchestration",
-            "plugin-scaffold"
-          ]
-        }
-      ],
-      "gaps_count": 22
-    },
     "shared": {
-      "summary": "code-atlas / installation / marketplace",
+      "summary": "plan-runner / bugs / migration-runner",
       "source_file": "docs/master-spec/CONSOLIDATED-shared.md",
       "sections": [
+        {
+          "anchor": "#bugs",
+          "original_path": "docs/plan-runner/2026-05-03/cycle-1/bugs.md",
+          "heading": "## bugs",
+          "line": 7,
+          "loc": 144,
+          "topics": [
+            "bugs",
+            "migration-runner",
+            "plan-runner",
+            "quality-assurance",
+            "findings"
+          ]
+        },
+        {
+          "anchor": "#bugs-2",
+          "original_path": "docs/plan-runner/2026-05-03/cycle-2/bugs.md",
+          "heading": "## bugs-2",
+          "line": 155,
+          "loc": 36,
+          "topics": [
+            "bugs",
+            "quality-assurance",
+            "migration-runner",
+            "scope-drift"
+          ]
+        },
+        {
+          "anchor": "#fix-plan",
+          "original_path": "docs/plan-runner/2026-05-03/cycle-1/fix-plan.md",
+          "heading": "## fix-plan",
+          "line": 195,
+          "loc": 103,
+          "topics": [
+            "fix-plan",
+            "migration-runner",
+            "bugs",
+            "remediation",
+            "acceptance-criteria"
+          ]
+        },
+        {
+          "anchor": "#fix-plan-2",
+          "original_path": "docs/plan-runner/2026-05-03/cycle-2/fix-plan.md",
+          "heading": "## fix-plan-2",
+          "line": 302,
+          "loc": 20,
+          "topics": [
+            "fix-plan",
+            "quality-assurance",
+            "remediation",
+            "scope-drift"
+          ]
+        },
+        {
+          "anchor": "#2026-06-19-plan-runner-agent-teams-design",
+          "original_path": "docs/superpowers/specs/2026-06-19-plan-runner-agent-teams-design.md",
+          "heading": "## 2026-06-19-plan-runner-agent-teams-design",
+          "line": 326,
+          "loc": 187,
+          "topics": [
+            "design",
+            "plan-runner",
+            "agent-teams",
+            "orchestration",
+            "token-optimization"
+          ]
+        },
+        {
+          "anchor": "#2026-06-20-plan-runner-pr-skill-design",
+          "original_path": "docs/superpowers/specs/2026-06-20-plan-runner-pr-skill-design.md",
+          "heading": "## 2026-06-20-plan-runner-pr-skill-design",
+          "line": 517,
+          "loc": 170,
+          "topics": [
+            "design",
+            "plan-runner",
+            "pr-automation",
+            "skill-design",
+            "pull-request"
+          ]
+        },
+        {
+          "anchor": "#2026-06-20-plan-runner-pr-skill",
+          "original_path": "docs/superpowers/plans/2026-06-20-plan-runner-pr-skill.md",
+          "heading": "## 2026-06-20-plan-runner-pr-skill",
+          "line": 691,
+          "loc": 424,
+          "topics": [
+            "implementation-plan",
+            "plan-runner",
+            "pr-creation",
+            "automation",
+            "skill-development"
+          ]
+        },
+        {
+          "anchor": "#2026-06-30-qa-swarm-repo-extraction",
+          "original_path": "docs/superpowers/plans/2026-06-30-qa-swarm-repo-extraction.md",
+          "heading": "## 2026-06-30-qa-swarm-repo-extraction",
+          "line": 1119,
+          "loc": 602,
+          "topics": [
+            "implementation-plan",
+            "repo-extraction",
+            "monorepo",
+            "qa-swarm",
+            "plugin-architecture"
+          ]
+        },
+        {
+          "anchor": "#2026-06-30-qa-swarm-repo-extraction-design",
+          "original_path": "docs/superpowers/specs/2026-06-30-qa-swarm-repo-extraction-design.md",
+          "heading": "## 2026-06-30-qa-swarm-repo-extraction-design",
+          "line": 1725,
+          "loc": 79,
+          "topics": [
+            "design",
+            "repo-extraction",
+            "qa-swarm",
+            "plugin-architecture",
+            "monorepo-migration"
+          ]
+        },
         {
           "anchor": "#readme",
           "original_path": "README.md",
           "heading": "## README",
-          "line": 7,
-          "loc": 97,
+          "line": 1808,
+          "loc": 133,
           "topics": [
             "marketplace",
             "plugins",
-            "installation",
-            "qa-swarm",
-            "code-atlas",
-            "plan-runner"
+            "code-review",
+            "architecture",
+            "planning",
+            "qa-automation",
+            "dependency-management"
           ]
         }
       ],
       "gaps_count": 3
     }
   },
-  "total_loc": 9498,
+  "total_loc": 7174,
   "scan_summary": {
-    "public_surface_found": 60,
-    "configs_found": 20,
+    "public_surface_found": 36,
+    "configs_found": 26,
     "behavioral_gaps_found": 0
   }
 }

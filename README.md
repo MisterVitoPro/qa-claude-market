@@ -1,6 +1,6 @@
 # Claude Code Plugin Marketplace
 
-Five production-grade plugins for [Claude Code](https://docs.claude.com/en/docs/claude-code/overview): multi-agent code review, queryable architecture maps, parallel plan execution, spec consolidation, and vulnerability-aware dependency upgrades.
+Six production-grade plugins for [Claude Code](https://docs.claude.com/en/docs/claude-code/overview): multi-agent code review, queryable architecture maps, parallel plan execution, spec consolidation, vulnerability-aware dependency upgrades, and a generated codebase wiki.
 
 ```bash
 # One-time: add the marketplace
@@ -14,7 +14,7 @@ claude plugin install qa-swarm@mistervitopro-plugin-marketplace
 
 ## Plugins
 
-### qa-swarm  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fqa-claude-market%2Fmain%2Fplugins%2Fqa-swarm%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&color=blue)
+### qa-swarm  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fqa-swarm%2Fmain%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&color=blue)
 
 **A swarm of specialist agents reviews your code, then fixes the bugs test-first.**
 
@@ -26,7 +26,7 @@ claude plugin install qa-swarm@mistervitopro-plugin-marketplace
 /qa-swarm:implement
 ```
 
-→ [Plugin docs](plugins/qa-swarm/README.md)
+→ [Plugin docs](https://github.com/MisterVitoPro/qa-swarm)
 
 ---
 
@@ -88,9 +88,26 @@ claude plugin install migration-runner@mistervitopro-plugin-marketplace
 
 ---
 
+### llm-wiki  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fqa-claude-market%2Fmain%2Fplugins%2Fllm-wiki%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&color=blue)
+
+**Turns your codebase into a navigable wiki -- written for both new engineers and Claude's per-task context.**
+
+A planner decides the page set, writer agents fill one page each in parallel waves, a diagram author derives Mermaid diagrams from the dependency graph, and a synthesizer builds a session-loaded index with validated cross-links. It is the prose layer that complements code-atlas: where code-atlas is a machine-first dependency graph, llm-wiki writes the human-and-agent-readable "how and why" -- consuming the code-atlas index as ground truth when present, else self-scanning. Pure static Markdown (no embeddings), per-page `source_files` provenance, and git-blob hash-diff staleness detection that regenerates only stale pages. A `SessionStart` hook loads the index so Claude reads one page per task instead of grepping.
+
+```bash
+claude plugin install llm-wiki@mistervitopro-plugin-marketplace
+/code-atlas:map                   # optional but recommended -- llm-wiki reuses the graph
+/llm-wiki:generate                # build the wiki under .llm-wiki/
+/llm-wiki:update                  # incrementally refresh stale pages
+```
+
+→ [Plugin docs](plugins/llm-wiki/README.md)
+
+---
+
 ## Why a marketplace?
 
-Each plugin is independently versioned and installable. Add the marketplace once; mix and match. All four work standalone — no cross-dependencies.
+Each plugin is independently versioned and installable. Add the marketplace once; mix and match. All six work standalone — no cross-dependencies.
 
 ## Troubleshooting
 
@@ -101,13 +118,13 @@ claude --debug                      # shows plugin load errors
 /plugin                             # opens the plugin manager UI
 ```
 
-`code-atlas` and `plan-runner` ship Node.js SessionStart hooks; Node must be on `PATH`.
+`code-atlas`, `plan-runner`, and `llm-wiki` ship Node.js SessionStart hooks; Node must be on `PATH`.
 
 ## Contributing
 
 1. Create `plugins/<name>/` with `.claude-plugin/plugin.json`, `agents/`, `skills/`, and a `README.md`.
 2. Register in [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json).
-3. Tag releases as `<plugin-name>/v<version>` (e.g. `qa-swarm/v1.4.1`) and push the tag — Claude Code uses tags as the version cache key.
+3. Tag releases as `<plugin-name>/v<version>` (e.g. `code-atlas/v2.1.0`) and push the tag — Claude Code uses tags as the version cache key. Plugins sourced from their own repo (e.g. `qa-swarm`) instead tag plain `v<version>` in that repo, then bump `ref`/`sha` on the plugin's `source` entry in this repo's `marketplace.json`.
 
 See [CLAUDE.md](CLAUDE.md) for repo conventions.
 
