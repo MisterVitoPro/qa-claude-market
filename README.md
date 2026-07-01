@@ -60,7 +60,7 @@ claude plugin install plan-runner@mistervitopro-plugin-marketplace
 
 ---
 
-### jupiter  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fqa-claude-market%2Fmain%2Fplugins%2Fjupiter%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&color=blue)
+### jupiter  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fjupiter%2Fmain%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&color=blue)
 
 **Consolidates scattered specs into a single canonical tree, and stubs out the docs you forgot to write.**
 
@@ -71,6 +71,8 @@ claude plugin install jupiter@mistervitopro-plugin-marketplace
 /jupiter:adopt          # reorganize specs in place
 /jupiter:rewrite        # collapse to single master file
 ```
+
+→ [Plugin docs](https://github.com/MisterVitoPro/jupiter)
 
 ---
 
