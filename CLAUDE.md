@@ -72,10 +72,12 @@ No circular dependencies. Each plugin is independent; marketplace.json registers
 
 ### Build & Run Commands
 ```bash
+# Add this marketplace, then install any plugin from it
 claude plugin marketplace add MisterVitoPro/qa-claude-market
-claude plugin marketplace add MisterVitoPro/qa-claude-market --plugin <qa-swarm|code-atlas|plan-runner>
-git tag <plugin-name>/v<version>
-git push origin --tags
+claude plugin install <plugin-name>@mistervitopro-plugin-marketplace
+
+# Releasing: tag v<version> in the plugin's OWN repo, then bump ref/sha on its
+# source entry in .claude-plugin/marketplace.json here (see Versioning above)
 ```
 
 <!-- code-atlas:end -->
