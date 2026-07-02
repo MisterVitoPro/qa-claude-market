@@ -47,7 +47,7 @@ claude plugin install code-atlas@mistervitopro-plugin-marketplace
 
 ---
 
-### plan-runner  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fqa-claude-market%2Fmain%2Fplugins%2Fplan-runner%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&color=blue)
+### plan-runner  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fplan-runner%2Fmain%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&color=blue)
 
 **Take a Markdown implementation plan, run it through a parallel agent swarm.**
 
@@ -57,6 +57,8 @@ The analyzer breaks your plan into file-disjoint waves (≤6 agents per wave). D
 claude plugin install plan-runner@mistervitopro-plugin-marketplace
 /plan-runner:run path/to/implementation-plan.md
 ```
+
+→ [Plugin docs](https://github.com/MisterVitoPro/plan-runner)
 
 ---
 
@@ -124,7 +126,7 @@ claude --debug                      # shows plugin load errors
 
 1. Create `plugins/<name>/` with `.claude-plugin/plugin.json`, `agents/`, `skills/`, and a `README.md`.
 2. Register in [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json).
-3. Tag releases as `<plugin-name>/v<version>` (e.g. `plan-runner/v1.5.0`) and push the tag — Claude Code uses tags as the version cache key. Plugins sourced from their own repo (e.g. `qa-swarm`, `code-atlas`) instead tag plain `v<version>` in that repo, then bump `ref`/`sha` on the plugin's `source` entry in this repo's `marketplace.json`.
+3. Tag releases as `<plugin-name>/v<version>` (e.g. `migration-runner/v0.1.0`) and push the tag — Claude Code uses tags as the version cache key. Plugins sourced from their own repo (e.g. `qa-swarm`, `code-atlas`, `plan-runner`) instead tag plain `v<version>` in that repo, then bump `ref`/`sha` on the plugin's `source` entry in this repo's `marketplace.json`.
 
 See [CLAUDE.md](CLAUDE.md) for repo conventions.
 
