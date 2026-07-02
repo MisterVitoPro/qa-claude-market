@@ -49,7 +49,12 @@
     {
       "name": "migration-runner",
       "description": "Vulnerability-aware dependency upgrade orchestrator across 7 ecosystems (npm, Python, Go, Rust, Java, Kotlin, C#); detects outdated packages, queries OSV.dev for CVEs, recommends the safest-yet-most-recent version per package, then executes wave-by-wave with build/typecheck/test verification and clean git rollback on failure",
-      "source": "./plugins/migration-runner",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/MisterVitoPro/migration-runner.git",
+        "ref": "v0.1.0",
+        "sha": "5f3bbecc21bd601bf320bd9230baaf97d6d967e3"
+      },
       "category": "development"
     },
     {

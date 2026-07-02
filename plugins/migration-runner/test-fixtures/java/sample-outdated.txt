@@ -1,4 +1,0 @@
-[INFO] The following dependencies in Dependencies have newer versions:
-[INFO]   com.google.guava:guava ........................... 31.1-jre -> 33.3.0-jre
-[INFO]   org.slf4j:slf4j-api .............................. 1.7.36 -> 2.0.13
-[INFO]

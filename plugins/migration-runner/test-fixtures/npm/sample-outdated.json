@@ -1,4 +1,0 @@
-{
-  "axios": { "current": "1.6.7", "wanted": "1.7.4", "latest": "1.7.4", "location": "node_modules/axios" },
-  "lodash": { "current": "4.17.20", "wanted": "4.17.21", "latest": "4.17.21", "location": "node_modules/lodash" }
-}
