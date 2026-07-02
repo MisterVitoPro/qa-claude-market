@@ -76,7 +76,7 @@ claude plugin install jupiter@mistervitopro-plugin-marketplace
 
 ---
 
-### migration-runner  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fqa-claude-market%2Fmain%2Fplugins%2Fmigration-runner%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&color=blue)
+### migration-runner  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fmigration-runner%2Fmain%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&color=blue)
 
 **Vulnerability-aware dependency upgrade orchestrator across 7 ecosystems.**
 
@@ -87,6 +87,8 @@ claude plugin install migration-runner@mistervitopro-plugin-marketplace
 /migration-runner:detect
 /migration-runner:run
 ```
+
+→ [Plugin docs](https://github.com/MisterVitoPro/migration-runner)
 
 ---
 
