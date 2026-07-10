@@ -1,6 +1,6 @@
 # Claude Code Plugin Marketplace
 
-Six production-grade plugins for [Claude Code](https://docs.claude.com/en/docs/claude-code/overview): multi-agent code review, queryable architecture maps, parallel plan execution, spec consolidation, vulnerability-aware dependency upgrades, and a generated codebase wiki.
+Seven production-grade plugins for [Claude Code](https://docs.claude.com/en/docs/claude-code/overview): idea-to-spec elicitation interviews, multi-agent code review, queryable architecture maps, parallel plan execution, spec consolidation, vulnerability-aware dependency upgrades, and a generated codebase wiki.
 
 ```bash
 # One-time: add the marketplace
@@ -108,6 +108,21 @@ claude plugin install llm-wiki@mistervitopro-plugin-marketplace
 ```
 
 → [Plugin docs](https://github.com/MisterVitoPro/llm-wiki)
+
+---
+
+### ideas  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fideas%2Fmain%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&color=blue)
+
+**Interviews you into an audited design spec before any code gets written.**
+
+A scope-sized interview (S/M/L triage, batched multiple-choice waves with recommended defaults, hard cap of 5 question calls) records every answer in an on-disk ledger with three statuses — `decided`, `assumed`, `open` — so the run survives `/clear` and resumes from the file alone. Two read-only agents gate the draft: a binding ledger audit (every spec claim must trace to a decision; a model guess is never recorded as a user decision) and a biggest-miss critic (the single sharpest risk plus mitigations, shown verbatim at the review gate). Output: a committed spec with EARS acceptance criteria, brownfield change deltas, mandatory Assumptions/Open-questions sections, and optional MADR-lite ADRs that later interviews read to skip already-decided questions. It is the front door of the pipeline: the approved spec feeds `plan-runner`.
+
+```bash
+claude plugin install ideas@mistervitopro-plugin-marketplace
+/ideas:interview "your rough idea here"
+```
+
+→ [Plugin docs](https://github.com/MisterVitoPro/ideas)
 
 ---
 

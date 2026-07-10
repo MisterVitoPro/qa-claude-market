@@ -72,6 +72,17 @@
         "sha": "ff3c176ae8ba9efaeafadcfddd464d2761302e5b"
       },
       "category": "development"
+    },
+    {
+      "name": "ideas",
+      "description": "Turn a raw idea into an audited design spec through a token-conscious interview: scope-sized batched questions (S/M/L triage, max 5 calls before the approach checkpoint), a three-status on-disk ledger (decided/assumed/open) that survives /clear and resumes from the file alone, a binding read-only ledger audit plus a biggest-miss critic before the review gate, and spec output with EARS acceptance criteria, brownfield change deltas, and optional MADR-lite ADRs that later interviews read to skip already-decided questions. A model guess is never recorded as a user decision. Not for typos, renames, or one-line fixes",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/MisterVitoPro/ideas.git",
+        "ref": "v0.1.0",
+        "sha": "5d60acc79d0c4f0af2a500d0a56e10a71367a8f6"
+      },
+      "category": "development"
     }
   ]
 }
