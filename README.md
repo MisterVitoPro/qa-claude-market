@@ -58,6 +58,8 @@ claude plugin install plan-runner@mistervitopro-plugin-marketplace
 /plan-runner:run path/to/implementation-plan.md
 ```
 
+Pairs with the `ideas` plugin as the pipeline's front door: `/ideas:interview` produces an audited spec and emits a plan-runner-ready plan for this command to execute.
+
 → [Plugin docs](https://github.com/MisterVitoPro/plan-runner)
 
 ---
@@ -113,9 +115,9 @@ claude plugin install llm-wiki@mistervitopro-plugin-marketplace
 
 ### ideas  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fideas%2Fmain%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&color=blue)
 
-**Interviews you into an audited design spec before any code gets written.**
+**Interviews you into an audited design spec before any code gets written — then hands plan-runner its input.**
 
-A scope-sized interview (S/M/L triage, batched multiple-choice waves with recommended defaults, hard cap of 5 question calls) records every answer in an on-disk ledger with three statuses — `decided`, `assumed`, `open` — so the run survives `/clear` and resumes from the file alone. Two read-only agents gate the draft: a binding ledger audit (every spec claim must trace to a decision; a model guess is never recorded as a user decision) and a biggest-miss critic (the single sharpest risk plus mitigations, shown verbatim at the review gate). Output: a committed spec with EARS acceptance criteria, brownfield change deltas, mandatory Assumptions/Open-questions sections, and optional MADR-lite ADRs that later interviews read to skip already-decided questions. It is the front door of the pipeline: the approved spec feeds `plan-runner`.
+A scope-sized interview (S/M/L triage, batched multiple-choice waves, hard cap of 5 question calls) pins the existing-system baseline from your repo first, then records every answer in an on-disk ledger — `decided` / `assumed` / `open` — so the run survives `/clear` and resumes from the file alone. A category-coverage elicitation floor sweeps the ambiguity taxonomy (non-functionals, lifecycle, and interfaces weighted first) so interviews can't close with critical ground unasked, and every unconfirmed item becomes a binding default welded into an acceptance criterion or a blocking open question — never a passive flag a builder can ignore. Two read-only agents gate the draft: a binding ledger audit (every spec claim traces to a decision; a model guess is never recorded as a user decision) and a biggest-miss critic. Output: a committed spec with EARS acceptance criteria, brownfield change deltas, and optional MADR-lite ADRs that later interviews read to skip already-decided questions. After approval, "Approve + generate plan" (or `--plan-runner <spec-path>` re-entry) emits a plan-runner-ready plan — contracts only, full criterion text per task. It complements `plan-runner`, it does not replace it: interview -> spec -> plan here, execution there. Interview behavior is benchmark-tuned against a paired simulated-user harness ([ideas-bench](https://github.com/MisterVitoPro/ideas-bench)).
 
 ```bash
 claude plugin install ideas@mistervitopro-plugin-marketplace

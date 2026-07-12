@@ -79,8 +79,8 @@
       "source": {
         "source": "url",
         "url": "https://github.com/MisterVitoPro/ideas.git",
-        "ref": "v0.3.0",
-        "sha": "f463e41da025364f3bb73f3eb51d9c58d289bcd3"
+        "ref": "v0.3.1",
+        "sha": "3811e916d806f2a7b04ebe179fcbb1ff579fbc41"
       },
       "category": "development"
     }
