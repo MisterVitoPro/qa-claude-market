@@ -75,12 +75,12 @@
     },
     {
       "name": "ideas",
-      "description": "Turn a raw idea into an audited design spec through a token-conscious interview: scope-sized batched questions (S/M/L triage, max 5 calls) with a category-coverage elicitation floor and an existing-system baseline pinned from the repo, a three-status on-disk ledger (decided/assumed/open) that survives /clear and resumes from the file alone, a binding read-only ledger audit plus a biggest-miss critic before the review gate, and spec output with EARS acceptance criteria, brownfield change deltas, and optional MADR-lite ADRs that later interviews read to skip already-decided questions. Assumptions resolve to binding defaults welded into EARS criteria or blocking open questions; a model guess is never recorded as a user decision. After approval, \"Approve + generate plan\" (or /ideas:plan run standalone against an approved spec) emits a plan-runner-ready plan: flat task list, full EARS criterion text, confirm-or-carry header. /ideas:tickets then projects the plan to GitHub as a parent tracking issue plus one linked sub-issue per task behind a Definition-of-Ready gate, gh CLI only. Not for typos, renames, or one-line fixes",
+      "description": "Turn a raw idea into an audited design spec through a token-conscious interview: scope-sized batched questions (S/M/L triage, max 5 calls) with a category-coverage elicitation floor and an existing-system baseline pinned from the repo, a three-status on-disk ledger (decided/assumed/open) that survives /clear and resumes from the file alone, a binding read-only ledger audit plus a biggest-miss critic before the review gate, and spec output with EARS acceptance criteria, brownfield change deltas, and optional MADR-lite ADRs that later interviews read to skip already-decided questions. Assumptions resolve to binding defaults welded into EARS criteria or blocking open questions; a model guess is never recorded as a user decision. After approval, \"Approve + generate plan\" (or /ideas:plan run standalone against an approved spec) emits a plan-runner-ready plan: flat task list, full EARS criterion text, confirm-or-carry header, ending at a completion gate that offers plan-runner execution (when installed), inline or subagent execution with exec()-commit resume, GitHub tickets, or stop. /ideas:tickets then projects the plan to GitHub as a parent tracking issue plus one linked sub-issue per task behind a Definition-of-Ready gate, gh CLI only. Not for typos, renames, or one-line fixes",
       "source": {
         "source": "url",
         "url": "https://github.com/MisterVitoPro/ideas.git",
-        "ref": "v0.5.0",
-        "sha": "393aebaefdbb3925def27b13fe12d6d9f04c475d"
+        "ref": "v0.6.0",
+        "sha": "18e94da33f3657189ad7ed6b902a668d543c369c"
       },
       "category": "development"
     }
