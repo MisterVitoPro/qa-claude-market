@@ -56,17 +56,26 @@ claude plugin install qa-swarm@mistervitopro-plugin-marketplace
 
 ---
 
-### code-atlas  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fcode-atlas%2Fv2.1.0%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&prefix=v&color=blue)
+### code-atlas  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fcode-atlas%2Fv2.2.0%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&prefix=v&color=blue)
 
-**Stops Claude from re-exploring your repo every session.**
+**Stops Claude Code and Codex from re-exploring your repo every session.**
 
-Three analyst agents scan your codebase in parallel and a graph synthesizer annotates the key modules, producing a curated architecture index (directory map, key files, tech stack, patterns, dependencies, build commands) plus a semantic dependency graph. Graph queries (dependencies, dependents, blast radius, risk filters) run deterministically through a bundled Node script. A `SessionStart` hook injects the index as context at session start so Claude navigates straight to the right files instead of grepping. Incremental updates re-scan only what changed.
+**Claude Code and Codex ready.** Version 2.2.0 ships both client manifests, Codex-valid skills, and a shared SessionStart hook. Codex users must review and trust the bundled hook with `/hooks` before automatic index injection begins.
+
+Three analyst agents scan your codebase in parallel and a graph synthesizer annotates the key modules, producing a curated architecture index (directory map, key files, tech stack, patterns, dependencies, build commands) plus a semantic dependency graph. Graph queries (dependencies, dependents, blast radius, risk filters) run deterministically through a bundled Node script. A `SessionStart` hook injects the index as context so either client navigates straight to the right files instead of grepping. Incremental updates re-scan only what changed.
 
 ```bash
+# Claude Code
 claude plugin install code-atlas@mistervitopro-plugin-marketplace
 /code-atlas:map                   # full first-time scan
 /code-atlas:update                # incremental refresh
 /code-atlas:query "what calls AuthService.login?"
+
+# Codex
+codex plugin add code-atlas@mistervitopro-plugin-marketplace
+$code-atlas:map
+$code-atlas:update
+$code-atlas:query "what calls AuthService.login?"
 ```
 
 → [Plugin docs](https://github.com/MisterVitoPro/code-atlas)
