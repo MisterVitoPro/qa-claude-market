@@ -35,8 +35,8 @@
       "source": {
         "source": "url",
         "url": "https://github.com/MisterVitoPro/plan-runner.git",
-        "ref": "v1.11.0",
-        "sha": "51eb62b05f5009cf89019cb93179bc9c3a9ba14d"
+        "ref": "v1.12.0",
+        "sha": "b5b5f7374d0ce69af671a035ecb6856321124d97"
       },
       "category": "development"
     },
