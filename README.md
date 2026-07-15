@@ -1,6 +1,17 @@
-# Claude Code Plugin Marketplace
+# Claude Code and Codex Plugin Marketplace
 
-Seven production-grade plugins for [Claude Code](https://docs.claude.com/en/docs/claude-code/overview): idea-to-spec elicitation interviews, multi-agent code review, queryable architecture maps, parallel plan execution, spec consolidation, vulnerability-aware dependency upgrades, and a generated codebase wiki.
+Seven development plugins published for [Claude Code](https://docs.claude.com/en/docs/claude-code/overview) and progressively enabled for Codex: idea-to-spec elicitation interviews, multi-agent code review, queryable architecture maps, parallel plan execution, spec consolidation, vulnerability-aware dependency upgrades, and a generated codebase wiki.
+
+The repository carries two synchronized catalogs:
+
+- `.claude-plugin/marketplace.json` for Claude Code
+- `.agents/plugins/marketplace.json` for Codex
+
+Each plugin is implemented in its own repository. A catalog entry becomes installable in Codex once that source repository ships a valid `.codex-plugin/plugin.json`; until then, Codex may omit or reject that individual entry while the Claude package remains available.
+
+## Installation
+
+### Claude Code
 
 ```bash
 # One-time: add the marketplace
@@ -12,9 +23,24 @@ claude plugin install qa-swarm@mistervitopro-plugin-marketplace
 
 ---
 
+### Codex
+
+```bash
+# One-time: add the marketplace
+codex plugin marketplace add MisterVitoPro/qa-claude-market
+
+# Inspect available entries, then install a Codex-enabled plugin
+codex plugin list
+codex plugin add <plugin-name>@mistervitopro-plugin-marketplace
+```
+
+Start a new Codex session after installing so bundled skills and tools are loaded. If a plugin includes lifecycle hooks, review and trust them with `/hooks` before expecting them to run.
+
+---
+
 ## Plugins
 
-### qa-swarm  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fqa-swarm%2Fmain%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&prefix=v&color=blue)
+### qa-swarm  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fqa-swarm%2Fv1.4.1%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&prefix=v&color=blue)
 
 **A swarm of specialist agents reviews your code, then fixes the bugs test-first.**
 
@@ -30,7 +56,7 @@ claude plugin install qa-swarm@mistervitopro-plugin-marketplace
 
 ---
 
-### code-atlas  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fcode-atlas%2Fmain%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&prefix=v&color=blue)
+### code-atlas  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fcode-atlas%2Fv2.1.0%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&prefix=v&color=blue)
 
 **Stops Claude from re-exploring your repo every session.**
 
@@ -47,11 +73,11 @@ claude plugin install code-atlas@mistervitopro-plugin-marketplace
 
 ---
 
-### plan-runner  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fplan-runner%2Fmain%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&prefix=v&color=blue)
+### plan-runner  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fplan-runner%2Fv1.11.0%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&prefix=v&color=blue)
 
 **Take a Markdown implementation plan, run it through a parallel agent swarm.**
 
-The analyzer breaks your plan into file-disjoint waves (≤6 agents per wave). Dev agents implement tasks in parallel; verifier agents check acceptance criteria per wave; the aggregator dedupes bugs and emits a `fix-plan.md` for re-runs. Per-wave git commits keep history bisectable. TDD red-green mode on by default (`--no-tdd` to disable). Auto-detects Claude Code Agent Teams (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`, v2.1.178+) for token-lean orchestration, with a transparent subagent fallback. Every dispatched subagent's token usage is tallied (best-effort) into `manifest.json` under `token_usage` and rendered as an end-of-run Token Report (per-phase table, top consumers, honest coverage) plus a per-phase breakdown in the PR stats, so you can see what a cycle cost. At the end it pushes the branch and opens/updates a proper PR (conventional title, structured body, draft when bugs remain) via the bundled `plan-runner:pr` skill.
+The analyzer breaks your plan into file-disjoint waves (≤6 agents per wave). Dev agents implement tasks in parallel; verifier agents check acceptance criteria per wave; the aggregator dedupes bugs and emits a `fix-plan.md` for re-runs. Per-wave git commits keep history bisectable. TDD red-green mode on by default (`--no-tdd` to disable). Auto-detects Claude Code Agent Teams (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`, v2.1.178+) for token-lean orchestration, with a transparent subagent fallback. Every dispatched subagent's token usage is tallied (best-effort) into `manifest.json` under `token_usage` and rendered as an end-of-run Token Report (per-phase table, top consumers, honest coverage) plus a per-phase breakdown in the PR stats; v1.11.0 adds a labeled lower-bound self-report fallback when the harness exposes no usage figure. At the end it pushes the branch and opens/updates a proper PR (conventional title, structured body, draft when bugs remain) via the bundled `plan-runner:pr` skill.
 
 ```bash
 claude plugin install plan-runner@mistervitopro-plugin-marketplace
@@ -64,7 +90,7 @@ Pairs with the `ideas` plugin as the pipeline's front door: `/ideas:interview` p
 
 ---
 
-### jupiter  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fjupiter%2Fmain%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&prefix=v&color=blue)
+### jupiter  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fjupiter%2Fv0.1.1%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&prefix=v&color=blue)
 
 **Consolidates scattered specs into a single canonical tree, and stubs out the docs you forgot to write.**
 
@@ -80,7 +106,7 @@ claude plugin install jupiter@mistervitopro-plugin-marketplace
 
 ---
 
-### migration-runner  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fmigration-runner%2Fmain%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&prefix=v&color=blue)
+### migration-runner  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fmigration-runner%2Fv0.1.0%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&prefix=v&color=blue)
 
 **Vulnerability-aware dependency upgrade orchestrator across 7 ecosystems.**
 
@@ -96,7 +122,7 @@ claude plugin install migration-runner@mistervitopro-plugin-marketplace
 
 ---
 
-### llm-wiki  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fllm-wiki%2Fmain%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&prefix=v&color=blue)
+### llm-wiki  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fllm-wiki%2Fv0.1.0%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&prefix=v&color=blue)
 
 **Turns your codebase into a navigable wiki -- written for both new engineers and Claude's per-task context.**
 
@@ -113,7 +139,7 @@ claude plugin install llm-wiki@mistervitopro-plugin-marketplace
 
 ---
 
-### ideas  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fideas%2Fmain%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&prefix=v&color=blue)
+### ideas  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fideas%2Fv0.6.0%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&prefix=v&color=blue)
 
 **Interviews you into an audited design spec before any code gets written — then hands plan-runner its input.**
 
@@ -130,7 +156,7 @@ claude plugin install ideas@mistervitopro-plugin-marketplace
 
 ## Troubleshooting
 
-If `/plugin` shows errors after installing:
+For Claude Code, if `/plugin` shows errors after installing:
 
 ```bash
 claude --debug                      # shows plugin load errors
@@ -139,11 +165,21 @@ claude --debug                      # shows plugin load errors
 
 `code-atlas`, `plan-runner`, and `llm-wiki` ship Node.js SessionStart hooks; Node must be on `PATH`.
 
+For Codex, inspect the configured marketplace and plugin state:
+
+```bash
+codex plugin marketplace list
+codex plugin list
+```
+
+If a catalog entry is missing, confirm that its pinned source contains `.codex-plugin/plugin.json`. Start a new session after installing or updating a plugin.
+
 ## Contributing
 
-1. Create `plugins/<name>/` with `.claude-plugin/plugin.json`, `agents/`, `skills/`, and a `README.md`.
-2. Register in [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json).
-3. Tag releases as `<plugin-name>/v<version>` (e.g. `migration-runner/v0.1.0`) and push the tag — Claude Code uses tags as the version cache key. Plugins sourced from their own repo (e.g. `qa-swarm`, `code-atlas`, `plan-runner`) instead tag plain `v<version>` in that repo, then bump `ref`/`sha` on the plugin's `source` entry in this repo's `marketplace.json`.
+1. Create a standalone plugin repository with both `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json`, plus its agents, skills, hooks, scripts, and documentation as applicable.
+2. Register the same URL, release `ref`, and commit `sha` in [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json) and [`.agents/plugins/marketplace.json`](.agents/plugins/marketplace.json). Add the required Codex installation/authentication policies and category.
+3. Tag the release as plain `v<version>` in the plugin repository, then update both catalog pins together. CI rejects catalog drift.
+4. Keep client-specific surfaces honest: Claude-only features may remain documented as such until an equivalent Codex skill, MCP server, or hook is provided.
 
 See [CLAUDE.md](CLAUDE.md) for repo conventions.
 

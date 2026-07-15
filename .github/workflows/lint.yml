@@ -12,27 +12,60 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Validate marketplace.json
+      - name: Validate marketplace JSON
         run: |
-          cat .claude-plugin/marketplace.json | python3 -m json.tool > /dev/null
-          echo "✓ marketplace.json is valid JSON"
+          python3 -m json.tool .claude-plugin/marketplace.json > /dev/null
+          python3 -m json.tool .agents/plugins/marketplace.json > /dev/null
+          echo "Both marketplace manifests are valid JSON"
 
-      - name: Validate plugin manifests
+      - name: Validate Codex marketplace contract
         run: |
-          for plugin in plugins/*/;  do
-            if [ -f "$plugin.claude-plugin/plugin.json" ]; then
-              cat "$plugin.claude-plugin/plugin.json" | python3 -m json.tool > /dev/null
-              echo "✓ $plugin plugin.json is valid"
-            fi
-          done
+          jq -e '.name | type == "string" and length > 0' \
+            .agents/plugins/marketplace.json > /dev/null
+          jq -e '
+            all(.plugins[];
+              (.name | type == "string" and length > 0) and
+              (.source.source == "url") and
+              (.source.url | type == "string" and startswith("https://")) and
+              (.source.ref | type == "string" and length > 0) and
+              (.source.sha | type == "string" and test("^[0-9a-f]{40}$")) and
+              (.policy.installation | IN("NOT_AVAILABLE", "AVAILABLE", "INSTALLED_BY_DEFAULT")) and
+              (.policy.authentication | IN("ON_INSTALL", "ON_USE")) and
+              (.category | type == "string" and length > 0)
+            )
+          ' .agents/plugins/marketplace.json > /dev/null
+
+      - name: Check Claude and Codex catalogs stay pinned together
+        run: |
+          jq -S '[.plugins[] | {name, url: .source.url, ref: .source.ref, sha: .source.sha}] | sort_by(.name)' \
+            .claude-plugin/marketplace.json > /tmp/claude-catalog.json
+          jq -S '[.plugins[] | {name, url: .source.url, ref: .source.ref, sha: .source.sha}] | sort_by(.name)' \
+            .agents/plugins/marketplace.json > /tmp/codex-catalog.json
+          diff -u /tmp/claude-catalog.json /tmp/codex-catalog.json
+
+      - name: Check README badges use pinned release tags
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          catalog = json.loads(Path('.claude-plugin/marketplace.json').read_text())
+          readme = Path('README.md').read_text()
+          for plugin in catalog['plugins']:
+              name = plugin['name']
+              ref = plugin['source']['ref']
+              marker = f'MisterVitoPro%2F{name}%2F{ref}%2F.claude-plugin%2Fplugin.json'
+              if marker not in readme:
+                  raise SystemExit(f'README badge for {name} is not pinned to {ref}')
+          PY
 
   markdown-lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check README formatting
+      - name: Check repository guidance
         run: |
-          echo "Checking markdown files exist and are readable..."
-          [ -f "README.md" ] && echo "✓ README.md found"
-          [ -f "CLAUDE.md" ] && echo "✓ CLAUDE.md found"
+          test -r README.md
+          test -r CLAUDE.md
+          test -r AGENTS.md

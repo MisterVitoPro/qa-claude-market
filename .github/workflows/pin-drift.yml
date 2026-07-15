@@ -41,7 +41,7 @@ jobs:
               echo
               printf '%s' "$drift"
               echo
-              echo "Bump the \`ref\` and \`sha\` in \`.claude-plugin/marketplace.json\` (and refresh the plugin's README/description copy if command surfaces changed)."
+              echo "Bump the \`ref\` and \`sha\` in both \`.claude-plugin/marketplace.json\` and \`.agents/plugins/marketplace.json\` (and refresh the plugin's README/description copy if command surfaces changed)."
               echo "EOF"
             } >> "$GITHUB_OUTPUT"
             printf 'Drift detected:\n%s' "$drift"
