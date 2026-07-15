@@ -1,7 +1,7 @@
 {
   "name": "mistervitopro-plugin-marketplace",
   "metadata": {
-    "description": "A collection of Claude Code plugins by MisterVitoPro"
+    "description": "A collection of Claude Code and Codex plugins by MisterVitoPro"
   },
   "owner": {
     "name": "MisterVitoPro"
@@ -9,12 +9,12 @@
   "plugins": [
     {
       "name": "qa-swarm",
-      "description": "AI-powered code quality analyzer: specialized agents find security, performance, architecture, and correctness issues, then fix them via TDD",
+      "description": "Claude Code and Codex quality pipeline: deploy parallel security, correctness, performance, architecture, data-flow, and concurrency reviewers; rank and corroborate evidence-backed findings; generate a fix spec and test plan; then implement selected fixes through a test-first loop.",
       "source": {
         "source": "url",
         "url": "https://github.com/MisterVitoPro/qa-swarm.git",
-        "ref": "v1.4.1",
-        "sha": "47dc40c871da40d8d405ffc49a14910d11397f4d"
+        "ref": "v1.5.0",
+        "sha": "3782261052328456ed30e6e5559134718d7f69e3"
       },
       "category": "development"
     },
@@ -31,7 +31,7 @@
     },
     {
       "name": "plan-runner",
-      "description": "Take a Markdown implementation plan, run it through a parallel agent swarm with per-wave verification, and generate a bug-fix plan for re-runs; TDD red-green mode on by default (--no-tdd to disable) with per-task red/green gate evidence; auto-detects Claude Code Agent Teams for token-lean orchestration with a subagent fallback. Tallies best-effort token usage for every dispatched subagent (analyzer, dev agents, verifiers, aggregator) into manifest.json token_usage with a grand total and honest coverage counters, surfaced in dashboards, an end-of-run per-phase Token Report with top consumers, and the PR stats; when the harness surfaces no usage figure for a subagent, each agent's own token_usage self-report (the last in-band harness figure, never an estimate) is used as a labeled lower-bound fallback. On the teams backend each wave is verifier-gated: the lead waits on the verifier's actual task result (never self-verifies) and a coverage gate before aggregation backfills any missing verdict, so a PR cannot open while a verifier is still outstanding. git is optional: when absent (no binary or not a repo) all git operations are skipped. Before opening the PR, syncs a code-atlas architecture index (runs /code-atlas:update when .code-atlas/ is present) so the index reflects what was implemented. Verification coverage is configurable via a .plan-runner.yml verify_mode (per-agent | per-wave | last-wave-only) or a --verify flag; lower modes verify fewer waves, record the rest as SKIPPED (distinct from UNVERIFIABLE), and force a draft PR with a banner. Final step opens or updates a proper PR via the plan-runner:pr skill (conventional title, rich body, draft when bugs remain).",
+      "description": "Claude Code and Codex plan executor: analyze a Markdown implementation plan into file-disjoint parallel waves, run test-first implementation with configurable independent verification, preserve honest token and coverage accounting, aggregate bugs into a re-runnable fix plan, refresh Code Atlas when available, and optionally open a structured pull request. Codex uses native subagents; Claude Code can additionally opt into Agent Teams.",
       "source": {
         "source": "url",
         "url": "https://github.com/MisterVitoPro/plan-runner.git",

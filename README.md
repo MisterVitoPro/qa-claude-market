@@ -1,6 +1,6 @@
 # Claude Code and Codex Plugin Marketplace
 
-Seven development plugins published for [Claude Code](https://docs.claude.com/en/docs/claude-code/overview) and progressively enabled for Codex: idea-to-spec elicitation interviews, multi-agent code review, queryable architecture maps, parallel plan execution, spec consolidation, vulnerability-aware dependency upgrades, and a generated codebase wiki.
+Seven development plugins published through synchronized Claude Code and Codex catalogs: idea-to-spec elicitation interviews, multi-agent code review, queryable architecture maps, parallel plan execution, spec consolidation, vulnerability-aware dependency upgrades, and a generated codebase wiki.
 
 The repository carries two synchronized catalogs:
 
@@ -40,16 +40,24 @@ Start a new Codex session after installing so bundled skills and tools are loade
 
 ## Plugins
 
-### qa-swarm  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fqa-swarm%2Fv1.4.1%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&prefix=v&color=blue)
+### qa-swarm  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fqa-swarm%2Fv1.5.0%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&prefix=v&color=blue)
 
 **A swarm of specialist agents reviews your code, then fixes the bugs test-first.**
+
+**Claude Code and Codex ready.** Version 1.5.0 ships both manifests, Codex-valid skills, host-neutral user gates, and portable bundled-role loading for native subagent dispatch.
 
 Six Sonnet core reviewers (security, correctness, performance, architecture, data-flow, async) run in parallel, optionally joined by up to six Haiku specialists (config/env, supply chain, type safety, state mgmt, logging, backwards-compat). Findings are deduplicated, ranked P0–P3, and corroborated across agents. The `implement` skill picks up the report and fixes issues with a 3-agent TDD loop (failing test → minimal fix → verify).
 
 ```bash
+# Claude Code
 claude plugin install qa-swarm@mistervitopro-plugin-marketplace
 /qa-swarm:attack "audit the authentication flow for security and correctness"
 /qa-swarm:implement
+
+# Codex
+codex plugin add qa-swarm@mistervitopro-plugin-marketplace
+$qa-swarm:attack "audit the authentication flow for security and correctness"
+$qa-swarm:implement
 ```
 
 → [Plugin docs](https://github.com/MisterVitoPro/qa-swarm)
@@ -82,18 +90,25 @@ $code-atlas:query "what calls AuthService.login?"
 
 ---
 
-### plan-runner  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fplan-runner%2Fv1.11.0%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&prefix=v&color=blue)
+### plan-runner  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fplan-runner%2Fv1.12.0%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&prefix=v&color=blue)
 
 **Take a Markdown implementation plan, run it through a parallel agent swarm.**
 
-The analyzer breaks your plan into file-disjoint waves (≤6 agents per wave). Dev agents implement tasks in parallel; verifier agents check acceptance criteria per wave; the aggregator dedupes bugs and emits a `fix-plan.md` for re-runs. Per-wave git commits keep history bisectable. TDD red-green mode on by default (`--no-tdd` to disable). Auto-detects Claude Code Agent Teams (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`, v2.1.178+) for token-lean orchestration, with a transparent subagent fallback. Every dispatched subagent's token usage is tallied (best-effort) into `manifest.json` under `token_usage` and rendered as an end-of-run Token Report (per-phase table, top consumers, honest coverage) plus a per-phase breakdown in the PR stats; v1.11.0 adds a labeled lower-bound self-report fallback when the harness exposes no usage figure. At the end it pushes the branch and opens/updates a proper PR (conventional title, structured body, draft when bugs remain) via the bundled `plan-runner:pr` skill.
+**Claude Code and Codex ready.** Version 1.12.0 loads bundled analyzer, developer, verifier, and aggregator roles relative to the active skill. Codex uses native subagents; Claude Code can additionally opt into Agent Teams.
+
+The analyzer breaks your plan into file-disjoint waves (≤6 agents per wave). Dev agents implement tasks in parallel; verifier agents check acceptance criteria per wave; the aggregator dedupes bugs and emits a `fix-plan.md` for re-runs. Per-wave git commits keep history bisectable. TDD red-green mode is on by default (`--no-tdd` to disable). Claude Code can auto-detect Agent Teams (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`, v2.1.178+); other Claude sessions and Codex use native subagents. Every dispatched subagent's token usage is tallied best-effort into `manifest.json`, with explicit lower-bound coverage when the host exposes incomplete usage data. At the end it can push the branch and open or update a structured pull request through the bundled PR skill.
 
 ```bash
+# Claude Code
 claude plugin install plan-runner@mistervitopro-plugin-marketplace
 /plan-runner:run path/to/implementation-plan.md
+
+# Codex
+codex plugin add plan-runner@mistervitopro-plugin-marketplace
+$plan-runner:run path/to/implementation-plan.md
 ```
 
-Pairs with the `ideas` plugin as the pipeline's front door: `/ideas:interview` produces an audited spec and emits a plan-runner-ready plan for this command to execute.
+Pairs with the `ideas` plugin as the pipeline's front door: its interview skill produces an audited spec and emits a plan-runner-ready plan for this skill to execute.
 
 → [Plugin docs](https://github.com/MisterVitoPro/plan-runner)
 
