@@ -75,12 +75,12 @@
     },
     {
       "name": "ideas",
-      "description": "Turn a raw idea into an audited design spec through a token-conscious interview: scope-sized batched questions (S/M/L triage, max 5 calls) with a category-coverage elicitation floor and an existing-system baseline pinned from the repo, a three-status on-disk ledger (decided/assumed/open) that survives /clear and resumes from the file alone, a binding read-only ledger audit plus a biggest-miss critic before the review gate, and spec output with EARS acceptance criteria, brownfield change deltas, and optional MADR-lite ADRs that later interviews read to skip already-decided questions. Assumptions resolve to binding defaults welded into EARS criteria or blocking open questions; a model guess is never recorded as a user decision. After approval, \"Approve + generate plan\" (or /ideas:plan run standalone against an approved spec) emits a plan-runner-ready plan: flat task list, full EARS criterion text, confirm-or-carry header, ending at a completion gate that offers plan-runner execution (when installed), inline or subagent execution with exec()-commit resume, GitHub tickets, or stop. /ideas:tickets then projects the plan to GitHub as a parent tracking issue plus one linked sub-issue per task behind a Definition-of-Ready gate, gh CLI only. Not for typos, renames, or one-line fixes",
+      "description": "Claude Code and Codex idea-to-spec pipeline: turn a raw idea into an audited design spec through a token-conscious interview with scope-sized batched questions, a category-coverage elicitation floor, an existing-system baseline, and a resumable three-status ledger. A binding ledger audit and biggest-miss critic gate the EARS-based spec. After approval, the Ideas plan skill emits a plan-runner-ready flat task list with full criteria and a completion gate for plan-runner, inline or subagent execution, GitHub tickets, or stop. The Ideas tickets skill projects ready tasks to a parent issue plus linked sub-issues using the gh CLI. Not for typos, renames, or one-line fixes.",
       "source": {
         "source": "url",
         "url": "https://github.com/MisterVitoPro/ideas.git",
-        "ref": "v0.6.0",
-        "sha": "18e94da33f3657189ad7ed6b902a668d543c369c"
+        "ref": "v0.7.0",
+        "sha": "68999e69c8fa5f9588b76bbdd09f5abfe25e55b2"
       },
       "category": "development"
     }

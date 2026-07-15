@@ -148,15 +148,27 @@ claude plugin install llm-wiki@mistervitopro-plugin-marketplace
 
 ---
 
-### ideas  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fideas%2Fv0.6.0%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&prefix=v&color=blue)
+### ideas  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fideas%2Fv0.7.0%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&prefix=v&color=blue)
 
 **Interviews you into an audited design spec before any code gets written — then hands plan-runner its input.**
+
+**Claude Code and Codex ready.** Version 0.7.0 ships both client manifests, Codex-valid skills,
+host-neutral structured-question handling, and portable auditor/critic subagent loading.
 
 A scope-sized interview (S/M/L triage, batched multiple-choice waves, hard cap of 5 question calls) pins the existing-system baseline from your repo first, then records every answer in an on-disk ledger — `decided` / `assumed` / `open` — so the run survives `/clear` and resumes from the file alone. A category-coverage elicitation floor sweeps the ambiguity taxonomy (non-functionals, lifecycle, and interfaces weighted first) so interviews can't close with critical ground unasked, and every unconfirmed item becomes a binding default welded into an acceptance criterion or a blocking open question — never a passive flag a builder can ignore. Two read-only agents gate the draft: a binding ledger audit (every spec claim traces to a decision; a model guess is never recorded as a user decision) and a biggest-miss critic. Output: a committed spec with EARS acceptance criteria, brownfield change deltas, and optional MADR-lite ADRs that later interviews read to skip already-decided questions. After approval, "Approve + generate plan" (or `/ideas:plan` run standalone against an approved spec) emits a plan-runner-ready plan — contracts only, full criterion text per task — and `/ideas:tickets` projects it to GitHub as a parent tracking issue plus one linked sub-issue per task behind a Definition-of-Ready gate (gh CLI only). It complements `plan-runner`, it does not replace it: interview -> spec -> plan here, execution there. Interview behavior is benchmark-tuned against a paired simulated-user harness ([ideas-bench](https://github.com/MisterVitoPro/ideas-bench)).
 
 ```bash
+# Claude Code
 claude plugin install ideas@mistervitopro-plugin-marketplace
 /ideas:interview "your rough idea here"
+/ideas:plan docs/specs/approved-spec.md
+/ideas:tickets docs/plans/approved-spec.plan.md
+
+# Codex
+codex plugin add ideas@mistervitopro-plugin-marketplace
+$ideas:interview "your rough idea here"
+$ideas:plan docs/specs/approved-spec.md
+$ideas:tickets docs/plans/approved-spec.plan.md
 ```
 
 → [Plugin docs](https://github.com/MisterVitoPro/ideas)
