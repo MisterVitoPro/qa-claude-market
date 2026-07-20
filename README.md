@@ -90,13 +90,13 @@ $code-atlas:query "what calls AuthService.login?"
 
 ---
 
-### plan-runner  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fplan-runner%2Fv1.12.0%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&prefix=v&color=blue)
+### plan-runner  ![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FMisterVitoPro%2Fplan-runner%2Fv1.14.0%2F.claude-plugin%2Fplugin.json&query=%24.version&label=version&prefix=v&color=blue)
 
 **Take a Markdown implementation plan, run it through a parallel agent swarm.**
 
-**Claude Code and Codex ready.** Version 1.12.0 loads bundled analyzer, developer, verifier, and aggregator roles relative to the active skill. Codex uses native subagents; Claude Code can additionally opt into Agent Teams.
+**Claude Code and Codex ready.** Version 1.14.0 pipelines verification off the critical path and loads bundled analyzer, developer, verifier, and aggregator roles relative to the active skill. Codex uses native subagents; Claude Code can additionally opt into Agent Teams.
 
-The analyzer breaks your plan into file-disjoint waves (≤6 agents per wave). Dev agents implement tasks in parallel; verifier agents check acceptance criteria per wave; the aggregator dedupes bugs and emits a `fix-plan.md` for re-runs. Per-wave git commits keep history bisectable. TDD red-green mode is on by default (`--no-tdd` to disable). Claude Code can auto-detect Agent Teams (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`, v2.1.178+); other Claude sessions and Codex use native subagents. Every dispatched subagent's token usage is tallied best-effort into `manifest.json`, with explicit lower-bound coverage when the host exposes incomplete usage data. At the end it can push the branch and open or update a structured pull request through the bundled PR skill.
+The analyzer breaks your plan into file-disjoint waves (≤6 agents per wave). Dev agents implement tasks in parallel; each wave commits, then its verifier checks acceptance criteria against a snapshot of that commit while the next wave's agents are already running -- every verdict still lands before aggregation, and `--sync-verify` restores blocking verification. The aggregator dedupes bugs and emits a `fix-plan.md` for re-runs. Per-wave git commits keep history bisectable. TDD red-green mode is on by default (`--no-tdd` to disable), with one shared full-suite run per wave for the regression diff. Large plans (over 4 waves) split into sequential phases checkpointed to `run-state.json`; `--resume` picks an interrupted run back up at the last completed wave. Claude Code can auto-detect Agent Teams (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`, v2.1.178+); other Claude sessions and Codex use native subagents. Every dispatched subagent's token usage is tallied best-effort into `manifest.json`, with explicit lower-bound coverage when the host exposes incomplete usage data. At the end it can push the branch and open or update a structured pull request through the bundled PR skill.
 
 ```bash
 # Claude Code
