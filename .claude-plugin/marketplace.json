@@ -75,12 +75,12 @@
     },
     {
       "name": "ideas",
-      "description": "Claude Code and Codex idea-to-spec pipeline: turn a raw idea into an audited design spec through a token-conscious interview with scope-sized batched questions, a category-coverage elicitation floor, an existing-system baseline, and a resumable three-status ledger. A binding ledger audit and biggest-miss critic gate the EARS-based spec. After approval, the Ideas plan skill emits a plan-runner-ready flat task list with full criteria and a completion gate for plan-runner, inline or subagent execution, GitHub tickets, or stop. The Ideas tickets skill projects ready tasks to a parent issue plus linked sub-issues using the gh CLI. Not for typos, renames, or one-line fixes.",
+      "description": "Claude Code and Codex idea-to-spec pipeline: turn a raw idea into an audited design spec through a token-conscious interview with scope-sized batched questions, a category-coverage elicitation floor, an existing-system baseline, and a resumable three-status ledger. A binding ledger audit and biggest-miss critic gate the EARS-based spec. After approval, the Ideas plan skill emits a plan-runner-ready flat task list with full criteria and a completion gate offering a /clear-then-paste plan-runner handoff (fresh context for the execution engine), inline or subagent execution, GitHub tickets, or stop. The Ideas tickets skill projects ready tasks to a parent issue plus linked sub-issues using the gh CLI. Not for typos, renames, or one-line fixes.",
       "source": {
         "source": "url",
         "url": "https://github.com/MisterVitoPro/ideas.git",
-        "ref": "v0.7.0",
-        "sha": "68999e69c8fa5f9588b76bbdd09f5abfe25e55b2"
+        "ref": "v0.7.1",
+        "sha": "6c735e69f7a749aa99e4e36dbe0c3247a62edfc4"
       },
       "category": "development"
     }
